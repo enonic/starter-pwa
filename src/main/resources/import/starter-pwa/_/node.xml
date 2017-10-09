@@ -46,7 +46,7 @@
         <property-set name="data">
             <string name="description">Sample site built with PWA Starter Kit for Enonic</string>
             <property-set name="siteConfig">
-                <string name="applicationKey">com.enonic.starter.pwa</string>
+                <string name="applicationKey">com.enonic.starter.workbox</string>
                 <property-set name="config">
                     <string name="appDescription">Sample PWA app built on Enonic XP platform</string>
                     <reference name="appIcon">f79c4bb0-d377-41d8-af5f-27eb8270a106</reference>
@@ -55,7 +55,7 @@
             </property-set>
         </property-set>
         <property-set name="page">
-            <string name="controller">com.enonic.starter.pwa:main</string>
+            <string name="controller">com.enonic.starter.workbox:main</string>
             <reference isNull="true" name="template"/>
             <property-set name="region">
                 <string name="name">main</string>
