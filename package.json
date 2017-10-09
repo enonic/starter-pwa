@@ -1,0 +1,32 @@
+{
+  "name": "pwa-starter",
+  "version": "1.0.0",
+  "description": "PWA starter kit for an app on Enonic XP platform",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alansemenov/starter-pwa.git"
+  },
+  "scripts": {
+    "build": "gradle build",
+    "deploy": "gradle deploy",
+    "watch": "gradle deploy -t"
+  },
+  "keywords": [
+    "enonic",
+    "pwa"
+  ],
+  "author": "Alan Semenov",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alansemenov/starter-pwa/issues"
+  },
+  "homepage": "https://github.com/alansemenov/starter-pwa#readme",
+  "devDependencies": {
+    "css-loader": "^0.26.1",
+    "extract-text-webpack-plugin": "^2.0.0-rc.3",
+    "less": "^2.7.2",
+    "less-loader": "^2.2.3",
+    "style-loader": "^0.13.1",
+    "webpack": "^3.0.0"
+  }
+}
