@@ -3,14 +3,16 @@ const extractTextPlugin = require('extract-text-webpack-plugin');
 const workboxBuild = require('workbox-build');
 
 const paths = {
-    assets: 'src/main/resources/assets/'
+    assets: 'src/main/resources/assets/',
+    buildAssets: 'build/resources/main/assets/'
 };
 
 const assetsPath = path.join(__dirname, paths.assets);
+const buildAssetsPath = path.join(__dirname, paths.buildAssets);
 
 workboxBuild.injectManifest({
     swSrc: path.join(assetsPath, 'js/sw-dev.js'),
-    swDest: path.join(assetsPath, 'sw.js'),
+    swDest: path.join(buildAssetsPath, 'sw.js'),
     globDirectory: assetsPath,
     globPatterns: ['precache/**\/*'],
     globIgnores: ['precache/browserconfig.xml', 'precache/manifest.json']
@@ -21,7 +23,7 @@ module.exports = {
     entry: path.join(assetsPath, 'js/main.js'),
 
     output: {
-        path: assetsPath,
+        path: buildAssetsPath,
         filename: 'precache/bundle.js'
     },
 
