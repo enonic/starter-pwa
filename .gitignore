@@ -86,3 +86,6 @@ crashlytics-build.properties
 ### Sass ###
 .sass-cache
 *.css.map
+
+# Node modules
+node_modules/
