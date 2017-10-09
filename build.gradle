@@ -1,0 +1,40 @@
+plugins {
+    id 'java'
+    id 'com.enonic.xp.app' version '1.0.11'
+}
+
+xp {
+  version = xpVersion
+}
+
+app {
+    name = project.ext.appName
+    displayName = project.ext.displayName
+    vendorName = 'Enonic AS'
+    vendorUrl = 'http://enonic.com'
+}
+
+dependencies {
+    compile "com.enonic.xp:core-api:${xpVersion}"
+    compile "com.enonic.xp:portal-api:${xpVersion}"
+    include "com.enonic.xp:lib-content:${xpVersion}"
+    include "com.enonic.xp:lib-portal:${xpVersion}"
+    include "com.enonic.xp:lib-thymeleaf:${xpVersion}"
+    //include "com.enonic.xp:lib-xslt:${xpVersion}"
+    //include "com.enonic.xp:lib-mustache:${xpVersion}"
+    //include "com.enonic.xp:lib-i18n:${xpVersion}"
+    //include "com.enonic.xp:lib-auth:${xpVersion}"
+    //include "com.enonic.xp:lib-cache:${xpVersion}"
+    //include "com.enonic.xp:lib-context:${xpVersion}"
+    //include "com.enonic.xp:lib-http-client:${xpVersion}"
+    //include "com.enonic.xp:lib-io:${xpVersion}"
+    //include "com.enonic.xp:lib-mail:${xpVersion}"
+    //include "com.enonic.xp:lib-repo:${xpVersion}"
+    //include "com.enonic.xp:lib-websocket:${xpVersion}"
+}
+
+repositories {
+    mavenLocal()
+    jcenter()
+    xp.enonicRepo()
+}
