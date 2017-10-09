@@ -27,6 +27,7 @@ dependencies {
     include "com.enonic.xp:lib-portal:${xpVersion}"
     include "com.enonic.xp:lib-mustache:${xpVersion}"
     include "com.enonic.xp:lib-io:${xpVersion}"
+    include "com.enonic.lib:lib-router:1.0.0"
 }
 
 repositories {
