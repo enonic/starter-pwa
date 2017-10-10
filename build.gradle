@@ -44,4 +44,4 @@ task webpack(type: NodeTask) {
 webpack.dependsOn 'npmInstall'
 webpack.dependsOn 'processResources'
 
-build.dependsOn webpack
+jar.dependsOn webpack
