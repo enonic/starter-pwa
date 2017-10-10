@@ -42,6 +42,6 @@ task webpack(type: NodeTask) {
 
 // processes your package.json before running webpack
 webpack.dependsOn 'npmInstall'
+webpack.dependsOn 'processResources'
 
 build.dependsOn webpack
-build.mustRunAfter webpack
