@@ -12,7 +12,7 @@ const buildAssetsPath = path.join(__dirname, paths.buildAssets);
 
 workboxBuild.injectManifest({
     swSrc: path.join(assetsPath, 'js/sw-dev.js'),
-    swDest: path.join(buildAssetsPath, 'sw.js'),
+    swDest: path.join(buildAssetsPath, 'sw-template.js'),
     globDirectory: assetsPath,
     globPatterns: ['precache/**\/*'],
     globIgnores: ['precache/browserconfig.xml', 'precache/manifest.json']
