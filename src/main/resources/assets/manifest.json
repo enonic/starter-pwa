@@ -1,0 +1,15 @@
+{
+  "name": "Workbox starter kit",
+  "short_name": "Workbox",
+  "theme_color": "#FFF",
+  "background_color": "#FFF",
+  "display": "standalone",
+  "start_url": ".?source=web_app_manifest",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

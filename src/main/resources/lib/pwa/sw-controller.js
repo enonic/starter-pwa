@@ -1,29 +1,16 @@
 var portalLib = require('/lib/xp/portal');
 var mustache = require('/lib/xp/mustache');
-var helper = require('/lib/helper');
+var view = resolve('sw-template.js');
 
 exports.get = function() {
-    var sitePath = portalLib.getSite()._path;
-    var appIcon = helper.getAppIcon();
-
-    var params = {
-        siteUrl : portalLib.pageUrl({path: sitePath})
-    };
-    
-    if (appIcon) {
-        params.hasAppIcon = true;
-        params.icons = {
-                png_16: helper.getSquareImageUrl(appIcon, 16),
-                png_32: helper.getSquareImageUrl(appIcon, 32),
-                png_180: helper.getSquareImageUrl(appIcon, 180)
-        };
-    }
-    
+    var appUrl = '/app/com.enonic.starter.workbox'; //TODO portalLib.url('/app/com.enonic.starter.workbox')
     return {
         headers: {
-            'Service-Worker-Allowed': params.siteUrl
+            'Service-Worker-Allowed': appUrl
         },
         contentType: 'application/javascript',
-        body: mustache.render(resolve('/assets/sw.js'), params)
+        body: mustache.render(view, {
+            appUrl: appUrl
+        })
     };
 };

@@ -27,6 +27,7 @@ dependencies {
     include "com.enonic.xp:lib-portal:${xpVersion}"
     include "com.enonic.xp:lib-mustache:${xpVersion}"
     include "com.enonic.xp:lib-io:${xpVersion}"
+    include "com.enonic.lib:lib-router:1.0.0"
 }
 
 repositories {
@@ -41,6 +42,6 @@ task webpack(type: NodeTask) {
 
 // processes your package.json before running webpack
 webpack.dependsOn 'npmInstall'
+webpack.dependsOn 'processResources'
 
-build.dependsOn webpack
-build.mustRunAfter webpack
+jar.dependsOn webpack
