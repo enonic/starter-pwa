@@ -10,10 +10,9 @@ workboxSW.precache([]);
 
 // Here we precache urls that are generated dynamically in the main.js controller
 workboxSW.precache([
-    '{{appUrl}}',
-    '{{appUrl}}/',
-    '{{appUrl}}/manifest.json',
-    '{{appUrl}}/browserconfig.xml'
+    '{{{preCacheRoot}}}',
+    '{{baseUrl}}/manifest.json',
+    '{{baseUrl}}/browserconfig.xml'
 ]);
 
 workboxSW.router.registerRoute(
