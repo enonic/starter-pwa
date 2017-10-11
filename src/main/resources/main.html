@@ -25,9 +25,6 @@
 <div id="pwa-container"></div>
 
 <script type="text/javascript">
-    if (document.location.href.endsWith('{{appUrl}}') && !document.location.href.endsWith('/')) {
-        document.location = document.location.href + "/";
-    }
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker
                 .register('{{appUrl}}/sw.js', {scope: '{{appUrl}}'})
