@@ -1,18 +1,15 @@
-var portalLib = require('/lib/xp/portal');
 var mustache = require('/lib/xp/mustache');
 var view = resolve('sw-template.js');
+var helper = require('/lib/helper');
 
 exports.get = function() {
-    var appUrl = portalLib.url({path:'/app/com.enonic.starter.workbox'});
-    log.info('appUrl: ' + appUrl);
-    log.info('endWithSlash: ' + endWithSlash(appUrl));
-    var baseUrl = endWithSlash(appUrl) ? appUrl.substring(0, appUrl.length - 1) : appUrl;
-    log.info('baseUrl: ' + baseUrl);
+    var appUrl = helper.getAppUrl();
+    var baseUrl = helper.getBaseUrl();
     
     var preCacheRoot;
     if (appUrl === '/') {
         preCacheRoot = '/';
-    } else if (endWithSlash(appUrl)) {
+    } else if (helper.endsWithSlash(appUrl)) {
         preCacheRoot = baseUrl + '\',\'' + appUrl;
     } else {
         preCacheRoot = appUrl + '\',\'' + appUrl + '/';
@@ -30,7 +27,3 @@ exports.get = function() {
         })
     };
 };
-
-function endWithSlash(url) {
-    return url.charAt(url.length - 1) === '/';
-}
