@@ -7,7 +7,7 @@
   "start_url": ".?source=web_app_manifest",
   "icons": [
     {
-      "src": "icons/icon.png",
+      "src": "precache/icons/icon.png",
       "sizes": "512x512",
       "type": "image/png"
     }

@@ -1,3 +1,25 @@
 html {
   min-height: 100%;
 }
+
+#main-content {
+  background-color: lightgray;
+  height: 100%;
+}
+
+#main-container {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-status {
+  width: 25%;
+  display: none;
+}
+
+.online #icon-online,
+.offline #icon-offline {
+  display: block;
+}

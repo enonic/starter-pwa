@@ -13,7 +13,5 @@ workboxSW.precache([
     '{{{preCacheRoot}}}',
     '{{baseUrl}}/manifest.json',
     '{{baseUrl}}/browserconfig.xml',
-    '{{baseUrl}}/precache/css/material.indigo-pink.min.css',
-    '{{baseUrl}}/precache/js/material.min.js',
     'https://fonts.googleapis.com/icon?family=Material+Icons'
 ]);

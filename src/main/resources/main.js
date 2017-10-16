@@ -11,7 +11,8 @@ router.get('/', function (req) {
             title: 'Workbox starter kit',
             appUrl: helper.getAppUrl(),
             baseUrl: helper.getBaseUrl(),
-            themeColor: '#FFF'
+            themeColor: '#FFF',
+            isLive: (req.mode == 'live')
         })
     }
 });
