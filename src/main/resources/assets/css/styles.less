@@ -12,6 +12,7 @@ html {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
 }
 
 .icon-status {
@@ -19,7 +20,19 @@ html {
   display: none;
 }
 
+#content-offline {
+  display: none;
+  margin-top: 20px;
+  opacity: 0.8;
+  font-size: 16px;
+}
+
 .online #icon-online,
-.offline #icon-offline {
+.offline #icon-offline,
+.offline #content-offline{
   display: block;
+}
+
+#page-content {
+  font-size: 24px;
 }
