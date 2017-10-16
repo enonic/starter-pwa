@@ -12,10 +12,8 @@ workboxSW.precache([]);
 workboxSW.precache([
     '{{{preCacheRoot}}}',
     '{{baseUrl}}/manifest.json',
-    '{{baseUrl}}/browserconfig.xml'
+    '{{baseUrl}}/browserconfig.xml',
+    '{{baseUrl}}/precache/css/material.indigo-pink.min.css',
+    '{{baseUrl}}/precache/js/material.min.js',
+    'https://fonts.googleapis.com/icon?family=Material+Icons'
 ]);
-
-workboxSW.router.registerRoute(
-    'http://ip-api.com/json',
-    workboxSW.strategies.cacheFirst()
-);
