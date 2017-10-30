@@ -57,20 +57,7 @@
                     console.log('Service Worker registration failure.');
                 });
     }
-
     {{/isLive}}
-    window.onload = function() {
-        const mainContainer = document.getElementById("main-container");
-        const toggleOnlineStatus = function () {
-            mainContainer.classList.toggle("online", navigator.onLine);
-            mainContainer.classList.toggle("offline", !navigator.onLine);
-        };
-
-        toggleOnlineStatus();
-
-        window.addEventListener("offline", toggleOnlineStatus);
-        window.addEventListener("online", toggleOnlineStatus);
-    };
 </script>
 
 </body>

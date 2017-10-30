@@ -14,6 +14,7 @@
     <script type="text/javascript" src="{{baseUrl}}/precache/js/material.min.js" async></script>
 
     <link rel="stylesheet" href="{{baseUrl}}/precache/bundle.css" type="text/css"/>
+    <script type="text/javascript" src="{{baseUrl}}/precache/bundle.js" async></script>
     <script type="text/javascript" src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
     <script type="text/javascript">
         $(function(){
@@ -40,19 +41,5 @@
     </main>
 </div>
 
-<script type="text/javascript">
-    window.onload = function() {
-        const mainContainer = document.getElementById("main-container");
-        const toggleOnlineStatus = function () {
-            mainContainer.classList.toggle("online", navigator.onLine);
-            mainContainer.classList.toggle("offline", !navigator.onLine);
-        };
-
-        toggleOnlineStatus();
-
-        window.addEventListener("offline", toggleOnlineStatus);
-        window.addEventListener("online", toggleOnlineStatus);
-    };
-</script>
 </body>
 </html>

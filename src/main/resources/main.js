@@ -4,9 +4,20 @@ var helper = require('/lib/helper');
 var swController = require('/lib/pwa/sw-controller');
 var siteTitle = 'Workbox Starter';
 
+var renderPage = function(pageName) {
+    return function() {
+        return {
+            body: mustacheLib.render(resolve('pages/' + pageName), {
+                title: siteTitle,
+                baseUrl: helper.getBaseUrl()
+            })
+        };
+    }
+};
+
 router.get('/', function (req) {
     return {
-        body: mustacheLib.render(resolve('main.html'), {
+        body: mustacheLib.render(resolve('/pages/main.html'), {
             title: siteTitle,
             appUrl: helper.getAppUrl(),
             baseUrl: helper.getBaseUrl(),
@@ -16,32 +27,11 @@ router.get('/', function (req) {
     }
 });
 
-router.get('/about', function (req) {
-    return {
-        body: mustacheLib.render(resolve('about.html'), {
-            title: siteTitle,
-            baseUrl: helper.getBaseUrl()
-        })
-    }
-});
+router.get('/about', renderPage('about.html'));
 
-router.get('/contact', function (req) {
-    return {
-        body: mustacheLib.render(resolve('contact.html'), {
-            title: siteTitle,
-            baseUrl: helper.getBaseUrl()
-        })
-    }
-});
+router.get('/contact', renderPage('contact.html'));
 
-router.get('/header', function (req) {
-    return {
-        body: mustacheLib.render(resolve('header.html'), {
-            title: siteTitle,
-            baseUrl: helper.getBaseUrl()
-        })
-    }
-});
+router.get('/header', renderPage('header.html'));
 
 router.get('/sw.js', swController.get);
 
