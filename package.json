@@ -1,10 +1,10 @@
 {
-  "name": "pwa-starter",
+  "name": "workbox-starter",
   "version": "1.0.0",
-  "description": "PWA starter kit for an app on Enonic XP platform",
+  "description": "Workbox PWA starter for Enonic XP platform",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/alansemenov/starter-pwa.git"
+    "url": "git+https://github.com/enonic/starter-workbox.git"
   },
   "scripts": {
     "build": "gradle build",
@@ -13,14 +13,16 @@
   },
   "keywords": [
     "enonic",
+    "workbox",
+    "webpack",
     "pwa"
   ],
   "author": "Alan Semenov",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/alansemenov/starter-pwa/issues"
+    "url": "https://github.com/enonic/starter-workbox/issues"
   },
-  "homepage": "https://github.com/alansemenov/starter-pwa#readme",
+  "homepage": "https://github.com/enonic/starter-workbox#readme",
   "devDependencies": {
     "css-loader": "^0.26.1",
     "extract-text-webpack-plugin": "^2.0.0-rc.3",
