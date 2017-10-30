@@ -21,6 +21,7 @@ router.get('/', function (req) {
             title: siteTitle,
             appUrl: helper.getAppUrl(),
             baseUrl: helper.getBaseUrl(),
+            precacheUrl: helper.getBaseUrl() + '/precache',
             themeColor: '#FFF',
             isLive: (req.mode == 'live')
         })
