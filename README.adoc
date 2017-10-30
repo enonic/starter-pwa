@@ -3,9 +3,10 @@
 = Workbox Starter for Enonic XP
 
 :linkattrs:
-This Starter enables you to build a simple application with PWA capabilities on Enonic XP Platform. It's using modern tools like link:https://webpack.js.org/[Webpack, window="_blank"]
-for the build process and link:https://workboxjs.org/[Workbox, window="_blank"] for automatic generation of Service Worker file and dynamic response caching. Simple routing is
-powered by link:https://github.com/enonic/lib-router[Enonic Router library, window="_blank"].
+
+This Starter enables you to build a simple application with PWA capabilities on Enonic XP Platform. It's using modern tools like link:https://webpack.js.org/[Webpack^]
+for the build process and link:https://workboxjs.org/[Workbox^] for automatic generation of Service Worker file and dynamic response caching. Simple routing is
+powered by link:https://github.com/enonic/lib-router[Enonic Router library^].
 
 == Webpack Config
 
