@@ -1,6 +1,6 @@
 {
-  "name": "Workbox starter kit",
-  "short_name": "Workbox",
+  "name": "PWA Starter for Enonic XP",
+  "short_name": "PWA Starter",
   "theme_color": "#FFF",
   "background_color": "#FFF",
   "display": "standalone",

@@ -2,7 +2,7 @@ var mustacheLib = require('/lib/xp/mustache');
 var router = require('/lib/router')();
 var helper = require('/lib/helper');
 var swController = require('/lib/pwa/sw-controller');
-var siteTitle = 'Workbox Starter';
+var siteTitle = 'PWA Starter';
 
 var renderPage = function(pageName) {
     return function() {

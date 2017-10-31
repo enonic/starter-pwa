@@ -1,6 +1,6 @@
 :imagesdir: ./docs/images
 
-= Workbox Starter for Enonic XP
+= PWA Starter for Enonic XP
 
 :linkattrs:
 
@@ -166,8 +166,8 @@ title, color scheme, display settings and favicon. Feel free to change the prede
 [source,json]
 ----
 {
-  "name": "Workbox starter kit",
-  "short_name": "Workbox",
+  "name": "PWA Starter for Enonic XP",
+  "short_name": "PWA Starter",
   "theme_color": "#FFF",
   "background_color": "#FFF",
   "display": "standalone",

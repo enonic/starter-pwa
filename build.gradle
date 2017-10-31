@@ -10,7 +10,7 @@ xp {
 
 app {
     name = project.appName
-    displayName = 'Workbox Starter Kit'
+    displayName = 'PWA Starter Kit'
     vendorName = 'Enonic AS'
     vendorUrl = 'http://enonic.com'
 }
