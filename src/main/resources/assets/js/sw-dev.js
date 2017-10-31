@@ -13,17 +13,11 @@ workboxSW.precache([
     '{{{preCacheRoot}}}',
     '{{baseUrl}}/manifest.json',
     '{{baseUrl}}/browserconfig.xml',
-    'https://fonts.googleapis.com/icon?family=Material+Icons',
-    'https://code.jquery.com/jquery-1.10.2.min.js'
+    'https://fonts.googleapis.com/icon?family=Material+Icons'
 ]);
 
 workboxSW.router.registerRoute(
     /^https:\/\/fonts\.gstatic\.com\//,
-    workboxSW.strategies.cacheFirst()
-);
-
-workboxSW.router.registerRoute(
-    '{{baseUrl}}/header',
     workboxSW.strategies.cacheFirst()
 );
 

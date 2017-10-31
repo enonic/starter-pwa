@@ -21,20 +21,33 @@
 
     <script type="text/javascript" src="{{precacheUrl}}/js/material.min.js"></script>
     <script type="text/javascript" src="{{precacheUrl}}/bundle.js"></script>
-    <script type="text/javascript" src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
-
-    <script type="text/javascript">
-    $(function(){
-        $("#header").load("{{baseUrl}}/header");
-    });
-    </script>
 </head>
 
 <body>
 <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
 
-    <!-- Div with id="header" will be automatically replaced with contents of header.html -->
-    <div id="header" class="mdl-layout mdl-js-layout mdl-layout--fixed-header"></div>
+    <header class="mdl-layout__header">
+        <div class="mdl-layout__header-row">
+            <!-- Title -->
+            <span class="mdl-layout-title">{{title}}</span>
+            <!-- Add spacer, to align navigation to the right -->
+            <div class="mdl-layout-spacer"></div>
+            <!-- Navigation. We hide it in small screens. -->
+            <nav class="mdl-navigation mdl-layout--large-screen-only">
+                <a class="mdl-navigation__link" href="{{baseUrl}}"><b>Home</b></a>
+                <a class="mdl-navigation__link" href="{{baseUrl}}/about">About</a>
+                <a class="mdl-navigation__link" href="{{baseUrl}}/contact">Contact</a>
+            </nav>
+        </div>
+    </header>
+    <div class="mdl-layout__drawer">
+        <span class="mdl-layout-title">{{title}}</span>
+        <nav class="mdl-navigation">
+            <a class="mdl-navigation__link" href="{{baseUrl}}"><b>Home</b></a>
+            <a class="mdl-navigation__link" href="{{baseUrl}}/about">About</a>
+            <a class="mdl-navigation__link" href="{{baseUrl}}/contact">Contact</a>
+        </nav>
+    </div>
 
     <main class="mdl-layout__content" id="main-content">
         <div id="main-container">

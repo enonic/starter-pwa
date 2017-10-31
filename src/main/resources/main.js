@@ -32,8 +32,6 @@ router.get('/about', renderPage('about.html'));
 
 router.get('/contact', renderPage('contact.html'));
 
-router.get('/header', renderPage('header.html'));
-
 router.get('/sw.js', swController.get);
 
 exports.get = function (req) {
