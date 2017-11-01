@@ -4,9 +4,61 @@
 
 :linkattrs:
 
-This Starter enables you to build a simple application with PWA capabilities on Enonic XP Platform. It's using modern tools like link:https://webpack.js.org/[Webpack^]
+This Starter enables you to build a basic application with PWA capabilities on Enonic XP Platform. It's using modern tools like link:https://webpack.js.org/[Webpack^]
 for the build process and link:https://workboxjs.org/[Workbox^] for automatic generation of Service Worker file and dynamic response caching. Simple routing is
 powered by link:https://github.com/enonic/lib-router[Enonic Router library^].
+
+== Installation
+
+1. Make sure you have Enonic XP of version 6.12 or later installed locally.
+
+2. Create a new folder for your application
+
+3. Go to that folder and initialize the app based on this Starter kit by running the following command (for more info on project initialisation,
+read http://xp.readthedocs.org/en/stable/reference/toolbox/init-project.html[the documentation for init-project])
+
+==== OSX/Linux
+
+$ toolbox.sh init-project -n com.company.myapp -r starter-pwa
+
+==== Windows
+
+$ toolbox.bat init-project -n com.company.myapp -r starter-pwa
+
+
+4.You can now build the app by running
+[source,groovy]
+----
+gradlew build deploy
+----
+
+5.If the build completed without errors you will have a new jar file in the deploy folder.
+
+
+== Usage and Testing of PWA
+
+We assume that XP service is running on ``localhost:8000``.
+
+1. Open http://localhost:8080/app/com.enonic.starter.pwa in your browser. You should see this:
+
+image::mainpage-online.png[]
+
+2.Click the "About" link in the header to open http://localhost:8080/app/com.enonic.starter.pwa/about. You should see this:
+
+image::about-online.png[]
+
+3.Now's the fun part. Go offline (either by turning off the Wi-Fi or unplugging cable or checking off "Offline" in the Dev Tools).
+Content of the About page should now change like this:
+
+image::about-offline.png[]
+
+4.Go back to the main page. It should now look like this:
+
+image::mainpage-offline.png[]
+
+As you can see, the Starter can track its online/offline status and change content of its pages accordingly.
+
+*You are now ready to expand the application's functionality, plugging in any Front-end framework etc.*
 
 == Webpack Config
 
@@ -135,7 +187,7 @@ workboxSW.precache([
 == Precaching custom assets
 
 Sometimes you may need to cache assets outside of the ``precache`` folder. In this case you have to explicitly specify the assets that you
-need to be cached (this can be a local asset or an external URL). Add a new line with a call to workboxSW.precache after the one with empty placeholder:
+need to be cached (this can be a local asset or an external URL). Add a new line with a call to ``workboxSW.precache`` after the one with empty placeholder:
 
 .sw-dev.js:
 [source,javascript]
@@ -197,10 +249,10 @@ forget to make same changes in ``manifest.json`` and ``browserconfig.xml``.
 
 == main.js
 
-Since the Starter is not a conventional website and doesn't have ``index.html`` file, it needs an entry point that will trigger page rendering and routing.
+This Starter is not a traditional site with plain HTML pages - everything is driven by a controller.
 Just like ``resources/assets/js/main.js`` is an entry point of the Starter's client-side bundle, ``resources/main.js`` is an entry point
-for the server-side execution. Setting it up is simple - just add handler of the GET request to ``main.js`` file and return response in form of
-rendered template or a simple string:
+and the main controller for the server-side execution. Setting it up is simple - just add handler of the GET request to ``main.js`` file and
+return response in form of rendered template or a simple string:
 
 .main.js:
 [source,html]
@@ -212,8 +264,8 @@ exports.get = function (req) {
 };
 ----
 
-If your application name is ``com.enonic.starter.workbox`` and Enonic web server is launched on ``localhost:8000`` then
-``http://localhost:8080/app/com.enonic.starter.workbox/`` will open the main page of your app.
+If your application name is ``com.enonic.starter.pwa`` and Enonic web server is launched on ``localhost:8000`` then
+``http://localhost:8080/app/com.enonic.starter.pwa/`` will open the main page of your app.
 
 == Dynamic routing
 
@@ -280,7 +332,7 @@ That's it, we have just built a simple routing inside the ``main.js`` file. You 
 == Response caching
 
 When you're building a PWA you typically want a user to be able to open previously visited pages even when the application is offline.
-In the Starter we are using Workbox to dynamically cache URL requests for future use.
+In this Starter we are using Workbox to dynamically cache URL requests for future use.
 
 .sw-dev.js:
 [source,javascript]
@@ -309,43 +361,6 @@ workboxSW.router.registerRoute(
 ----
 
 Here we cache requests to the ``/about`` and ``/contact`` URLs mentioned above, as well as request to the 3rd-party font file on an external URL.
-Note that we are using _cacheFirst_ strategy for each URL where the cached version is served first while the up-to-date version is being fetched and cached.
+
+NOTE: Note that we are using _cacheFirst_ strategy for each URL where the cached version is served first while the up-to-date version is being fetched and cached.
 Read more about possible caching strategies https://workboxjs.org/reference-docs/latest/module-workbox-runtime-caching.html[here].
-
-== Installation and Usage
-
-1.Make sure you have Enonic XP of version 6.12 or later installed locally. We assume that web server is running on ``localhost:8000``.
-
-2.Clone this repo from GitHub by running this in the Terminal:
-
-[source,groovy]
-----
-git clone https://github.com/enonic/starter-workbox.git
-----
-
-3.Go to the new ``starter-workbox`` folder and build the app:
-[source,groovy]
-----
-cd starter-workbox
-gradlew build deploy
-----
-
-4.If the build completed without errors you will have a new jar file in the deploy folder and should see this when opening
-http://localhost:8080/app/com.enonic.starter.workbox in your browser:
-
-image::mainpage-online.png[]
-
-5.Click the "About" link in the header to open http://localhost:8080/app/com.enonic.starter.workbox/about. You should see this:
-
-image::about-online.png[]
-
-6.Now's the fun part. Go offline (either by turning off the Wi-Fi or unplugging cable or checking off "Offline" in the Dev Tools).
-Content of the About page should now change like this:
-
-image::about-offline.png[]
-
-7.Go back to the main page. It should now look like this:
-
-image::mainpage-offline.png[]
-
-As you can see, the Starter can track its online/offline status and change content of its pages accordingly.
