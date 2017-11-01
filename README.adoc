@@ -37,13 +37,13 @@ gradlew build deploy
 
 == Usage and Testing of PWA
 
-We assume that XP service is running on ``localhost:8000``.
+We assume that XP service is running on ``localhost:8000`` and your app is called ``com.company.myapp`` as in example above.
 
-1. Open http://localhost:8080/app/com.enonic.starter.pwa in your browser. You should see this:
+1. Open http://localhost:8080/app/com.company.myapp in your browser. You should see this:
 
 image::mainpage-online.png[]
 
-2.Click the "About" link in the header to open http://localhost:8080/app/com.enonic.starter.pwa/about. You should see this:
+2.Click the "About" link in the header to open http://localhost:8080/app/com.company.myapp/about. You should see this:
 
 image::about-online.png[]
 
