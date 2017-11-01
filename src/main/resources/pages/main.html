@@ -55,19 +55,56 @@
             <img id="icon-offline" class="icon-status" src="{{precacheUrl}}/icons/offline.svg">
             <!-- Your content goes here -->
         </div>
+
     </main>
 </div>
 
+<footer id="notification-bar" class="mdl-js-snackbar mdl-snackbar">
+    <div class="mdl-snackbar__text"></div>
+    <button class="mdl-snackbar__action" type="button"></button>
+</footer>
 <script type="text/javascript">
     {{#isLive}}
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker
                 .register('{{baseUrl}}/sw.js', {scope: '{{appUrl}}'})
                 .then(function(reg) {
+                    reg.onupdatefound = function() {
+                        notifyAboutNewVersion();
+                    };
                     console.log('Service Worker registered with scope '  + reg.scope);
                 }, function() {
                     console.log('Service Worker registration failure.');
                 });
+    }
+
+    function showNotification() {
+        var snackbarContainer = document.querySelector('#notification-bar');
+        var data = {message: '{{title}} upgraded to the latest version'};
+        snackbarContainer.MaterialSnackbar.showSnackbar(data);
+    }
+
+    function notifyAboutNewVersion() {
+        if (!("Notification" in window)) {
+            console.log('Notification API not supported.');
+            return;
+        }
+
+        // Let's check whether notification permissions have already been granted
+        if (Notification.permission === "granted") {
+            // If it's okay let's create a notification
+            showNotification();
+        }
+
+        // Otherwise, we need to ask the user for permission
+        else if (Notification.permission !== 'denied') {
+            Notification.requestPermission(function (permission) {
+                // If the user accepts, let's create a notification
+                if (permission === "granted") {
+                    showNotification();
+                }
+            });
+        }
     }
     {{/isLive}}
 </script>
