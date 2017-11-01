@@ -1,6 +1,5 @@
 plugins {
-    id 'java'
-    id 'com.enonic.xp.app' version '1.0.11'
+    id 'com.enonic.xp.app' version '1.0.13'
     id "com.moowork.node" version "1.1.1"
 }
 
@@ -27,7 +26,7 @@ dependencies {
     include "com.enonic.xp:lib-portal:${xpVersion}"
     include "com.enonic.xp:lib-mustache:${xpVersion}"
     include "com.enonic.xp:lib-io:${xpVersion}"
-    include "com.enonic.lib:lib-router:1.0.1-SNAPSHOT"
+    include "com.enonic.lib:lib-router:1.0.1"
 }
 
 repositories {
