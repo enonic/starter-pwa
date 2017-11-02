@@ -10,7 +10,7 @@ powered by link:https://github.com/enonic/lib-router[Enonic Router library^].
 
 == Installation
 
-1. Make sure you have Enonic XP of version 6.12 or later installed locally.
+1. Make sure you have Enonic XP of version 6.12 or later installed locally. If not, http://repo.enonic.com/public/com/enonic/xp/distro/6.12.2/distro-6.12.2.zip[get it here]:
 
 2. Create a new folder for your application
 
@@ -19,12 +19,15 @@ read http://xp.readthedocs.org/en/stable/reference/toolbox/init-project.html[the
 
 ==== OSX/Linux
 
-$ toolbox.sh init-project -n com.company.myapp -r starter-pwa
+`$ <$XP_INSTALL>/toolbox/toolbox.sh init-project -n com.company.myapp -r starter-pwa`
 
 ==== Windows
 
-$ toolbox.bat init-project -n com.company.myapp -r starter-pwa
+`$ <$XP_INSTALL>/toolbox/toolbox.bat init-project -n com.company.myapp -r starter-pwa`
 
+where `<$XP_INSTALL>` is the installation folder of XP.
+
+TIP: Replace ``com.company.myapp`` with a unique name of your app.
 
 4.You can now build the app by running
 [source,groovy]
@@ -32,7 +35,7 @@ $ toolbox.bat init-project -n com.company.myapp -r starter-pwa
 gradlew build deploy
 ----
 
-5.If the build completed without errors you will have a new jar file in the deploy folder.
+5.If the build completed without errors you will have a new jar file in the `<$XP_INSTALL>/home/deploy` folder.
 
 
 == Usage and Testing of PWA
@@ -58,7 +61,7 @@ image::mainpage-offline.png[]
 
 As you can see, the Starter can track its online/offline status and change content of its pages accordingly.
 
-*You are now ready to expand the application's functionality, plugging in any Front-end framework etc.*
+*You are now ready to expand the application's functionality, plug in any Front-end framework etc.*
 
 == Webpack Config
 
