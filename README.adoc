@@ -10,7 +10,7 @@ powered by link:https://github.com/enonic/lib-router[Enonic Router library^].
 
 == Installation
 
-1. Make sure you have Enonic XP of version 6.12 or later installed locally. If not, http://repo.enonic.com/public/com/enonic/xp/distro/6.12.2/distro-6.12.2.zip[get it here]:
+1. Make sure you have Enonic XP of version 6.12 or later installed locally. If not, http://xp.readthedocs.io/en/stable/getstarted/other.html#download-enonic-xp[read how to install it here]:
 
 2. Create a new folder for your application
 
