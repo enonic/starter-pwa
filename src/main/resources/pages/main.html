@@ -121,8 +121,6 @@
         link.setAttribute('type', 'text/css');
         link.setAttribute('href', src);
         link.onload = () => {
-            debugger;
-
             cssLoaded++;
             if (cssLoaded === 3) {
                 removeInlineStyles();
