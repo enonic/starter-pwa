@@ -1,5 +1,5 @@
 plugins {
-    id 'com.enonic.xp.app' version '1.0.13'
+    id 'com.enonic.xp.app' version '1.0.15'
     id "com.moowork.node" version "1.1.1"
 }
 
@@ -12,6 +12,7 @@ app {
     displayName = 'PWA Starter Kit'
     vendorName = 'Enonic AS'
     vendorUrl = 'http://enonic.com'
+    systemVersion = "${xpVersion}"
 }
 
 node {
