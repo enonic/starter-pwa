@@ -5,14 +5,15 @@ var helper = require('/lib/helper');
 exports.get = function() {
     var appUrl = helper.getAppUrl();
     var baseUrl = helper.getBaseUrl();
+    var postfix = '?source=web_app_manifest';
     
     var preCacheRoot;
     if (appUrl === '/') {
-        preCacheRoot = '/';
+        preCacheRoot = '/' + ',\'' + postfix;
     } else if (helper.endsWithSlash(appUrl)) {
-        preCacheRoot = baseUrl + '\',\'' + appUrl;
+        preCacheRoot = baseUrl + '\',\'' + appUrl + '\',\'' + baseUrl + postfix;
     } else {
-        preCacheRoot = appUrl + '\',\'' + appUrl + '/';
+        preCacheRoot = appUrl + '\',\'' + appUrl + '/' + '\',\'' + appUrl + '/' + postfix;
     }
     
     return {

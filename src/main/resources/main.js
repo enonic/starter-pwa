@@ -23,6 +23,7 @@ router.get('/', function (req) {
             baseUrl: helper.getBaseUrl(),
             precacheUrl: helper.getBaseUrl() + '/precache',
             themeColor: '#FFF',
+            styles: mustacheLib.render(resolve('/pages/styles.txt')),
             isLive: (req.mode == 'live')
         })
     }

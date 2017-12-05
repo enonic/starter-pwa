@@ -15,12 +15,10 @@
     <meta name="msapplication-config" content="{{baseUrl}}/browserconfig.xml" />
     <meta name="msapplication-TileColor" content="{{themeColor}}">
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="{{precacheUrl}}/css/material.indigo-pink.min.css">
-    <link rel="stylesheet" href="{{precacheUrl}}/bundle.css" type="text/css"/>
+    <script type="text/javascript" src="{{precacheUrl}}/js/material.min.js" async></script>
+    <script type="text/javascript" src="{{precacheUrl}}/bundle.js" async></script>
+    {{{styles}}}
 
-    <script type="text/javascript" src="{{precacheUrl}}/js/material.min.js"></script>
-    <script type="text/javascript" src="{{precacheUrl}}/bundle.js"></script>
 </head>
 
 <body>
@@ -51,18 +49,20 @@
 
     <main class="mdl-layout__content" id="main-content">
         <div id="main-container">
-            <img id="icon-online" class="icon-status" src="{{precacheUrl}}/icons/online.svg">
-            <img id="icon-offline" class="icon-status" src="{{precacheUrl}}/icons/offline.svg">
+            <img id="icon-online" class="icon-status" src="{{precacheUrl}}/icons/online.svg" alt="Online">
+            <img id="icon-offline" class="icon-status" src="{{precacheUrl}}/icons/offline.svg" alt="Offline">
+            <noscript>
+                <p id="js-disabled">Javascript is disabled. PWA features of this application are not available.</p>
+            </noscript>
             <!-- Your content goes here -->
         </div>
 
     </main>
+    <footer id="notification-bar" class="mdl-js-snackbar mdl-snackbar" aria-hidden="true">
+        <div class="mdl-snackbar__text"></div>
+        <button class="mdl-snackbar__action" type="button"></button>
+    </footer>
 </div>
-
-<footer id="notification-bar" class="mdl-js-snackbar mdl-snackbar">
-    <div class="mdl-snackbar__text"></div>
-    <button class="mdl-snackbar__action" type="button"></button>
-</footer>
 <script type="text/javascript">
     {{#isLive}}
     if ('serviceWorker' in navigator) {
@@ -107,6 +107,34 @@
         }
     }
     {{/isLive}}
+
+    let cssLoaded = 0;
+
+    function removeInlineStyles() {
+        const styleEl = document.getElementsByTagName('style')[0];
+        styleEl.parentNode.removeChild(styleEl);
+    }
+
+    function addLinkElToHead(src) {
+        const link = document.createElement('link');
+        link.setAttribute('rel', 'stylesheet');
+        link.setAttribute('type', 'text/css');
+        link.setAttribute('href', src);
+        link.onload = () => {
+            debugger;
+
+            cssLoaded++;
+            if (cssLoaded === 3) {
+                removeInlineStyles();
+            }
+        }
+        document.getElementsByTagName('head')[0].appendChild(link);
+    }
+
+    addLinkElToHead('{{precacheUrl}}/css/material.indigo-pink.min.css');
+    addLinkElToHead('{{precacheUrl}}/bundle.css');
+    addLinkElToHead('https://fonts.googleapis.com/icon?family=Material+Icons');
+
 </script>
 
 </body>
