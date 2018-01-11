@@ -14,6 +14,7 @@
     <meta name="theme-color" content="{{themeColor}}">
     <meta name="msapplication-config" content="{{baseUrl}}/browserconfig.xml" />
     <meta name="msapplication-TileColor" content="{{themeColor}}">
+    <meta name="Description" content="PWA Starter for Enonic XP application">
 
     <script type="text/javascript" src="{{precacheUrl}}/js/material.min.js" async></script>
     <script type="text/javascript" src="{{precacheUrl}}/bundle.js" async></script>
@@ -81,7 +82,9 @@
     function showNotification() {
         var snackbarContainer = document.querySelector('#notification-bar');
         var data = {message: '{{title}} upgraded to the latest version'};
-        snackbarContainer.MaterialSnackbar.showSnackbar(data);
+        if (snackbarContainer.MaterialSnackbar) {
+            snackbarContainer.MaterialSnackbar.showSnackbar(data);
+        }
     }
 
     function notifyAboutNewVersion() {

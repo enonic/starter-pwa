@@ -5,14 +5,22 @@ html, body {
 .mdl-layout {
   min-height: 100%;
 }
+
+.mdl-navigation__link {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 #main-content {
   background-color: lightgray;
   height: 100%;
-  padding-top: 10px;
 }
 
 #main-container {
   min-height: 100%;
+  max-width: 50%;
+  margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -20,8 +28,9 @@ html, body {
 }
 
 .icon-status {
-  width: 25%;
   display: none;
+  max-width: 100%;
+  height: auto;
 }
 
 #content-offline {
