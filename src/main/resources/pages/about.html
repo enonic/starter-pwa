@@ -9,12 +9,11 @@
     <link rel="apple-touch-icon" href="{{baseUrl}}/precache/icons/icon.png">
     <link rel="icon" href="{{baseUrl}}/precache/icons/icon.png">
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="{{baseUrl}}/precache/css/material.indigo-pink.min.css">
     <script type="text/javascript" src="{{baseUrl}}/precache/js/material.min.js" async></script>
 
-    <link rel="stylesheet" href="{{baseUrl}}/precache/bundle.css" type="text/css"/>
     <script type="text/javascript" src="{{baseUrl}}/precache/bundle.js" async></script>
+
+    {{{styles}}}
 </head>
 
 <body>
@@ -46,7 +45,7 @@
     <main class="mdl-layout__content" id="main-content">
         <div id="main-container">
             <div id="page-content">
-                This is the About page
+                This is the About page UPDATED
             </div>
             <div id="content-offline">
                 You are now offline but this page is still available
@@ -56,7 +55,13 @@
             </noscript>
         </div>
     </main>
+    <footer id="notification-bar" class="mdl-js-snackbar mdl-snackbar" aria-hidden="true">
+        <div class="mdl-snackbar__text"></div>
+        <button class="mdl-snackbar__action" type="button"></button>
+    </footer>
 </div>
+
+{{{serviceWorker}}}
 
 </body>
 </html>

@@ -1,5 +1,6 @@
 importScripts('https://unpkg.com/workbox-sw@2.0.1/build/importScripts/workbox-sw.prod.v2.0.1.js');
 
+const swVersion = '{{appVersion}}';
 const workboxSW = new self.WorkboxSW({
     skipWaiting: true,
     clientsClaim: true
@@ -22,11 +23,15 @@ workboxSW.router.registerRoute(
 );
 
 workboxSW.router.registerRoute(
+    '{{baseUrl}}/',
+    workboxSW.strategies.networkFirst()
+);
+workboxSW.router.registerRoute(
     '{{baseUrl}}/about',
-    workboxSW.strategies.cacheFirst()
+    workboxSW.strategies.networkFirst()
 );
 
 workboxSW.router.registerRoute(
     '{{baseUrl}}/contact',
-    workboxSW.strategies.cacheFirst()
+    workboxSW.strategies.networkFirst()
 );

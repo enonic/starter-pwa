@@ -9,25 +9,23 @@ var renderPage = function(pageName) {
         return {
             body: mustacheLib.render(resolve('pages/' + pageName), {
                 title: siteTitle,
-                baseUrl: helper.getBaseUrl()
+                version: app.version,
+                baseUrl: helper.getBaseUrl(),
+                precacheUrl: helper.getBaseUrl() + '/precache',
+                themeColor: '#FFF',
+                styles: mustacheLib.render(resolve('/pages/styles.css')),
+                serviceWorker: mustacheLib.render(resolve('/pages/sw.html'), {
+                    title: siteTitle,
+                    baseUrl: helper.getBaseUrl(),
+                    precacheUrl: helper.getBaseUrl() + '/precache',
+                    appUrl: helper.getAppUrl()
+                })
             })
         };
     }
 };
 
-router.get('/', function (req) {
-    return {
-        body: mustacheLib.render(resolve('/pages/main.html'), {
-            title: siteTitle,
-            appUrl: helper.getAppUrl(),
-            baseUrl: helper.getBaseUrl(),
-            precacheUrl: helper.getBaseUrl() + '/precache',
-            themeColor: '#FFF',
-            styles: mustacheLib.render(resolve('/pages/styles.txt')),
-            isLive: (req.mode == 'live')
-        })
-    }
-});
+router.get('/', renderPage('main.html'));
 
 router.get('/about', renderPage('about.html'));
 

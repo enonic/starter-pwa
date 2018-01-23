@@ -24,7 +24,8 @@ exports.get = function() {
         body: mustache.render(view, {
             appUrl: appUrl,
             baseUrl: baseUrl,
-            preCacheRoot: preCacheRoot
+            preCacheRoot: preCacheRoot,
+            appVersion: app.version
         })
     };
 };
