@@ -10,9 +10,9 @@ powered by link:https://github.com/enonic/lib-router[Enonic Router library^].
 
 == Installation
 
-1. Make sure you have Enonic XP of version 6.12 or later installed locally. If not, http://xp.readthedocs.io/en/stable/getstarted/other.html#download-enonic-xp[read how to install it here]:
+1.Make sure you have Enonic XP of version 6.12 or later installed locally. If not, http://xp.readthedocs.io/en/stable/getstarted/other.html#download-enonic-xp[read how to install it here]:
 
-2. Set up environment variable XP_INSTALL that points to the XP installation folder:
+2.Set up environment variable XP_INSTALL that points to the XP installation folder:
 
 ==== OSX/Linux
 
@@ -22,9 +22,9 @@ powered by link:https://github.com/enonic/lib-router[Enonic Router library^].
 
 `set XP_INSTALL=/Users/ase/Downloads/enonic-xp-6.13.0-SNAPSHOT`
 
-3. Create a new folder for your application
+3.Create a new folder for your application
 
-4. Initialize the app based on this Starter kit by running the following command (for more info on project initialisation,
+4.Initialize the app based on this Starter kit by running the following command (for more info on project initialisation,
 read http://xp.readthedocs.org/en/stable/reference/toolbox/init-project.html[the documentation for init-project])
 
 ==== OSX/Linux
@@ -37,13 +37,13 @@ read http://xp.readthedocs.org/en/stable/reference/toolbox/init-project.html[the
 
 TIP: Replace ``com.company.myapp`` with a unique name of your app.
 
-4.You can now build the app by running the following from inside the app's folder:
+5.You can now build the app by running the following from inside the app's folder:
 [source,groovy]
 ----
 gradlew build deploy
 ----
 
-5.If the build completed without errors you will have a new jar file in the `<$XP_INSTALL>/home/deploy` folder.
+6.If the build completed without errors you will have a new jar file in the `<$XP_INSTALL>/home/deploy` folder.
 
 
 == Usage and Testing of PWA
@@ -357,12 +357,12 @@ const workboxSW = new self.WorkboxSW({
 
 workboxSW.router.registerRoute(
     '{{baseUrl}}/about',
-    workboxSW.strategies.cacheFirst()
+    workboxSW.strategies.networkFirst()
 );
 
 workboxSW.router.registerRoute(
     '{{baseUrl}}/contact',
-    workboxSW.strategies.cacheFirst()
+    workboxSW.strategies.networkFirst()
 );
 
 workboxSW.router.registerRoute(
@@ -373,5 +373,5 @@ workboxSW.router.registerRoute(
 
 Here we cache requests to the ``/about`` and ``/contact`` URLs mentioned above, as well as request to the 3rd-party font file on an external URL.
 
-NOTE: Note that we are using _cacheFirst_ strategy for each URL where the cached version is served first while the up-to-date version is being fetched and cached.
+NOTE: Note that we are using _networkFirst_ strategy for the pages where we first check for the fresh version from the network and fall back to the cached version if the network is down.
 Read more about possible caching strategies https://workboxjs.org/reference-docs/latest/module-workbox-runtime-caching.html[here].
