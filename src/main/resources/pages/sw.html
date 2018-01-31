@@ -44,6 +44,7 @@ function notifyAboutNewVersion() {
 }
 
 let cssLoaded = 0;
+let cssAdded = 0;
 
 function removeInlineStyles() {
     const styleEl = document.getElementsByTagName('style')[0];
@@ -57,11 +58,12 @@ function addLinkElToHead(src) {
     link.setAttribute('href', src);
     link.onload = () => {
         cssLoaded++;
-        if (cssLoaded === 3) {
+        if (cssLoaded === cssAdded) {
             removeInlineStyles();
         }
     }
     document.getElementsByTagName('head')[0].appendChild(link);
+    cssAdded++;
 }
 
 addLinkElToHead('{{precacheUrl}}/css/material.indigo-pink.min.css');
