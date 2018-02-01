@@ -17,15 +17,10 @@ workboxSW.precache([
     'https://fonts.googleapis.com/icon?family=Material+Icons'
 ]);
 
-workboxSW.router.registerRoute(
-    /^https:\/\/fonts\.gstatic\.com\//,
-    workboxSW.strategies.cacheFirst()
-);
+workboxSW.router.setDefaultHandler({
+    handler: workboxSW.strategies.cacheFirst()
+});
 
-workboxSW.router.registerRoute(
-    '{{baseUrl}}/',
-    workboxSW.strategies.networkFirst()
-);
 workboxSW.router.registerRoute(
     '{{baseUrl}}/about',
     workboxSW.strategies.networkFirst()
