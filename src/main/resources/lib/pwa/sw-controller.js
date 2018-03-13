@@ -1,4 +1,4 @@
-var mustache = require('/lib/xp/mustache');
+var thymeleaf = require('/lib/xp/thymeleaf');
 var view = resolve('sw-template.js');
 var helper = require('/lib/helper');
 
@@ -21,7 +21,7 @@ exports.get = function() {
             'Service-Worker-Allowed': appUrl
         },
         contentType: 'application/javascript',
-        body: mustache.render(view, {
+        body: thymeleaf.render(view, {
             appUrl: appUrl,
             baseUrl: baseUrl,
             preCacheRoot: preCacheRoot,

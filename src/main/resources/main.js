@@ -1,8 +1,20 @@
-var mustacheLib = require('/lib/xp/mustache');
+var thymeleaf = require('/lib/xp/thymeleaf');
 var router = require('/lib/router')();
 var helper = require('/lib/helper');
-var swController = require('/lib/pwa/sw-controller');
+var portalLib = require('/lib/xp/portal');
+//var swController = require('/lib/pwa/sw-controller');
 var siteTitle = 'PWA Starter';
+
+var renderMainPage = function() {
+    return {
+        body: thymeleaf.render(resolve('views/page.html'), {
+            title: siteTitle,
+            pageId: 'main',
+            version: app.version,
+            appUrl: portalLib.url({path:'/app/' + app.name})
+        })
+    };
+};
 
 var renderPage = function(pageName) {
     return function() {
@@ -25,14 +37,14 @@ var renderPage = function(pageName) {
     }
 };
 
-router.get('/', renderPage('main.html'));
-
+router.get('/', renderMainPage);
+/*
 router.get('/about', renderPage('about.html'));
 
 router.get('/contact', renderPage('contact.html'));
 
 router.get('/sw.js', swController.get);
-
+*/
 exports.get = function (req) {
     return router.dispatch(req);
 };

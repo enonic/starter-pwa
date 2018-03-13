@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<div data-th-fragment="fragment-site-menu" data-th-remove="tag">
+    <div class="mdl-layout__drawer">
+        <span class="mdl-layout-title" data-th-utext="${title + ' ' + version}"></span>
+        <nav class="mdl-navigation">
+            <a class="mdl-navigation__link" data-th-href="${appUrl}" data-th-classappend="${pageId == 'main' ? 'mdl-typography--font-black' : ''}">Home</a>
+            <a class="mdl-navigation__link" data-th-href="${appUrl + '/about'}" data-th-classappend="${pageId == 'about' ? 'mdl-typography--font-black' : ''}">About</a>
+            <a class="mdl-navigation__link" data-th-href="${appUrl + '/contact'}" data-th-classappend="${pageId == 'contact' ? 'mdl-typography--font-black' : ''}">Contact</a>
+        </nav>
+    </div>
+</div>
+
+<div data-th-fragment="fragment-main-page" data-th-remove="tag">
+    <div id="main-container">
+        <img id="icon-online" class="icon-status" data-th-src="${portal.assetUrl({'_path=precache/icons/online.svg'})}" alt="Online">
+        <img id="icon-offline" class="icon-status" data-th-src="${portal.assetUrl({'_path=precache/icons/offline.svg'})}" alt="Offline">
+        <noscript>
+            <p id="js-disabled">Javascript is disabled. PWA features of this application are not available.</p>
+        </noscript>
+        <!-- Your content goes here -->
+    </div>
+</div>
+
+
+
+
+</body>
+</html>
