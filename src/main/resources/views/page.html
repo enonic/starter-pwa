@@ -39,7 +39,17 @@
     <div data-th-replace="/views/fragments/fragments::fragment-site-menu(title=${title}, pageId=${pageId}, appUrl=${appUrl})"></div>
 
     <main class="mdl-layout__content" id="main-content">
-        <div data-th-replace="/views/fragments/fragments::fragment-main-page"></div>
+        <div id="main-container">
+            <div data-th-if="${pageId == 'main'}" data-th-remove="tag">
+                <div data-th-replace="/views/fragments/fragments::fragment-page-main"></div>
+            </div>
+            <div data-th-if="${pageId == 'about'}" data-th-remove="tag">
+                <div data-th-replace="/views/fragments/fragments::fragment-page-about"></div>
+            </div>
+            <div data-th-if="${pageId == 'contact'}" data-th-remove="tag">
+                <div data-th-if="${pageId == 'contact'}" data-th-replace="/views/fragments/fragments::fragment-page-contact"></div>
+            </div>
+        </div>
     </main>
 
     <footer id="notification-bar" class="mdl-js-snackbar mdl-snackbar" aria-hidden="true">

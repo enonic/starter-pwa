@@ -1,3 +1,4 @@
+
 var thymeleaf = require('/lib/xp/thymeleaf');
 var router = require('/lib/router')();
 var helper = require('/lib/helper');
@@ -6,43 +7,38 @@ var portalLib = require('/lib/xp/portal');
 var siteTitle = 'PWA Starter';
 
 var renderMainPage = function() {
+    return renderPage('main');
+};
+
+var renderAboutPage = function() {
+    return renderPage('about', 'About');
+};
+
+var renderContactPage = function() {
+    return renderPage('contact', 'Contact');
+};
+
+var renderPage = function(pageId, title) {
     return {
-        body: thymeleaf.render(resolve('views/page.html'), {
-            title: siteTitle,
-            pageId: 'main',
-            version: app.version,
-            appUrl: portalLib.url({path:'/app/' + app.name})
-        })
+        body: thymeleaf.render(resolve('views/page.html'), getParameters(pageId, title))
     };
 };
 
-var renderPage = function(pageName) {
-    return function() {
-        return {
-            body: mustacheLib.render(resolve('pages/' + pageName), {
-                title: siteTitle,
-                version: app.version,
-                baseUrl: helper.getBaseUrl(),
-                precacheUrl: helper.getBaseUrl() + '/precache',
-                themeColor: '#FFF',
-                styles: mustacheLib.render(resolve('/pages/styles.html')),
-                serviceWorker: mustacheLib.render(resolve('/pages/sw.html'), {
-                    title: siteTitle,
-                    baseUrl: helper.getBaseUrl(),
-                    precacheUrl: helper.getBaseUrl() + '/precache',
-                    appUrl: helper.getAppUrl()
-                })
-            })
-        };
-    }
+var getParameters = function(pageId, title) {
+    return {
+        version: app.version,
+        appUrl: portalLib.url({path:'/app/' + app.name}),
+        pageId: pageId,
+        title: title || siteTitle
+    };
 };
 
 router.get('/', renderMainPage);
+
+router.get('/about', renderAboutPage);
+
+router.get('/contact', renderContactPage);
 /*
-router.get('/about', renderPage('about.html'));
-
-router.get('/contact', renderPage('contact.html'));
-
 router.get('/sw.js', swController.get);
 */
 exports.get = function (req) {
