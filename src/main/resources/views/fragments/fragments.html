@@ -4,12 +4,13 @@
 
 <div data-th-fragment="fragment-site-menu" data-th-remove="tag">
     <div class="mdl-layout__drawer">
-        <span class="mdl-layout-title" data-th-utext="${title + ' ' + version}"></span>
+        <span class="mdl-layout-title" data-th-utext="${title}"></span>
         <nav class="mdl-navigation">
             <a class="mdl-navigation__link" data-th-href="${appUrl}" data-th-classappend="${pageId == 'main' ? 'mdl-typography--font-black' : ''}">Home</a>
             <a class="mdl-navigation__link" data-th-href="${appUrl + '/about'}" data-th-classappend="${pageId == 'about' ? 'mdl-typography--font-black' : ''}">About</a>
             <a class="mdl-navigation__link" data-th-href="${appUrl + '/contact'}" data-th-classappend="${pageId == 'contact' ? 'mdl-typography--font-black' : ''}">Contact</a>
         </nav>
+        <p class="app-version" data-th-utext="${'v.' + version}"></p>
     </div>
 </div>
 
