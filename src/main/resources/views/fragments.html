@@ -17,30 +17,26 @@
 <div data-th-fragment="fragment-page-main" data-th-remove="tag">
     <img id="icon-online" class="icon-status" data-th-src="${portal.assetUrl({'_path=precache/icons/online.svg'})}" alt="Online">
     <img id="icon-offline" class="icon-status" data-th-src="${portal.assetUrl({'_path=precache/icons/offline.svg'})}" alt="Offline">
-    <noscript>
-        <p id="js-disabled">Javascript is disabled. PWA features of this application are not available.</p>
-    </noscript>
+    <div data-th-replace="fragments::fragment-no-javascript"></div>
 </div>
 
-<div data-th-fragment="fragment-page-about" data-th-remove="tag">
+
+<div data-th-fragment="fragment-page-common" data-th-remove="tag">
     <div id="page-content">
-        This is the About page
+        <div data-th-if="${pageId == 'about'}" data-th-remove="tag">
+            This is the About page
+        </div>
+        <div data-th-if="${pageId == 'contact'}" data-th-remove="tag">
+            This is the Contact page
+        </div>
     </div>
     <div id="content-offline">
         You are now offline but this page is still available
     </div>
-    <noscript>
-        <p id="js-disabled">Javascript is disabled. PWA features of this application are not available.</p>
-    </noscript>
+    <div data-th-replace="fragments::fragment-no-javascript"></div>
 </div>
 
-<div data-th-fragment="fragment-page-contact" data-th-remove="tag">
-    <div id="page-content">
-        This is the Contact page
-    </div>
-    <div id="content-offline">
-        You are now offline but this page is still available
-    </div>
+<div data-th-fragment="fragment-no-javascript" data-th-remove="tag">
     <noscript>
         <p id="js-disabled">Javascript is disabled. PWA features of this application are not available.</p>
     </noscript>
