@@ -1,9 +1,8 @@
 
 var thymeleaf = require('/lib/xp/thymeleaf');
 var router = require('/lib/router')();
-var helper = require('/lib/helper');
 var portalLib = require('/lib/xp/portal');
-//var swController = require('/lib/pwa/sw-controller');
+var swController = require('/lib/pwa/sw-controller');
 var siteTitle = 'PWA Starter';
 
 var renderMainPage = function() {
@@ -38,9 +37,9 @@ router.get('/', renderMainPage);
 router.get('/about', renderAboutPage);
 
 router.get('/contact', renderContactPage);
-/*
+
 router.get('/sw.js', swController.get);
-*/
+
 exports.get = function (req) {
     return router.dispatch(req);
 };
