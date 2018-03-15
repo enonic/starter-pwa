@@ -41,7 +41,7 @@ module.exports = {
         new workboxPlugin({
             globDirectory: buildAssetsPath,
             globPatterns: ['precache/**\/*'],
-            globIgnores: [],
+            globIgnores: ['precache/manifest.json'],
             swSrc: path.join(assetsPath, 'js/sw-dev.js'),
             swDest: path.join(buildPwaLibPath, 'sw-template.js')
         })

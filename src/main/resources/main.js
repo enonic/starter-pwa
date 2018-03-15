@@ -38,8 +38,10 @@ router.get('/about', renderAboutPage);
 
 router.get('/contact', renderContactPage);
 
-router.get('/sw.js', swController.get);
+router.get('/sw.js', swController.renderSW);
+router.get('/manifest.json', swController.renderManifest);
 
 exports.get = function (req) {
+    log.info(JSON.stringify(req));
     return router.dispatch(req);
 };
