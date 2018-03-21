@@ -10,24 +10,14 @@ const workboxSW = new self.WorkboxSW({
 workboxSW.precache([]);
 
 // Here we precache urls that are generated dynamically in the main.js controller
-workboxSW.precache(['{{{preCacheRoot}}}',
+workboxSW.precache([
     '{{baseUrl}}/manifest.json',
     'https://fonts.googleapis.com/icon?family=Material+Icons'
 ]);
 
 workboxSW.router.setDefaultHandler({
-    handler: workboxSW.strategies.cacheFirst()
+    handler: workboxSW.strategies.networkFirst()
 });
-
-workboxSW.router.registerRoute(
-    '{{baseUrl}}/about',
-    workboxSW.strategies.networkFirst()
-);
-
-workboxSW.router.registerRoute(
-    '{{baseUrl}}/contact',
-    workboxSW.strategies.networkFirst()
-);
 
 workboxSW.router.registerRoute(
     'https://fonts.gstatic.com/s/materialicons/*',

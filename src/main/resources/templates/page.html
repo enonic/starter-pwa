@@ -24,6 +24,11 @@
     <link rel="stylesheet" type="text/css" data-th-href="${portal.assetUrl({'_path=precache/bundle.css'})}">
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 
+    <script type="text/javascript" data-th-if="${pageId=='main'}">
+        if (!document.location.href.endsWith('/')) {
+            document.location = document.location.href + "/";
+        }
+    </script>
 </head>
 
 <body>
@@ -36,15 +41,19 @@
         </div>
     </header>
 
-    <div data-th-replace="/views/fragments::fragment-site-menu(title=${title}, pageId=${pageId}, appUrl=${appUrl})"></div>
+    <div data-th-replace="/templates/fragments/common::fragment-site-menu(title=${title}, pageId=${pageId}, appUrl=${appUrl})"></div>
 
     <main class="mdl-layout__content" id="main-content">
-        <div id="main-container">
-            <div data-th-if="${pageId == 'main'}" data-th-remove="tag">
-                <div data-th-replace="/views/fragments::fragment-page-main"></div>
+        <div id="main-container" data-th-switch="${pageId}">
+
+            <div data-th-case="'main'" data-th-remove="tag">
+                <div data-th-replace="/templates/fragments/common::fragment-page-main"></div>
             </div>
-            <div data-th-if="${pageId != 'main'}" data-th-remove="tag">
-                <div data-th-replace="/views/fragments::fragment-page-common"></div>
+            <div data-th-case="'offline'" data-th-remove="tag">
+                <div data-th-replace="/templates/fragments/offline::fragment-page-offline"></div>
+            </div>
+            <div data-th-case="*" data-th-remove="tag">
+                <div data-th-replace="/templates/fragments/under_construction::fragment-page-under-construction"></div>
             </div>
         </div>
     </main>
