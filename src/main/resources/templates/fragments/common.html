@@ -6,7 +6,7 @@
     <div class="mdl-layout__drawer">
         <span class="mdl-layout-title" data-th-utext="${title}"></span>
         <nav class="mdl-navigation">
-            <a class="mdl-navigation__link" data-th-href="${appUrl}" data-th-classappend="${pageId == 'main' ? 'mdl-typography--font-black' : ''}">Home</a>
+            <a class="mdl-navigation__link" data-th-href="${appUrl + '/'}" data-th-classappend="${pageId == 'main' ? 'mdl-typography--font-black' : ''}">Home</a>
             <a class="mdl-navigation__link" data-th-href="${appUrl + '/offline'}" data-th-classappend="${pageId == 'offline' ? 'mdl-typography--font-black' : ''}">Offline</a>
             <a class="mdl-navigation__link" data-th-href="${appUrl + '/push'}" data-th-classappend="${pageId == 'push' ? 'mdl-typography--font-black' : ''}">Push</a>
             <a class="mdl-navigation__link" data-th-href="${appUrl + '/cache-first'}" data-th-classappend="${pageId == 'cache-first' ? 'mdl-typography--font-black' : ''}">Cache First</a>
