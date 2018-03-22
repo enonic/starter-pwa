@@ -1,4 +1,4 @@
-importScripts('https://unpkg.com/workbox-sw@2.0.1/build/importScripts/workbox-sw.prod.v2.0.1.js');
+importScripts('{{appUrl}}js/workbox-sw.prod.v2.0.1.js');
 
 const swVersion = '{{appVersion}}';
 const workboxSW = new self.WorkboxSW({
@@ -9,16 +9,11 @@ const workboxSW = new self.WorkboxSW({
 // This is a placeholder for manifest dynamically injected from webpack.config.js
 workboxSW.precache([]);
 
-// Here we precache urls that are generated dynamically in the main.js controller
+// Here we precache custom defined Urls
 workboxSW.precache([
-    'https://fonts.googleapis.com/icon?family=Material+Icons'
+    '{{appUrl}}'
 ]);
 
 workboxSW.router.setDefaultHandler({
     handler: workboxSW.strategies.networkFirst()
 });
-
-workboxSW.router.registerRoute(
-    '//fonts.gstatic.com/s/materialicons/*',
-    workboxSW.strategies.cacheFirst()
-);

@@ -2,15 +2,17 @@ var thymeleaf = require('/lib/xp/thymeleaf');
 var router = require('/lib/router')();
 var portalLib = require('/lib/xp/portal');
 var siteTitle = 'PWA Starter';
-
 var mustache = require('/lib/xp/mustache');
-var helper = require('/lib/helper');
-var postfix = '/?source=web_app_manifest';
+
+function getAppUrl() {
+    return portalLib.url({path:'/app/' + app.name}) + '/';
+};
+
 
 function renderPage(pageId, title) {
     var model = {
         version: app.version,
-        appUrl: portalLib.url({path:'/app/' + app.name}),
+        appUrl: getAppUrl(),
         pageId: pageId,
         title: title || siteTitle
     };
@@ -20,18 +22,9 @@ function renderPage(pageId, title) {
     };
 }
 
-function renderSW() {
-    var appUrl = helper.getAppUrl();
-    var baseUrl = helper.getBaseUrl();
 
-    var preCacheRoot;
-    if (appUrl === '/') {
-        preCacheRoot = '/' + ',\'' + postfix;
-    } else if (helper.endsWithSlash(appUrl)) {
-        preCacheRoot = baseUrl + '\',\'' + appUrl + '\',\'' + baseUrl + postfix;
-    } else {
-        preCacheRoot = appUrl + '\',\'' + appUrl + '/' + '\',\'' + appUrl + postfix;
-    }
+function renderSW() {
+    var appUrl = getAppUrl();
 
     return {
         headers: {
@@ -41,20 +34,17 @@ function renderSW() {
         // sw.js will be generated during build by Workbox from webpack.config.js
         body: mustache.render(resolve('/templates/sw.js'), {
             appUrl: appUrl,
-            baseUrl: baseUrl,
-            preCacheRoot: preCacheRoot,
             appVersion: app.version
         })
     };
 }
 
 function renderManifest() {
-    var baseUrl = helper.getBaseUrl();
 
     return {
         contentType: 'application/json',
         body: mustache.render(resolve('/templates/manifest.json'), {
-            appUrl: baseUrl + postfix
+            startUrl: getAppUrl() + '?source=web_app_manifest'
         })
     };
 }

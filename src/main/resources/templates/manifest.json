@@ -4,7 +4,7 @@
   "theme_color": "#FFF",
   "background_color": "#FFF",
   "display": "standalone",
-  "start_url": "{{appUrl}}",
+  "start_url": "{{startUrl}}",
   "icons": [
     {
       "src": "precache/icons/icon.png",
