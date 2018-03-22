@@ -10,15 +10,15 @@ powered by link:https://github.com/enonic/lib-router[Enonic Router library^].
 
 == Installation
 
-1.Make sure you have Enonic XP of version 6.12 or later installed locally. If not, http://xp.readthedocs.io/en/stable/getstarted/other.html#download-enonic-xp[read how to install it here]:
+1.Make sure you have Enonic XP of version 6.12 or later installed locally. If not, http://xp.readthedocs.io/en/stable/getstarted/other.html#download-enonic-xp[read how to install it here]
 
 2.Set up environment variable XP_INSTALL that points to the XP installation folder:
 
-==== OSX/Linux
+=== OSX/Linux
 
 `export XP_INSTALL=/Users/ase/Downloads/enonic-xp-6.13.0-SNAPSHOT`
 
-==== Windows
+=== Windows
 
 `set XP_INSTALL=/Users/ase/Downloads/enonic-xp-6.13.0-SNAPSHOT`
 
@@ -27,11 +27,11 @@ powered by link:https://github.com/enonic/lib-router[Enonic Router library^].
 4.Initialize the app based on this Starter kit by running the following command (for more info on project initialisation,
 read http://xp.readthedocs.org/en/stable/reference/toolbox/init-project.html[the documentation for init-project])
 
-==== OSX/Linux
+=== OSX/Linux
 
 `$XP_INSTALL/toolbox/toolbox.sh init-project -n com.company.myapp -r starter-pwa`
 
-==== Windows
+=== Windows
 
 `$XP_INSTALL/toolbox/toolbox.bat init-project -n com.company.myapp -r starter-pwa`
 
@@ -48,34 +48,45 @@ gradlew build deploy
 
 == Usage and Testing of PWA
 
-We assume that XP service is running on ``localhost:8000`` and your app is called ``com.company.myapp`` as in example above.
+We assume that XP service is running on ``localhost:8000`` and your app is called ``com.company.myapp`` as in the example above.
 
 1. Open http://localhost:8080/app/com.company.myapp in your browser. You should see this:
 
-image::mainpage-online.png[]
+image::main-page.png[]
 
-2.Click the "About" link in the header to open http://localhost:8080/app/com.company.myapp/about. You should see this:
+2.Click the burger icon in the header:
 
-image::about-online.png[]
+image::menu.png[]
 
-3.Now's the fun part. Go offline (either by turning off the Wi-Fi or unplugging cable or checking off "Offline" in the Dev Tools).
-Content of the About page should now change like this:
+3.This menu showcases different capabilities of the PWA Starter. Read about them below.
 
-image::about-offline.png[]
+TIP: Some of the features in the menu are not implemented yet but will be added in future versions.
 
-4.Go back to the main page. It should now look like this:
 
-image::mainpage-offline.png[]
+== PWA Features
+
+=== Tracking online/offline state
+
+
+Click the "Offline" link in the Starter menu. That will open a new page looking like this:
+
+image::page-online.png[]
+
+This page shows that it's possible to easily determine online/offline status in the browser and show different content on the page based on that. Go offline by unplugging network cable or turning off Wi-Fi. Now the page should change and look like this:
+
+image::page-offline.png[]
+
+If you now - while staying offline - go to the main page, you will see additional note under the welcome text
+
+image::main-page-offline.png[]
 
 As you can see, the Starter can track its online/offline status and change content of its pages accordingly.
-
-*You are now ready to expand the application's functionality, plug in any Front-end framework etc.*
 
 == Webpack Config
 
 The Starter is using Webpack to build all LESS files into one CSS bundle (``bundle.css``) and all Javascript assets into one JS bundle
-(``bundle.js``). The Workbox plugin is used by Webpack to automatically generate a template for the Service Worker (``sw-template.js``) based
-on a predefined file (``sw-template.js``). Final Service Worker file will be rendered on-the-fly by https://github.com/enonic/lib-router[Enonic Router] lib by intercepting
+(``bundle.js``). The Workbox plugin is used by Webpack to automatically generate a template for the Service Worker (``sw.js``) based
+on a predefined file (``workbox-sw.js``). Final Service Worker file will be rendered on-the-fly by https://github.com/enonic/lib-router[Enonic Router] lib by intercepting
 a call to ``/sw.js`` file in the site root.
 
 .webpack.config.js:
@@ -87,14 +98,16 @@ const extractTextPlugin = require('extract-text-webpack-plugin');
 const workboxPlugin = require('workbox-webpack-plugin');
 
 const paths = {
+    templates: 'src/main/resources/templates/',
     assets: 'src/main/resources/assets/',
     buildAssets: 'build/resources/main/assets/',
-    buildPwaLib: 'build/resources/main/lib/pwa/'
+    buildTemplates: 'build/resources/main/templates/'
 };
 
+const templatesPath = path.join(__dirname, paths.templates);
 const assetsPath = path.join(__dirname, paths.assets);
 const buildAssetsPath = path.join(__dirname, paths.buildAssets);
-const buildPwaLibPath = path.join(__dirname, paths.buildPwaLib);
+const buildTemplatesPath = path.join(__dirname, paths.buildTemplates);
 
 module.exports = {
 
@@ -125,9 +138,8 @@ module.exports = {
         new workboxPlugin({
             globDirectory: buildAssetsPath,
             globPatterns: ['precache/**\/*'],
-            globIgnores: [],
-            swSrc: path.join(assetsPath, 'js/sw-dev.js'),
-            swDest: path.join(buildPwaLibPath, 'sw-template.js')
+            swSrc: path.join(templatesPath, 'workbox-sw.js'),
+            swDest: path.join(buildTemplatesPath, 'sw.js')
         })
     ]
 
@@ -136,7 +148,7 @@ module.exports = {
 
 == Dependencies
 
-``js/main.js`` is used as entry point for the Webpack builder, so make sure you add first level of dependencies to this file (using ``require``).
+``js/main.js`` is used as entry point for the Webpack builder, so make sure you add the first level of dependencies to this file (using ``require``).
 For example, if ``js/main.js`` is using a LESS file called ``styles.less``, add the following line to the ``main.js``:
 
 [source,javascript]
@@ -144,14 +156,14 @@ For example, if ``js/main.js`` is using a LESS file called ``styles.less``, add 
 require('../css/styles.less');
 ----
 
-Same with JS-dependencies. For example, to include a file called ``about.js`` from the same ``js`` folder add this line to ``main.js``:
+Same with JS-dependencies. For example, to include a file called ``new.js`` from the same ``js`` folder add this line to ``main.js``:
 
 [source,javascript]
 ----
-require('../js/about.js');
+require('../js/new.js');
 ----
 
-You can then require other LESS or JS files directly from ``about.js`` effectively building a chain of dependencies that Webpack will resolve during the build.
+You can then require other LESS or JS files directly from ``new.js`` effectively building a chain of dependencies that Webpack will resolve during the build.
 
 As mentioned before, the build process will bundle all LESS and JS assets into bundle.css and bundle.js files in the ``precache`` folder which can then
 be referenced directly from the ``main.html`` page.
@@ -162,9 +174,10 @@ be referenced directly from the ``main.html`` page.
 When the application is launched for the first time, Service Worker will attempt to precache the Application Shell - the minimum set of assets
 required for the application to continue working while offline. As described above, two files - ``bundle.css`` and ``bundle.js`` - generated by the build
 process will be precached by default. In addition, you may add any files to the ``assets/precache`` folder and they will *automatically* be added
-to the list of precached assets. Typically that would be images, icons, font files, 3rd-party stylesheets and Javascript libraries etc.
+to the list of precached assets. Typically that would be images, icons, font files, 3rd-party stylesheets and Javascript libraries etc. - assets that are
+considered *static* to current version of the application.
 
-.sw-dev.js:
+.workbox-sw.js:
 [source,javascript]
 ----
 importScripts('https://unpkg.com/workbox-sw@2.0.1/build/importScripts/workbox-sw.prod.v2.0.1.js');
@@ -177,7 +190,7 @@ const workboxSW = new self.WorkboxSW({
 workboxSW.precache([]);
 ----
 
-Empty square brackets in The last line is the placeholder which after the build will be filled with paths to actual assets from the
+Empty square brackets in the last line is the placeholder which after the build will be filled with paths to actual assets from the
 ``precache`` folder, something like this:
 
 [source,javascript]
@@ -223,7 +236,7 @@ workboxSW.precache([
 == Application Manifest file
 
 *Application Manifest* is a file in JSON format which turns the application into a PWA. Starter comes with its own manifest.json with hardcoded
-title, color scheme, display settings and favicon. Feel free to change the predefined settings: the file is located directly in the ``/assets/`` folder.
+title, color scheme, display settings and favicon. Feel free to change the predefined settings: the file is located in the ``/resources/templates/`` folder.
 
 .manifest.json:
 [source,json]
@@ -248,8 +261,8 @@ title, color scheme, display settings and favicon. Feel free to change the prede
 == Changing favicon
 
 Default favicon used by the Starter is called ``icon.png`` and located in ``precache/icons/`` folder, so you can simply replace this icon with
-your own of the same name. If you want to use a different icon file, add it to the same location and change ``main.html`` to point to the new icon. Don't
-forget to make same changes in ``manifest.json`` and ``browserconfig.xml``.
+your own of the same name. If you want to use a different icon file, add it to the same location and change ``page.html`` to point to the new icon. Don't
+forget to make same changes in ``manifest.json``.
 
 .main.html:
 [source,html]
@@ -278,22 +291,32 @@ exports.get = function (req) {
 If your application name is ``com.enonic.starter.pwa`` and Enonic web server is launched on ``localhost:8000`` then
 ``http://localhost:8080/app/com.enonic.starter.pwa/`` will open the main page of your app.
 
+== Page rendering
+
+As mentioned above, ``main.js` is used to render pages and serve the content. In our starter we use one main template
+(``templates/page.html``) and then use fragments for showing different content based on which page you're on. This is explained below.
+
+
 == Dynamic routing
 
 If your application is not a single-page app, you are going to need some routing capabilities. The Starter is using Enonic Router library
 which makes it incredibly simple to dynamically route a request to correct page template.
-First, let's change the default page to render a proper template instead of a simple string. Let's say, we have a ``main.html`` template in the
-``/resources/pages/``.
+First, let's change the default page to render a proper template instead of a simple string.
 
 .main.js:
-[source,html]
+[source,javascript]
 ----
-var mustacheLib = require('/lib/xp/mustache');
-var router = require('/lib/router')();
+var thymeleaf = require('/lib/xp/thymeleaf');
+var router = require('/lib/router');
+var portalLib = require('/lib/portal');
 
 router.get('/', function (req) {
     return {
-        body: mustacheLib.render(resolve('/pages/main.html'), {})
+        body: thymeleaf.render(resolve('/templates/page.html'), {
+            appUrl: portalLib.url({path:'/app/' + app.name}),
+            pageId: 'main',
+            title: 'Main page'
+        })
     }
 });
 
@@ -303,32 +326,56 @@ exports.get = function (req) {
 
 ----
 
-Here we told the Router to respond to the "/" request (which is the app's main page) with the rendered template from ``/pages/main.html``.
+Here we told the Router to respond to the "/" request (which is the app's main page) with the rendered template from ``/templates/page.html``.
 
-Now let's expand this to enable routing to other pages. Let's say, we need two pages called _"About"_ and _"Contact"_ which should open via ``/about`` and
-``/contact`` URLs correspondingly.
+Now let's create a fragment showing the content of the main page that is different from other pages:
 
-.main.js:
+templates/fragments/common.html:
 [source,html]
 ----
-var mustacheLib = require('/lib/xp/mustache');
+<div data-th-fragment="fragment-page-main" data-th-remove="tag">
+    <div>
+        This is the main page!
+    </div>
+</div>
+----
+
+Finally, inside the main template we should render correct fragment based on ``pageId``:
+templates/page.html:
+[source,html]
+----
+    <main class="mdl-layout__content" id="main-content">
+        <div id="main-container" data-th-switch="${pageId}">
+
+            <div data-th-case="'main'" data-th-remove="tag">
+                <div data-th-replace="/templates/fragments/common::fragment-page-main"></div>
+            </div>
+            <div data-th-case="*" data-th-remove="tag">
+                <div data-th-replace="/templates/fragments/under_construction::fragment-page-under-construction"></div>
+            </div>
+        </div>
+    </main>
+----
+
+Now let's expand this to enable routing to other pages. Let's say, we need a new page called _"About"_ which should open via ``/about`` URL.
+
+.main.js:
+[source,javascript]
+----
+var thymeleaf = require('/lib/xp/thymeleaf');
 var router = require('/lib/router')();
 
 router.get('/', function (req) {
-    return {
-        body: mustacheLib.render(resolve('/pages/main.html'), {})
-    }
+    ...
 });
 
 router.get('/about', function (req) {
     return {
-        body: mustacheLib.render(resolve('/pages/about.html'), {})
-    }
-});
-
-router.get('/contact', function (req) {
-    return {
-        body: mustacheLib.render(resolve('/pages/contact.html'), {})
+        body: thymeleaf.render(resolve('/templates/page.html'), {
+            appUrl: portalLib.url({path:'/app/' + app.name}),
+            pageId: 'about',
+            title: 'About Us'
+        })
     }
 });
 
@@ -338,12 +385,43 @@ exports.get = function (req) {
 
 ----
 
-That's it, we have just built a simple routing inside the ``main.js`` file. You can pass custom rendering parameters to each template inside the {} argument.
+Create a new fragment for the "About" page:
 
-== Response caching
+templates/fragments/about.html:
+[source,html]
+----
+<div data-th-fragment="fragment-page-about" data-th-remove="tag">
+    <div>
+        This is the About Us page!
+    </div>
+</div>
+----
+
+Handle new fragment inside the main template:
+templates/page.html:
+[source,html]
+----
+<main class="mdl-layout__content" id="main-content">
+    <div id="main-container" data-th-switch="${pageId}">
+
+        <div data-th-case="'main'" data-th-remove="tag">
+            <div data-th-replace="/templates/fragments/common::fragment-page-main"></div>
+        </div>
+        <div data-th-case="'about'" data-th-remove="tag">
+            <div data-th-replace="/templates/fragments/common::fragment-page-main"></div>
+        </div>
+        <div data-th-case="*" data-th-remove="tag">
+            <div data-th-replace="/templates/fragments/under_construction::fragment-page-under-construction"></div>
+        </div>
+    </div>
+</main>
+----
+
+== Runtime caching
 
 When you're building a PWA you typically want a user to be able to open previously visited pages even when the application is offline.
-In this Starter we are using Workbox to dynamically cache URL requests for future use.
+In this Starter we are using Workbox to dynamically cache URL requests for future use. Note that we are using ``networkFirst` as a default
+strategy but you can specify a different strategy for specific pages.
 
 .sw-dev.js:
 [source,javascript]
@@ -355,23 +433,25 @@ const workboxSW = new self.WorkboxSW({
     clientsClaim: true
 });
 
+workboxSW.router.setDefaultHandler({
+    handler: workboxSW.strategies.networkFirst()
+});
+
 workboxSW.router.registerRoute(
     '{{baseUrl}}/about',
-    workboxSW.strategies.networkFirst()
-);
-
-workboxSW.router.registerRoute(
-    '{{baseUrl}}/contact',
-    workboxSW.strategies.networkFirst()
-);
-
-workboxSW.router.registerRoute(
-    /^https:\/\/fonts\.gstatic\.com\//,
     workboxSW.strategies.cacheFirst()
 );
+
+workboxSW.router.registerRoute(
+    '//fonts.gstatic.com/s/materialicons/*',
+    workboxSW.strategies.cacheFirst()
+);
+
 ----
 
-Here we cache requests to the ``/about`` and ``/contact`` URLs mentioned above, as well as request to the 3rd-party font file on an external URL.
+Here we specify default caching strategy for the entire app and then specific caching strategy for ``/about`` URL and
+requests to the 3rd-party font file on an external URL.
 
-NOTE: Note that we are using _networkFirst_ strategy for the pages where we first check for the fresh version from the network and fall back to the cached version if the network is down.
+TIP: Note that we by default are using _networkFirst_ strategy which means that Service Worker will first check for the fresh
+version from the network and fall back to the cached version if the network is down.
 Read more about possible caching strategies https://workboxjs.org/reference-docs/latest/module-workbox-runtime-caching.html[here].

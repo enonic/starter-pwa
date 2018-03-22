@@ -5,7 +5,7 @@ var siteTitle = 'PWA Starter';
 
 var mustache = require('/lib/xp/mustache');
 var helper = require('/lib/helper');
-var postfix = '?source=web_app_manifest';
+var postfix = '/?source=web_app_manifest';
 
 function renderPage(pageId, title) {
     var model = {

@@ -11,7 +11,6 @@ workboxSW.precache([]);
 
 // Here we precache urls that are generated dynamically in the main.js controller
 workboxSW.precache([
-    '{{baseUrl}}/manifest.json',
     'https://fonts.googleapis.com/icon?family=Material+Icons'
 ]);
 
@@ -20,6 +19,6 @@ workboxSW.router.setDefaultHandler({
 });
 
 workboxSW.router.registerRoute(
-    'https://fonts.gstatic.com/s/materialicons/*',
+    '//fonts.gstatic.com/s/materialicons/*',
     workboxSW.strategies.cacheFirst()
 );
