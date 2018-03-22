@@ -16,7 +16,7 @@ const buildTemplatesPath = path.join(__dirname, paths.buildTemplates);
 
 module.exports = {
 
-    entry: path.join(assetsPath, 'js/main.js'),
+    entry: path.join(assetsPath, 'js/app.js'),
 
     output: {
         path: buildAssetsPath,

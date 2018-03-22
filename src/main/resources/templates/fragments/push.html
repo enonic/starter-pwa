@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+
+<div data-th-fragment="fragment-push" data-th-remove="tag">
+    <div id="page-content">
+        Push Notifications test
+    </div>
+    <div data-th-replace="/templates/fragments/common::fragment-no-javascript"></div>
+    <script type="text/javascript">
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready
+                .then(function(reg) {
+                    window.askForPermissions(reg);
+                }, function() {
+                    console.log('Service Worker is not ready.');
+                });
+        }
+    </script>
+</div>
+
+
+
+</body>
+</html>
