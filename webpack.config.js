@@ -20,7 +20,9 @@ module.exports = {
 
     output: {
         path: buildAssetsPath,
-        filename: 'precache/bundle.js'
+        filename: 'precache/bundle.js',
+        libraryTarget: 'var',
+        library: 'Starter'
     },
 
     resolve: {

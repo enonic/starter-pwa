@@ -68,14 +68,13 @@
 
 <script type="text/javascript">
     const registerServiceWorker = function(appUrl) {
-    const swPath = appUrl + 'sw.js';
 
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker
-                .register(swPath, {scope: appUrl})
+                .register(appUrl + 'sw.js', {scope: appUrl})
                 .then(function(reg) {
                     reg.onupdatefound = function() {
-                        window.notifyAboutNewVersion();
+                        Starter.notifyAboutNewVersion();
                     };
                     console.log('Service Worker registered with scope '  + reg.scope);
                 }, function() {

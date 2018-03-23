@@ -6,8 +6,7 @@ var mustache = require('/lib/xp/mustache');
 
 function getAppUrl() {
     return portalLib.url({path:'/app/' + app.name}) + '/';
-};
-
+}
 
 function renderPage(pageId, title) {
     var model = {
