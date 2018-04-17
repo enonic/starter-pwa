@@ -4,6 +4,11 @@ var portalLib = require('/lib/xp/portal');
 var siteTitle = 'PWA Starter';
 var mustache = require('/lib/xp/mustache');
 
+var init = require('/lib/init');
+
+init.initialize();
+
+
 function getAppUrl() {
     return portalLib.url({path:'/app/' + app.name}) + '/';
 }
