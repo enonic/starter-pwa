@@ -8,6 +8,8 @@ var repo = require('/lib/repoWrapper');
 
 repo.initialize();
 
+var push = require('/lib/push');
+
 
 function getAppUrl() {
     return portalLib.url({path:'/app/' + app.name}) + '/';
@@ -22,6 +24,8 @@ function renderPage(pageId, title) {
 
         pushUrl: portalLib.serviceUrl({service: "push"}),
         subscribeUrl: portalLib.serviceUrl({service: "subscribe"}),
+        serviceUrl: getAppUrl() + "push",
+        publicKey: push.getKeyPair().publicKey,
     };
 
     return {

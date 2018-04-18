@@ -3,51 +3,31 @@
 <body>
 
 <div data-th-fragment="fragment-push" data-th-remove="tag">
-
-    <script type="text/javascript">
-        var postForm = function(formId) {
-            var jquery = $ || wemjq;
-            var form = jquery(formId);
-            jquery.ajax({
-                type: 'post',
-                url: form.attr('action'),
-                data: form.serialize()
-            });
-
-            return false;
-        }
-    </script>
-
     <div id="page-content">
         <p>Push Notifications test</p>
 
-        <form id="subscribe-form" data-th-action="${subscribeUrl}" method="POST" onsubmit="return postForm('#subscribe-form');">
+        <form>
             <label>Subscribe to notifications</label>
-            <button type="submit" >Yes please</button>
+            <button id="subscribe-button">Yes please</button>
         </form>
 
-        <form id="push-form" data-th-action="${pushUrl}" method="POST" onsubmit="return postForm('#push-form');">
+        <form>
             <label>Push notification</label>
             <input type="text" name="message" placeholder="Write a notification message here..." />
-            <button type="submit" >Send</button>
+            <button id="push-button">Send</button>
         </form>
     </div>
 
     <div data-th-replace="/templates/fragments/common::fragment-no-javascript"></div>
 
-    <script type="text/javascript">
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.ready
-                .then(function(reg) {
-                    Starter.initPushNotifications(reg);
-                }, function() {
-                    console.log('Service Worker is not ready.');
-                });
-        }
-    </script>
+    <div id="push-subscription-data" style="display:none;"
+         th:attr="data-subscription-url=${subscriptionUrl},data-push-url=${pushUrl},data-public-key=${publicKey}">
+    </div>
+
+    <script defer data-th-src="${portal.assetUrl({'_path=js/main.js'})}" type="text/javascript"></script>
 </div>
 
 
-
 </body>
+
 </html>
