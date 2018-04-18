@@ -5,6 +5,8 @@ var ENDPOINT = 'endpoint';
 var KEY = 'key';
 
 exports.post = function (req) {
+    log.info(JSON.stringify({subscriptionRequest_req:req}, null, 2));
+
     var subscription = getSubscriptionObj(req.params);
 
     if (!subscription) {
@@ -12,6 +14,7 @@ exports.post = function (req) {
         return;
     }
 
+    log.info(JSON.stringify({subscription:subscription}, null, 2));
     repo.sudo(function(){ createSubscriptionNode(subscription); });
 };
 

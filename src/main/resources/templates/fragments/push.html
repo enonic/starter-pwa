@@ -1,14 +1,40 @@
-
 <!DOCTYPE html>
 <html>
 <body>
 
-
 <div data-th-fragment="fragment-push" data-th-remove="tag">
+
+    <script type="text/javascript">
+        var postForm = function(formId) {
+            var jquery = $ || wemjq;
+            var form = jquery(formId);
+            jquery.ajax({
+                type: 'post',
+                url: form.attr('action'),
+                data: form.serialize()
+            });
+
+            return false;
+        }
+    </script>
+
     <div id="page-content">
-        Push Notifications test
+        <p>Push Notifications test</p>
+
+        <form id="subscribe-form" data-th-action="${subscribeUrl}" method="POST" onsubmit="return postForm('#subscribe-form');">
+            <label>Subscribe to notifications</label>
+            <button type="submit" >Yes please</button>
+        </form>
+
+        <form id="push-form" data-th-action="${pushUrl}" method="POST" onsubmit="return postForm('#push-form');">
+            <label>Push notification</label>
+            <input type="text" name="message" placeholder="Write a notification message here..." />
+            <button type="submit" >Send</button>
+        </form>
     </div>
+
     <div data-th-replace="/templates/fragments/common::fragment-no-javascript"></div>
+
     <script type="text/javascript">
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.ready

@@ -4,9 +4,9 @@ var portalLib = require('/lib/xp/portal');
 var siteTitle = 'PWA Starter';
 var mustache = require('/lib/xp/mustache');
 
-var init = require('/lib/init');
+var repo = require('/lib/repoWrapper');
 
-init.initialize();
+repo.initialize();
 
 
 function getAppUrl() {
@@ -18,7 +18,10 @@ function renderPage(pageId, title) {
         version: app.version,
         appUrl: getAppUrl(),
         pageId: pageId,
-        title: title || siteTitle
+        title: title || siteTitle,
+
+        pushUrl: portalLib.serviceUrl({service: "push"}),
+        subscribeUrl: portalLib.serviceUrl({service: "subscribe"}),
     };
 
     return {
