@@ -1,60 +1,39 @@
-var nodeLib = require('/lib/xp/node');
-var repoLib = require('/lib/xp/repo');
-var util = require('/lib/util');
-var init = require('/lib/init');
+var repo = require('/lib/repoWrapper');
 
-var REPO_NAME = init.REPO_NAME;
-var PUSH_SUBSCRIPTIONS_PATH = init.PUSH_SUBSCRIPTIONS_PATH;
-var ROOT_PERMISSIONS = init.ROOT_PERMISSIONS;
-
-var subscription;
+var AUTH = 'auth';
+var ENDPOINT = 'endpoint';
+var KEY = 'key';
 
 exports.post = function (req) {
-    subscription = getSubscriptionObj(req.params);
+    var subscription = getSubscriptionObj(req.params);
 
     if (!subscription) {
         log.info('No subscription data in request');
         return;
     }
 
-    util.sudo(createSubscriptionNode);
+    repo.sudo(function(){ createSubscriptionNode(subscription); });
 };
 
 var getSubscriptionObj = function(params) {
-    if (!params['auth'] || !params['endpoint'] || !params['key']) {
+    if (!params[AUTH] || !params[ENDPOINT] || !params[KEY]) {
+        log.error("Invalid subscription object parameters");
         return null;
     }
 
     return {
-        auth: params['auth'],
-        endpoint: params['endpoint'],
-        key: params['key']
+        auth: params[AUTH],
+        endpoint: params[ENDPOINT],
+        key: params[KEY]
     };
 };
 
-var uuidv4 = function () {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
-};
-
-var createSubscriptionNode = function () {
-
-    if (!repoLib.get(REPO_NAME)) {
-        log.info('Repo does not exist');
-
-        return;
-    }
-
-    var repoConn = nodeLib.connect({
-        repoId: REPO_NAME,
-        branch: 'master'
-    });
+var createSubscriptionNode = function (subscription) {
+    var repoConn = repo.getRepoConnection();
 
     repoConn.create({
-        _parentPath: PUSH_SUBSCRIPTIONS_PATH,
-        _permissions: ROOT_PERMISSIONS,
+        _parentPath: repo.PUSH_SUBSCRIPTIONS_PATH,
+        _permissions: repo.ROOT_PERMISSIONS,
         subscription: subscription
     });
 };

@@ -1,12 +1,19 @@
 var repoLib = require('/lib/xp/repo');
 var nodeLib = require('/lib/xp/node');
-var util = require('/lib/util');
+var contextLib = require('/lib/xp/context');
+
+
+
+// -------------------------------------------------------------------- Constants
 
 var REPO_NAME = 'push';
-exports.REPO_NAME = REPO_NAME;
-
+var REPO_BRANCH = 'master';
 var PUSH_SUBSCRIPTIONS_PATH = '/subscriptions';
-exports.PUSH_SUBSCRIPTIONS_PATH = PUSH_SUBSCRIPTIONS_PATH;
+var REPO_USER = {
+    login: 'su',
+    userStore: 'system'
+};
+var REPO_PRINCIPAL = ["role:system.admin"];
 
 var ROOT_PERMISSIONS = [
     {
@@ -23,12 +30,43 @@ var ROOT_PERMISSIONS = [
         "deny": []
     }
 ];
+
 exports.ROOT_PERMISSIONS = ROOT_PERMISSIONS;
+exports.REPO_NAME = REPO_NAME;
+exports.REPO_BRANCH = REPO_BRANCH;
+exports.PUSH_SUBSCRIPTIONS_PATH = PUSH_SUBSCRIPTIONS_PATH;
+
+
+
+// -------------------------------------------------------------------- Utility functions
+
+function sudo(func) {
+    return contextLib.run({
+        user: REPO_USER,
+        principals: REPO_PRINCIPAL,
+    }, func);
+};
+
+
+function getRepoConnection() {
+    return nodeLib.connect({
+        repoId: REPO_NAME,
+        branch: REPO_BRANCH,
+    });
+}
+
+exports.getRepoConnection = getRepoConnection;
+exports.sudo = sudo;
+
+
+
+
+// ------------------------------------------------------------------------- Initialization
 
 exports.initialize = function () {
     log.info('Initializing repository...');
 
-    util.sudo(doInitialize);
+    sudo(doInitialize);
 
     log.info('Repository initialized.');
 };
@@ -42,6 +80,11 @@ var doInitialize = function () {
         log.info('Repository [' + REPO_NAME + ']  not found');
         createRepo();
     }
+
+    if (!repoLib.get(REPO_NAME)) {
+        throw Error('Couldnt create repo:' + REPO_NAME);
+    }
+
     createSubscriptionNode();
 };
 
@@ -55,10 +98,7 @@ var createRepo = function () {
 };
 
 var createSubscriptionNode = function () {
-    var repoConn = nodeLib.connect({
-        repoId: REPO_NAME,
-        branch: 'master'
-    });
+    var repoConn = getRepoConnection();
 
     var pushSubscriptionsExist = nodeWithPathExists(repoConn, PUSH_SUBSCRIPTIONS_PATH);
 

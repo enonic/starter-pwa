@@ -1,18 +1,14 @@
-var nodeLib = require('/lib/xp/node');
-var contextLib = require('/lib/xp/context');
 var notifications = require('/lib/notifications');
+var repo = require('/lib/repoWrapper');
 
-var REPO_NAME = 'statnett';
-var PUSH_SUBSCRIPTIONS_PATH = '/push-subscriptions';
 
 exports.getKeyPair = function () {
-
-    var keyPair = sudo(function () {
+    var keyPair = repo.sudo(function () {
         return loadKeyPair();
     });
     if (!keyPair) {
         keyPair = notifications.generateKeyPair();
-        sudo(function () {
+        repo.sudo(function () {
             storeKeyPair(keyPair);
         });
     }
@@ -20,27 +16,24 @@ exports.getKeyPair = function () {
     return keyPair;
 };
 
+
 exports.sendPushNotificationToAllSubscribers = function (message) {
-    var repoConn = nodeLib.connect({
-        repoId: REPO_NAME,
-        branch: 'master'
-    });
+    var repoConn = repo.getRepoConnection();
 
     var keyPair = exports.getKeyPair();
     var subscriptions = repoConn.findChildren({
         start: 0,
         count: -1,
-        parentKey: PUSH_SUBSCRIPTIONS_PATH
+        parentKey: repo.PUSH_SUBSCRIPTIONS_PATH
     });
 
-    if (subscriptions.total == 0) {
+    if (subscriptions.total === 0) {
         log.info('No subscriptions found');
         return;
     }
 
     for (var i = 0; i < subscriptions.hits.length; i++) {
         var node = repoConn.get(subscriptions.hits[i].id);
-
 
         if (node && node.subscription) {
             sendPushNotification(keyPair, node.subscription, message);
@@ -50,6 +43,7 @@ exports.sendPushNotificationToAllSubscribers = function (message) {
         }
     }
 };
+
 
 var sendPushNotification = function (keyPair, subscription, message) {
     notifications.sendAsync({
@@ -71,36 +65,20 @@ var sendPushNotification = function (keyPair, subscription, message) {
 };
 
 
-var sudo = function (func) {
-    return contextLib.run({
-        user: {
-            login: 'su',
-            userStore: 'system'
-        },
-        principals: ["role:system.admin"]
-    }, func);
-};
-
 var loadKeyPair = function () {
-    var repoConn = nodeLib.connect({
-        repoId: REPO_NAME,
-        branch: 'master'
-    });
-    var pushSubNode = repoConn.get(PUSH_SUBSCRIPTIONS_PATH);
-    if (pushSubNode) {
-        return pushSubNode.keyPair;
-    }
+    var repoConn = repo.getRepoConnection();
 
-    return null;
+    var pushSubNode = repoConn.get(repo.PUSH_SUBSCRIPTIONS_PATH);
+
+    return (pushSubNode) ? pushSubNode.keyPair : null;
 };
+
 
 var storeKeyPair = function (keyPair) {
-    var repoConn = nodeLib.connect({
-        repoId: REPO_NAME,
-        branch: 'master'
-    });
+    var repoConn = repo.getRepoConnection();
+
     repoConn.modify({
-        key: PUSH_SUBSCRIPTIONS_PATH,
+        key: repo.PUSH_SUBSCRIPTIONS_PATH,
         editor: function (node) {
             node.keyPair = {
                 publicKey: keyPair.publicKey,
