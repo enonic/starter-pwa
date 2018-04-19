@@ -2,7 +2,7 @@ var repo = require('/lib/repoWrapper');
 
 
 exports.post = function (req) {
-    log.info(JSON.stringify({subscriptionRequest_request:req}, null, 2));
+    log.info(JSON.stringify({subscribe_request:req}, null, 2));
 
     var subscription = getSubscriptionObj(req.params);
     if (!subscription) {
@@ -14,13 +14,13 @@ exports.post = function (req) {
         };
     }
 
-    var retVal = (req.params.cancelSubscription) ?
+    var body = (req.params.cancelSubscription) ?
         repo.sudo(function(){ return deleteSubscriptionNode(subscription); }) :
         repo.sudo(function(){ return createSubscriptionNode(subscription); });
 
-    log.info(JSON.stringify({returnFromSubscribeService:retVal}, null, 2));
+    log.info(JSON.stringify({subscribe_response:body}, null, 2));
     return {
-        body: retVal,
+        body: body,
         headers: {
             'Content-Type': 'application/json',
         },

@@ -18,17 +18,20 @@ workboxSW.router.setDefaultHandler({
     handler: workboxSW.strategies.networkFirst(),
 });
 workboxSW.router.registerRoute('/subscribe', workboxSW.strategies.networkOnly());
+workboxSW.router.registerRoute('/push', workboxSW.strategies.networkOnly());
 
 
 
 // Handling the receiving of a push in the subscription
 self.addEventListener('push', function(event) {
-    console.log('[Service Worker] Push Received.');
-    console.log(`[Service Worker] Push had this data: "${event.data.text()}"`);
+    console.log('[Service Worker] Push Received:');
+
+    var data = JSON.parse(event.data.text())
+    console.log(data);
 
     const title = 'Push Codelab';
     const options = {
-        body: event.data.text(),
+        body: data.text,
         icon: 'images/icon.png',
         badge: 'images/badge.png'
     };
@@ -41,10 +44,5 @@ self.addEventListener('push', function(event) {
 // Clicking on the notification
 self.addEventListener('notificationclick', function(event) {
     console.log('[Service Worker] Notification click Received.');
-
     event.notification.close();
-
-    event.waitUntil(
-        clients.openWindow('https://developers.google.com/web/')
-    );
 });

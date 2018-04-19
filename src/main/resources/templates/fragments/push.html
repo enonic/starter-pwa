@@ -4,17 +4,15 @@
 
 <div data-th-fragment="fragment-push" data-th-remove="tag">
     <div id="page-content">
-        <p>Push Notifications test</p>
-
-        <form>
-            <label>Subscribe to notifications</label>
+        <form data-th-action="${subscribeUrl}" onSubmit="return false;">
+            <label id="subscribe-status">Subscribe to notifications</label>
             <button id="subscribe-button">Yes please</button>
         </form>
 
-        <form>
-            <label>Push notification</label>
+        <form id="push-form" data-th-action="${pushUrl}" onSubmit="return false;">
+            <label>Notify subscribers</label>
             <input type="text" name="message" placeholder="Write a notification message here..." />
-            <button id="push-button">Send</button>
+            <button id="push-button">Push message</button>
         </form>
     </div>
 

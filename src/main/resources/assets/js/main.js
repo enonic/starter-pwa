@@ -1,10 +1,10 @@
-// TODO: The private key doesn't seem to be needed anywhere?
 var publicKey = null;
 var subscribeUrl = null;
 var pushUrl = null;
 
+const pushButton = document.getElementById("push-button");
 const subscribeButton = document.getElementById("subscribe-button");
-const pushButton = document.getElementById('push-button');
+const subscribeStatus = document.getElementById("subscribe-status");
 
 // State
 let isSubscribed = false;
@@ -52,44 +52,56 @@ if ('serviceWorker' in navigator && 'PushManager' in window) {
 
 function initializeUI() {
 
-    // Add button click listener
-    subscribeButton.addEventListener('click', function() {
-        subscribeButton.disabled = true;
-        if (isSubscribed) {
-            unsubscribeUser();
-        } else {
-            subscribeUser();
-        }
-    });
+    // Add button click listeners
+    subscribeButton.addEventListener('click', clickSubscriptionButton);
+    pushButton.addEventListener('click', clickPushButton);
 
-    // Get the initial subscription state and store it
+    // Get the initial subscription state and store itf
     swRegistration.pushManager.getSubscription()
-        .then(function(subscription) {
-            isSubscribed = !(subscription === null);
+        .then(function(subscr) {
+            var subscription = JSON.parse(JSON.stringify(subscr || {}));
+            var keys = subscription.keys || {};
 
-            updateSubscriptionOnServer(subscription);
+            subscriptionEndpoint = subscription.endpoint;
+            subscriptionKey = keys.p256dh;
+            subscriptionAuth = keys.auth;
 
+            isSubscribed = subscriptionEndpoint && subscriptionKey && subscriptionAuth;
             if (isSubscribed) {
                 console.log('User IS subscribed.');
             } else {
                 console.log('User is NOT subscribed.');
             }
+            updateBtn();
         });
 }
 
 
+
+// -------------------------------------------------------------------------  Subscription section
+
+function clickSubscriptionButton() {
+    subscribeButton.disabled = true;
+    if (isSubscribed) {
+        unsubscribeUser();
+    } else {
+        subscribeUser();
+    }
+}
+
 // What should the button look like
 function updateBtn() {
     if (Notification.permission === 'denied') {
-        subscribeButton.textContent = 'Push Notifications are blocked.';
+        subscribeStatus.textContent = 'Push Notifications are blocked.';
         subscribeButton.disabled = true;
-        removeSubscriptionOnServer(null);
         return;
     }
 
     if (isSubscribed) {
+        subscribeStatus.textContent = 'Subscribing to notifications';
         subscribeButton.textContent = 'Unsubscribe';
     } else {
+        subscribeStatus.textContent = 'Not subscribing to notifications';
         subscribeButton.textContent = 'Subscribe';
     }
 
@@ -124,7 +136,7 @@ function subscribeUser() {
             updateSubscriptionOnServer(subscription);
         })
         .catch(function(err) {
-            console.log('Failed to subscribe the user: ', err);
+            console.error('Failed to subscribe the user: ', err);
             updateBtn();
         });
 }
@@ -138,11 +150,9 @@ function unsubscribeUser() {
                 return subscription.unsubscribe();
             }
         })
-        .then(function() {
-            removeSubscriptionOnServer();
-        })
+        .then(removeSubscriptionOnServer)
         .catch(function(err) {
-            console.log('Error unsubscribing', err);
+            console.error('Failed to unsubscribe the user: ', err);
             updateBtn();
         });
 }
@@ -235,14 +245,45 @@ function updateSubscriptionOnServer(subscription) {
             updateBtn();
         },
 
-        function fail (data) {
+        function fail (error) {
             console.error('Failed to subscribe to push notification.');
-            console.log({response:data});
+            console.log({response:error});
 
             isSubscribed = false;
             updateBtn();
         }
     );
+}
+
+
+
+// -------------------------------------------------------------------------------- Push section
+
+function clickPushButton() {
+    var jquery = $ || wemjq;
+    var form = jquery('#push-form');
+    jquery.post({
+        url: form.attr('action'),
+        data: form.serialize(),
+        dataType: "json",
+
+    }).then(
+        function success(data) {
+            if ((data || {}).success === true) {
+                console.log("Push succeeded");
+
+            } else {
+                console.log(data);
+            }
+        },
+
+        function fail(error) {
+            console.warn("Push failed");
+            console.error(error);
+        },
+    );
+
+    return false;
 }
 
 

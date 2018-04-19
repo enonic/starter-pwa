@@ -28,20 +28,25 @@ exports.sendPushNotificationToAllSubscribers = function (message) {
     });
 
     if (subscriptions.total === 0) {
-        log.info('No subscriptions found');
-        return;
+        log.warning('No subscriptions found');
+        return false;
     }
 
+    log.info("Subscriptions:");
     for (var i = 0; i < subscriptions.hits.length; i++) {
         var node = repoConn.get(subscriptions.hits[i].id);
 
         if (node && node.subscription) {
+            log.info("\n" + JSON.stringify(node.subscription, null, 2));
             sendPushNotification(keyPair, node.subscription, message);
-        }
-        else {
+
+        } else {
             log.info(JSON.stringify(subscriptions.hits[i], null, 2));
         }
     }
+    log.info("\n\nSubscriptions:");
+
+    return true;
 };
 
 
@@ -56,10 +61,10 @@ var sendPushNotification = function (keyPair, subscription, message) {
             text: message
         },
         success: function () {
-            log.info(prefix + 'Push notification sent successfully');
+            log.info('Push notification sent successfully');
         },
         error: function () {
-            log.warning(prefix + 'Could not send push notification');
+            throw Error("Could not send push notification: '" + message + "'");
         }
     });
 };
