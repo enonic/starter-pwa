@@ -74,8 +74,6 @@ function initializeUI() {
             } else {
                 console.log('User is NOT subscribed.');
             }
-
-            updateBtn();
         });
 }
 
@@ -123,13 +121,7 @@ function subscribeUser() {
             applicationServerKey: applicationServerKey
         })
         .then(function(subscription) {
-            console.log('User is subscribed.');
-
             updateSubscriptionOnServer(subscription);
-
-            isSubscribed = true;
-
-            updateBtn();
         })
         .catch(function(err) {
             console.log('Failed to subscribe the user: ', err);
@@ -146,24 +138,20 @@ function unsubscribeUser() {
                 return subscription.unsubscribe();
             }
         })
-        .catch(function(error) {
-            console.log('Error unsubscribing', error);
-        })
         .then(function() {
-            removeSubscriptionOnServer(null);
-
-            console.log('User is unsubscribed.');
-            isSubscribed = false;
-
+            removeSubscriptionOnServer();
+        })
+        .catch(function(err) {
+            console.log('Error unsubscribing', err);
             updateBtn();
         });
 }
 
 
 function removeSubscriptionOnServer() {
-    if (subscriptionEndpoint && subscriptionKey && subscriptionAuth) {
+    if (isSubscribed && subscriptionEndpoint && subscriptionKey && subscriptionAuth) {
 
-        const pushSubParams = {
+        const params = {
             cancelSubscription: true,
             endpoint: subscriptionEndpoint,
             key: subscriptionKey,
@@ -171,17 +159,42 @@ function removeSubscriptionOnServer() {
         };
 
         var jquery = $ || wemjq;
-        jquery.ajax({
-            method: 'POST',
+        jquery.post({
             url: subscribeUrl,
-            data: pushSubParams,
-            success: function() {
-                console.log('Successfully unsubscribed push notifications')
+            data: params,
+            dataType: "json",
+
+            success: function(data) {
+                if (((data || {}).success === true)) {
+                    console.log('Successfully unsubscribed from push notification');
+
+                    isSubscribed = false;
+                    subscriptionEndpoint = null;
+                    subscriptionKey = null;
+                    subscriptionAuth = null;
+
+                } else {
+                    console.warn("Server responded with status 200, but not with success=true");
+                }
+
+                if (data.message) {
+                    console.log(data.message);
+                }
+                updateBtn();
             },
-            error: function() {
-                console.log('Failed to unsubscribe push notification')
+
+            error: function(data) {
+                console.error('Failed to unsubscribe from push notification.');
+                if (data.message) {
+                    console.info(data.message);
+                }
+                updateBtn();
             }
         });
+
+
+    } else {
+        console.log("No subscription to remove");
     }
 }
 
@@ -193,30 +206,43 @@ function updateSubscriptionOnServer(subscription) {
     }
 
     const subObj = JSON.parse(JSON.stringify(subscription));
-    subscriptionEndpoint = subObj.endpoint;
-    subscriptionKey = subObj.keys.p256dh;
-    subscriptionAuth = subObj.keys.auth;
 
-    const pushSubParams = {
-        endpoint: subscriptionEndpoint,
-        key: subscriptionKey,
-        auth: subscriptionAuth
+    const params = {
+        endpoint: subObj.endpoint,
+        key: subObj.keys.p256dh,
+        auth: subObj.keys.auth
     };
 
-    console.log(JSON.stringify({pushSubParams:pushSubParams}, null, 2));
-
     var jquery = $ || wemjq;
-    jquery.ajax({
-        method: 'POST',
+    jquery.post({
         url: subscribeUrl,
-        data: pushSubParams,
-        success: function() {
-            console.log('Successfully subscribed to push notification')
+        data: params,
+        dataType: "json",
+
+    }).then(
+        function success(data) {
+            if (((data || {}).success === true)) {
+                console.log('Successfully subscribed to push notification');
+
+                subscriptionEndpoint = params.endpoint;
+                subscriptionKey = params.key;
+                subscriptionAuth = params.auth;
+                isSubscribed = true;
+
+            } else {
+                console.warn("Server responded with status 200, but not with success=true");
+            }
+            updateBtn();
         },
-        error: function() {
-            console.log('Failed to subscribe to push notification')
+
+        function fail (data) {
+            console.error('Failed to subscribe to push notification.');
+            console.log({response:data});
+
+            isSubscribed = false;
+            updateBtn();
         }
-    });
+    );
 }
 
 
