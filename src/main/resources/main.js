@@ -24,7 +24,6 @@ function renderPage(pageId, title) {
 
         pushUrl: portalLib.serviceUrl({service: "push"}),
         subscribeUrl: portalLib.serviceUrl({service: "subscribe"}),
-        serviceUrl: getAppUrl() + "push",
         publicKey: push.getKeyPair().publicKey,
     };
 
