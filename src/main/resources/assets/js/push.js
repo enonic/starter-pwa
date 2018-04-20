@@ -1,19 +1,20 @@
-var publicKey = null;
-var subscribeUrl = null;
-var pushUrl = null;
 
+// Components
 const pushButton = document.getElementById("push-button");
 const subscribeButton = document.getElementById("subscribe-button");
 const subscribeStatus = document.getElementById("subscribe-status");
+let swRegistration = null;
 
 // State
 let isSubscribed = false;
-let swRegistration = null;
-
 var subscriptionEndpoint = null;
 var subscriptionKey = null;
 var subscriptionAuth = null;
 
+
+var publicKey = null;
+var subscribeUrl = null;
+var pushUrl = null;
 
 // Setup service worker
 if ('serviceWorker' in navigator && 'PushManager' in window) {
@@ -92,7 +93,7 @@ function clickSubscriptionButton() {
 // What should the button look like
 function updateBtn() {
     if (Notification.permission === 'denied') {
-        subscribeStatus.textContent = 'Push Notifications are blocked.';
+        subscribeStatus.textContent = 'Push Notifications are blocked';
         subscribeButton.disabled = true;
         return;
     }

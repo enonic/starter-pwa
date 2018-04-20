@@ -1,4 +1,4 @@
-var pushLib = require('/lib/push');
+var pushLib = require('/lib/pushWrapper');
 
 exports.post = function (req) {
     log.info(JSON.stringify({push_request:req}, null, 2));
