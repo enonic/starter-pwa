@@ -1,17 +1,17 @@
 
 // Components
-const pushButton = document.getElementById("push-button");
-const subscribeButton = document.getElementById("subscribe-button");
-const subscribeStatus = document.getElementById("subscribe-status");
-let swRegistration = null;
+var subscribeStatus = document.getElementById("subscribe-status");
+var subscribeButton = document.getElementById("subscribe-button");
+var pushField = document.getElementById("push-field");
+var pushButton = document.getElementById("push-button");
 
 // State
-let isSubscribed = false;
+var isSubscribed = false;
 var subscriptionEndpoint = null;
 var subscriptionKey = null;
 var subscriptionAuth = null;
 
-
+var swRegistration = null;
 var publicKey = null;
 var subscribeUrl = null;
 var pushUrl = null;
@@ -261,6 +261,8 @@ function updateSubscriptionOnServer(subscription) {
 // -------------------------------------------------------------------------------- Push section
 
 function clickPushButton() {
+    pushButton.disabled = true;
+
     var jquery = $ || wemjq;
     var form = jquery('#push-form');
     jquery.post({
@@ -270,6 +272,9 @@ function clickPushButton() {
 
     }).then(
         function success(data) {
+            pushButton.disabled = false;
+            pushField.disabled = false;
+            pushField.value = "";
             if ((data || {}).success === true) {
                 console.log("Push succeeded");
 
@@ -279,12 +284,12 @@ function clickPushButton() {
         },
 
         function fail(error) {
-            console.warn("Push failed");
+            pushButton.textContent = 'Push failed';
+            console.warn("Push failed. See server log.");
             console.error(error);
         },
     );
+    pushField.disabled = true;
 
     return false;
 }
-
-
