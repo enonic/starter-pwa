@@ -2,6 +2,7 @@
 // Components
 var subscribeStatus = document.getElementById("subscribe-status");
 var subscribeButton = document.getElementById("subscribe-button");
+var pushForm = document.getElementById("push-form");
 var pushField = document.getElementById("push-field");
 var pushButton = document.getElementById("push-button");
 
@@ -73,7 +74,7 @@ function initializeUI() {
             } else {
                 console.log('User is NOT subscribed.');
             }
-            updateBtn();
+            updateGUI();
         });
 }
 
@@ -91,19 +92,28 @@ function clickSubscriptionButton() {
 }
 
 // What should the button look like
-function updateBtn() {
+function updateGUI(doFade) {
     if (Notification.permission === 'denied') {
         subscribeStatus.textContent = 'Push Notifications are blocked';
         subscribeButton.disabled = true;
+        pushForm.classList.add("disabled");
         return;
     }
 
     if (isSubscribed) {
         subscribeStatus.textContent = 'Subscribing to notifications';
         subscribeButton.textContent = 'Unsubscribe';
+        pushForm.classList.remove("disabled");
+        if (doFade) {
+            pushForm.classList.add("fade");
+        }
     } else {
         subscribeStatus.textContent = 'Not subscribing to notifications';
         subscribeButton.textContent = 'Subscribe';
+        pushForm.classList.add("disabled");
+        if (doFade) {
+            pushForm.classList.add("fade");
+        }
     }
 
     subscribeButton.disabled = false;
@@ -138,7 +148,7 @@ function subscribeUser() {
         })
         .catch(function(err) {
             console.error('Failed to subscribe the user: ', err);
-            updateBtn();
+            updateGUI();
         });
 }
 
@@ -154,7 +164,7 @@ function unsubscribeUser() {
         .then(removeSubscriptionOnServer)
         .catch(function(err) {
             console.error('Failed to unsubscribe the user: ', err);
-            updateBtn();
+            updateGUI();
         });
 }
 
@@ -191,7 +201,7 @@ function removeSubscriptionOnServer() {
                 if (data.message) {
                     console.log(data.message);
                 }
-                updateBtn();
+                updateGUI(true);
             },
 
             error: function(data) {
@@ -199,7 +209,7 @@ function removeSubscriptionOnServer() {
                 if (data.message) {
                     console.info(data.message);
                 }
-                updateBtn();
+                updateGUI();
             }
         });
 
@@ -243,7 +253,7 @@ function updateSubscriptionOnServer(subscription) {
             } else {
                 console.warn("Server responded with status 200, but not with success=true");
             }
-            updateBtn();
+            updateGUI(true);
         },
 
         function fail (error) {
@@ -251,7 +261,7 @@ function updateSubscriptionOnServer(subscription) {
             console.log({response:error});
 
             isSubscribed = false;
-            updateBtn();
+            updateGUI();
         }
     );
 }

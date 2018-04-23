@@ -9,7 +9,7 @@
             <div class="button-holder"><button id="subscribe-button">Yes please</button></div>
         </form>
 
-        <form class="push-forms push" id="push-form" data-th-action="${pushUrl}" onSubmit="return false;">
+        <form class="push-forms push disabled" id="push-form" data-th-action="${pushUrl}" onSubmit="return false;">
             <label>Notify subscribers</label>
             <input type="text" id="push-field" name="message" autocomplete="off" placeholder="Write a notification message here..." />
             <div class="button-holder"><button id="push-button">Push</button></div>
