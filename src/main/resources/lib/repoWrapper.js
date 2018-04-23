@@ -32,22 +32,28 @@ var ROOT_PERMISSIONS = [
 ];
 
 exports.ROOT_PERMISSIONS = ROOT_PERMISSIONS;
-exports.REPO_NAME = REPO_NAME;
-exports.REPO_BRANCH = REPO_BRANCH;
 exports.PUSH_SUBSCRIPTIONS_PATH = PUSH_SUBSCRIPTIONS_PATH;
 
 
 
 // -------------------------------------------------------------------- Utility functions
 
+/**
+ * Wraps a repo function in a SuperUser context, to allow high-level permission operations.
+ * @public
+ * @param {Function} func - Nullary function
+ */
 function sudo(func) {
     return contextLib.run({
         user: REPO_USER,
         principals: REPO_PRINCIPAL,
     }, func);
-};
+}
 
-
+/**
+ * Returns a connection to the repo. Low-level permission if not part of functions that are wrapped in {@link sudo}.
+ * @public
+ */
 function getRepoConnection() {
     return nodeLib.connect({
         repoId: REPO_NAME,
@@ -63,6 +69,10 @@ exports.sudo = sudo;
 
 // ------------------------------------------------------------------------- Initialization
 
+/**
+ * Initializes the push notification repo: if either don't exist, the repo and/or the subscription node path are created.
+ * @public
+ */
 exports.initialize = function () {
     log.info('Initializing repository...');
 

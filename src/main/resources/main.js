@@ -7,7 +7,7 @@ var repo = require('/lib/repoWrapper');
 
 repo.initialize();
 
-var push = require('/lib/pushWrapper');
+var pushKeys = require('/lib/pushKeys');
 
 
 function getAppUrl() {
@@ -23,7 +23,7 @@ function renderPage(pageId, title) {
 
         pushUrl: portalLib.serviceUrl({service: "push"}),
         subscribeUrl: portalLib.serviceUrl({service: "subscribe"}),
-        publicKey: push.getKeyPair().publicKey,
+        publicKey: pushKeys.getKeyPair().publicKey,
     };
 
     return {
@@ -43,7 +43,8 @@ function renderSW() {
         // sw.js will be generated during build by Workbox from webpack.config.js
         body: mustache.render(resolve('/templates/sw.js'), {
             appUrl: appUrl,
-            appVersion: app.version
+            appVersion: app.version,
+            appName: app.name,
         })
     };
 }
@@ -73,3 +74,6 @@ router.get('/manifest.json', renderManifest);
 exports.get = function (req) {
     return router.dispatch(req);
 };
+
+
+

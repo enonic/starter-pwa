@@ -1,26 +1,43 @@
 var repo = require('/lib/repoWrapper');
 
 
-exports.post = function (req) {
-    log.info(JSON.stringify({subscribe_request:req}, null, 2));
+/**
+ * Parameters in the request.params object
+ * @typedef {Object} SubscriptionParameters
+ * @property {string} endpoint - The push notification service endpoint
+ * @property {string} auth - Digest of the public key
+ * @property {string} key - Identifies the subscription
+ * @property {boolean} cancelSubscription - If this is set and truthy, the subscription with that key will be deleted if it exists.
+ */
 
+/**
+ * Service entry: opens or cancels a subscription for push notifications for the sender client.
+ * @public
+ * @param {SubscriptionParameters} req - HTTP request object
+ *
+ * @returns {{body: Object, [status]: number, headers: Object}} HTTP Response object
+ */
+exports.post = function (req) {
     var subscription = getSubscriptionObj(req.params);
     if (!subscription) {
         var message = 'Missing/invalid subscription data in request';
-        log.info(message);
+        log.warning(message);
         return {
             status: 400,
             message: message,
         };
     }
 
-    var body = (req.params.cancelSubscription) ?
+    var result = (req.params.cancelSubscription) ?
         repo.sudo(function(){ return deleteSubscriptionNode(subscription); }) :
         repo.sudo(function(){ return createSubscriptionNode(subscription); });
 
-    log.info(JSON.stringify({subscribe_response:body}, null, 2));
+    if (result.status && Number(result.status) >= 400) {
+        return result;
+    }
+
     return {
-        body: body,
+        body: result,
         headers: {
             'Content-Type': 'application/json',
         },
@@ -29,7 +46,7 @@ exports.post = function (req) {
 
 var getSubscriptionObj = function(params) {
     if (!params.auth || !params.endpoint || !params.key) {
-        log.error("Invalid subscription object parameters - missing auth, endpoint and/or key");
+        log.warning("Invalid subscription object parameters - missing auth, endpoint and/or key");
         return null;
     }
 
@@ -50,7 +67,7 @@ var createSubscriptionNode = function (subscription) {
         });
 
         if (!node) {
-            log.error("Tried creating subscripton node, seems something went wrong: " + JSON.stringify(
+            log.error("Tried creating subscripton node, but something seems wrong: " + JSON.stringify(
                 {
                     incoming_subscription:subscription,
                     resulting_node:node

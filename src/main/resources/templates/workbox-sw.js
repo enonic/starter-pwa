@@ -14,29 +14,38 @@ workboxSW.precache([
     '{{appUrl}}'
 ]);
 
+
+/**
+ * Sets the default caching strategy for the client: tries contacting the network first
+ */
 workboxSW.router.setDefaultHandler({
     handler: workboxSW.strategies.networkFirst(),
 });
+
+
+/**
+ * Push and subscribe services, however, shouldn't use cache at all.
+ */
 workboxSW.router.registerRoute(
     '/subscribe',
     workboxSW.strategies.networkOnly(),
     'POST');
-
 workboxSW.router.registerRoute(
     '/push',
     workboxSW.strategies.networkOnly(),
     'POST');
 
 
-
-// Handling the receiving of a push in the subscription
+/**
+ * Handles the event of receiving of a subscribed push notification
+*/
 self.addEventListener('push', function(event) {
     console.log('[Service Worker] Push Received:');
 
     var data = JSON.parse(event.data.text())
     console.log(data);
 
-    const title = 'Push Codelab';
+    const title = '{{appName}}';
     const options = {
         body: data.text,
         icon: 'images/icon.png',
@@ -48,7 +57,9 @@ self.addEventListener('push', function(event) {
 });
 
 
-// Clicking on the notification
+/**
+ * Handles the event of the push notification being clicked on
+ */
 self.addEventListener('notificationclick', function(event) {
     console.log('[Service Worker] Notification click Received.');
     event.notification.close();
