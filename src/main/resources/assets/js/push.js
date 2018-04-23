@@ -15,7 +15,29 @@ var subscriptionAuth = null;
 var swRegistration = null;
 var publicKey = null;
 var subscribeUrl = null;
-var pushUrl = null;
+
+function readDOMData() {
+    var subscrData = document.getElementById("push-subscription-data");
+    subscribeUrl = subscrData.getAttribute("data-subscribe-url");
+    publicKey = subscrData.getAttribute("data-public-key");
+}
+
+function getPublicKey() {
+    if (publicKey == null) {
+        readDOMData();
+    }
+    return publicKey;
+}
+
+function getSubscribeUrl() {
+    if (subscribeUrl == null) {
+        readDOMData();
+    }
+    return subscribeUrl;
+}
+
+
+
 
 // Setup service worker
 if ('serviceWorker' in navigator && 'PushManager' in window) {
@@ -24,10 +46,6 @@ if ('serviceWorker' in navigator && 'PushManager' in window) {
     // Read core constants stored in DOM
     navigator.serviceWorker.ready
         .then(function(reg) {
-            var subscrData = document.getElementById("push-subscription-data");
-            subscribeUrl = subscrData.getAttribute("data-subscribe-url");
-            pushUrl = subscrData.getAttribute("data-push-url");
-            publicKey = subscrData.getAttribute("data-public-key");
 
         }, function() {
             console.log('Service Worker is not ready.');
@@ -48,6 +66,7 @@ if ('serviceWorker' in navigator && 'PushManager' in window) {
 
 } else {
     console.warn('Push messaging is not supported');
+    subscribeButton.disabled = true;
     subscribeButton.textContent = 'Push Not Supported';
 }
 
@@ -138,7 +157,7 @@ function urlB64ToUint8Array(base64String) {
 
 // Make a new subscription
 function subscribeUser() {
-    const applicationServerKey = urlB64ToUint8Array(publicKey);
+    const applicationServerKey = urlB64ToUint8Array(getPublicKey());
     swRegistration.pushManager.subscribe({
             userVisibleOnly: true,
             applicationServerKey: applicationServerKey
@@ -181,7 +200,7 @@ function removeSubscriptionOnServer() {
 
         var jquery = $ || wemjq;
         jquery.post({
-            url: subscribeUrl,
+            url: getSubscribeUrl(),
             data: params,
             dataType: "json",
 
@@ -236,7 +255,7 @@ function updateSubscriptionOnServer(subscription) {
 
     var jquery = $ || wemjq;
     jquery.post({
-        url: subscribeUrl,
+        url: getSubscribeUrl(),
         data: params,
         dataType: "json",
 

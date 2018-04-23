@@ -6,9 +6,9 @@ var contextLib = require('/lib/xp/context');
 
 // -------------------------------------------------------------------- Constants
 
-var REPO_NAME = 'push';
+var REPO_NAME = app.name;
 var REPO_BRANCH = 'master';
-var PUSH_SUBSCRIPTIONS_PATH = '/subscriptions';
+var PUSH_SUBSCRIPTIONS_PATH = '/push';
 var REPO_USER = {
     login: 'su',
     userStore: 'system'

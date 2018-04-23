@@ -17,8 +17,15 @@ workboxSW.precache([
 workboxSW.router.setDefaultHandler({
     handler: workboxSW.strategies.networkFirst(),
 });
-workboxSW.router.registerRoute('/subscribe', workboxSW.strategies.networkOnly());
-workboxSW.router.registerRoute('/push', workboxSW.strategies.networkOnly());
+workboxSW.router.registerRoute(
+    '/subscribe',
+    workboxSW.strategies.networkOnly(),
+    'POST');
+
+workboxSW.router.registerRoute(
+    '/push',
+    workboxSW.strategies.networkOnly(),
+    'POST');
 
 
 

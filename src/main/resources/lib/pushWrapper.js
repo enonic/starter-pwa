@@ -2,6 +2,11 @@ var notifications = require('/lib/notifications');
 var repo = require('/lib/repoWrapper');
 
 
+
+
+
+// --------------------------------------------------------------------------------  Initialization: key setup
+
 exports.getKeyPair = function () {
     var keyPair = repo.sudo(function () {
         return loadKeyPair();
@@ -16,6 +21,36 @@ exports.getKeyPair = function () {
     return keyPair;
 };
 
+
+
+
+var loadKeyPair = function () {
+    var repoConn = repo.getRepoConnection();
+
+    var pushSubNode = repoConn.get(repo.PUSH_SUBSCRIPTIONS_PATH);
+
+    return (pushSubNode) ? pushSubNode.keyPair : null;
+};
+
+
+var storeKeyPair = function (keyPair) {
+    var repoConn = repo.getRepoConnection();
+
+    repoConn.modify({
+        key: repo.PUSH_SUBSCRIPTIONS_PATH,
+        editor: function (node) {
+            node.keyPair = {
+                publicKey: keyPair.publicKey,
+                privateKey: keyPair.privateKey
+            };
+            return node;
+        }
+    });
+};
+
+
+
+// --------------------------------------------------------------------------------  Sending a push notification to subscribers
 
 exports.sendPushNotificationToAllSubscribers = function (message) {
     var repoConn = repo.getRepoConnection();
@@ -65,31 +100,6 @@ var sendPushNotification = function (keyPair, subscription, message) {
         },
         error: function () {
             throw Error("Could not send push notification: '" + message + "'");
-        }
-    });
-};
-
-
-var loadKeyPair = function () {
-    var repoConn = repo.getRepoConnection();
-
-    var pushSubNode = repoConn.get(repo.PUSH_SUBSCRIPTIONS_PATH);
-
-    return (pushSubNode) ? pushSubNode.keyPair : null;
-};
-
-
-var storeKeyPair = function (keyPair) {
-    var repoConn = repo.getRepoConnection();
-
-    repoConn.modify({
-        key: repo.PUSH_SUBSCRIPTIONS_PATH,
-        editor: function (node) {
-            node.keyPair = {
-                publicKey: keyPair.publicKey,
-                privateKey: keyPair.privateKey
-            };
-            return node;
         }
     });
 };
