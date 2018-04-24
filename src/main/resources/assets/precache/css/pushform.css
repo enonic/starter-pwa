@@ -3,6 +3,7 @@
     box-sizing: border-box;
     width: 100%;
     height: 25vh;
+    position: relative;
 }
 
 .push-forms label {
@@ -75,7 +76,7 @@
 
 #push-form.disabled {
     margin-left: -9999px;
-    margin-top: -30px;
+    top: -30px;
 }
 
 #push-form.disabled.fade {
@@ -88,12 +89,12 @@
 
 @keyframes fadeout {
     from {
-        margin-top: 0;
+        top: 0;
         margin-left: 0;
         opacity: 1;
     }
     to   {
-        margin-top: -30px;
+        top: -30px;
         margin-left: 0;
         opacity: 0;
     }
@@ -106,7 +107,7 @@
         opacity: 1;
     }
     to   {
-        margin-top: -30px;
+        top: -30px;
         margin-left: 0;
         opacity: 0;
     }
@@ -115,12 +116,12 @@
 /* Safari, Chrome and Opera > 12.1 */
 @-webkit-keyframes fadeout {
     from {
-        margin-top: 0;
+        top: 0;
         margin-left: 0;
         opacity: 1;
     }
     to   {
-        margin-top: -30px;
+        top: -30px;
         margin-left: 0;
         opacity: 0;
     }
@@ -129,12 +130,12 @@
 /* Internet Explorer */
 @-ms-keyframes fadeout {
     from {
-        margin-top: 0;
+        top: 0;
         margin-left: 0;
         opacity: 1;
     }
     to   {
-        margin-top: -30px;
+        top: -30px;
         margin-left: 0;
         opacity: 0;
     }
@@ -143,12 +144,12 @@
 /* Opera < 12.1 */
 @-o-keyframes fadeout {
     from {
-        margin-top: 0;
+        top: 0;
         margin-left: 0;
         opacity: 1;
     }
     to   {
-        margin-top: -30px;
+        top: -30px;
         margin-left: 0;
         opacity: 0;
     }
@@ -167,12 +168,12 @@
 
 @keyframes fadein {
     from {
-        margin-top: -30px;
+        top: -30px;
         margin-left: 0;
         opacity: 0;
     }
     to {
-        margin-top: 0;
+        top: 0;
         margin-left: 0;
         opacity: 1;
     }
@@ -181,12 +182,12 @@
 /* Firefox < 16 */
 @-moz-keyframes fadein {
     from {
-        margin-top: -30px;
+        top: -30px;
         margin-left: 0;
         opacity: 0;
     }
     to {
-        margin-top: 0;
+        top: 0;
         margin-left: 0;
         opacity: 1;
     }
@@ -195,12 +196,12 @@
 /* Safari, Chrome and Opera > 12.1 */
 @-webkit-keyframes fadein {
     from {
-        margin-top: -30px;
+        top: -30px;
         margin-left: 0;
         opacity: 0;
     }
     to {
-        margin-top: 0;
+        top: 0;
         margin-left: 0;
         opacity: 1;
     }
@@ -209,12 +210,12 @@
 /* Internet Explorer */
 @-ms-keyframes fadein {
     from {
-        margin-top: -30px;
+        top: -30px;
         margin-left: 0;
         opacity: 0;
     }
     to {
-        margin-top: 0;
+        top: 0;
         margin-left: 0;
         opacity: 1;
     }
@@ -223,12 +224,12 @@
 /* Opera < 12.1 */
 @-o-keyframes fadein {
     from {
-        margin-top: -30px;
+        top: -30px;
         margin-left: 0;
         opacity: 0;
     }
     to {
-        margin-top: 0;
+        top: 0;
         margin-left: 0;
         opacity: 1;
     }
