@@ -28,27 +28,16 @@ var swRegistration = null;
  */
 if ('serviceWorker' in navigator && 'PushManager' in window) {
     console.log('Service Worker and Push is supported');
-
-    // Read core constants stored in DOM
     navigator.serviceWorker.ready
         .then(function(reg) {
+            console.log('Service Worker is ready', reg);
+            swRegistration = reg;
+            initializeUI();
 
         }, function() {
             console.log('Service Worker is not ready.');
         });
 
-
-    // Register sw.js
-    navigator.serviceWorker.register('sw.js')
-        .then(function(swReg) {
-            console.log('Service Worker is registered', swReg);
-
-            swRegistration = swReg;
-            initializeUI();
-        })
-        .catch(function(error) {
-            console.error('Service Worker Error', error);
-        });
 
 } else {
     console.warn('Push messaging is not supported');
