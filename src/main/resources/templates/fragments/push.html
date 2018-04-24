@@ -4,14 +4,6 @@
 
 <div data-th-fragment="fragment-push" data-th-remove="tag">
     <div id="page-content">
-        <form class="push-forms subscribe"
-              id="subscribe-form"
-              data-th-action="${subscribeUrl}"
-              th:attr="data-public-key=${publicKey}"
-              onSubmit="return false;">
-            <label id="subscribe-status">Subscribe to notifications</label>
-            <div class="button-holder"><button id="subscribe-button">Subscribe</button></div>
-        </form>
 
         <form class="push-forms push disabled" id="push-form" data-th-action="${pushUrl}" onSubmit="return false;">
             <label>Notify subscribers</label>
@@ -27,10 +19,17 @@
     <script defer data-th-src="${portal.assetUrl({'_path=js/push.js'})}" type="text/javascript"></script>
 
     <div id="permission-footer">
-        <div class="center">
-            <p>Push notifications are <span id="permission-status">disabled</span> on this device.</p>
-            <div class="button-holder"><button id="permission-button">Enable</button></div>
-        </div>
+        <form class="push-forms subscribe center"
+              id="subscribe-form"
+              data-th-action="${subscribeUrl}"
+              th:attr="data-public-key=${publicKey}"
+              onSubmit="return false;">
+            <label id="subscribe-status">Checking subscription and permissions...</label>
+            <div>
+                <div class="button-holder"><button id="permission-button" class="hidden">Ask</button></div>
+                <div class="button-holder"><button id="subscribe-button">Subscribe</button></div>
+            </div>
+        </form>
     </div>
 </div>
 
