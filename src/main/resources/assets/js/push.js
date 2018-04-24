@@ -3,12 +3,14 @@
  */
 
 
-// Components
+// Components - see templates/fragments/push.html
 var subscribeStatus = document.getElementById("subscribe-status");
 var subscribeButton = document.getElementById("subscribe-button");
 var pushForm = document.getElementById("push-form");
 var pushField = document.getElementById("push-field");
 var pushButton = document.getElementById("push-button");
+var permissionStatus = document.getElementById("permission-status");
+var permissionButton = document.getElementById("permission-button");
 
 // State
 var isSubscribed = false;
@@ -109,12 +111,13 @@ function updateGUI(doFade) {
 }
 
 
-// -------------------------------------------------------------------------
+// ----------------------------------  Basic click handlers:  ---------------------------------------
 
 /**
  * Click handler: when the user clicks the subscribe button, toggle a subscription
  */
-function clickSubscriptionButton() {
+function clickSubscriptionButton(event) {
+    event.target.blur();
     subscribeButton.disabled = true;
     if (isSubscribed) {
         unsubscribeUser();
@@ -123,8 +126,33 @@ function clickSubscriptionButton() {
     }
 }
 
+function clickPermissionButton(event) {
+    event.target.blur();
+    var enable = !this.pushEnabled;
 
-// ------------------------------------------------ Adding a subscription: -----------------------------------------
+    this.updatingPush = true;
+    if (enable) {
+        this.notifService.requestNotificationPermission().then(() => {
+            this.notifService.subscribeUser().then((subscription) => {
+                this.setNotificationStatus(enable);
+                this.updateSubscriptionOnServer(subscription);
+                this.pushEnabled = enable;
+                this.updatingPush = false;
+            });
+        });
+
+    } else {
+        this.notifService.unsubscribeUser().then((subscription) => {
+            this.setNotificationStatus(enable);
+            this.removeSubscriptionOnServer(subscription);
+            this.pushEnabled = enable;
+            this.updatingPush = false;
+        });
+    }
+}
+
+
+// ------------------------------------------------  Adding a subscription:  -----------------------------------------
 
 /**
  * Encodes the public key to a byte array, when adding a subscription
@@ -235,7 +263,7 @@ function updateSubscriptionOnServer(subscription) {
 
 
 
-// ------------------------------------------------ Removing a subscription: -----------------------------------------
+// ------------------------------------------------  Removing a subscription:  -----------------------------------------
 
 /**
  * Removes an existing subscription, first from the service worker's push manager, and then from the server's subscriptions registry.
@@ -312,9 +340,10 @@ function removeSubscriptionOnServer() {
 
 
 
-// --------------------------------------- Pushing a message to subscribing clients: -----------------------------------------
+// ---------------------------------------  Pushing a message to subscribing clients:  -----------------------------------------
 
-function clickPushButton() {
+function clickPushButton(event) {
+    event.target.blur();
     pushButton.disabled = true;
 
     var jquery = $ || wemjq;
@@ -347,3 +376,8 @@ function clickPushButton() {
 
     return false;
 }
+
+
+
+
+// -----------------------------------  Programmatically request permission changes:  --------------------------------------

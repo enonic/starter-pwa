@@ -8,6 +8,7 @@
 
 #page-content {
     width: 100%;
+    margin-bottom: 50px;
 }
 
 .push-forms label {
@@ -20,6 +21,7 @@
 .push-forms input {
     display: block;
     width: 95%;
+    max-width: 640px;
     padding: 5px 15px;
     text-align: center;
     font-size: 13pt;
@@ -242,13 +244,20 @@
 /* ---------------------------------------------------------------------------------------------- */
 /* Notification footer: */
 
-#notification-footer {
+#permission-footer {
     position: fixed;
     bottom: 0;
     width: 100%;
     background-color: white;
     box-shadow: 0 0 10px rgba(0,0,0,.3);
     padding: 10px 30px;
+}
+
+
+#permission-footer .center{
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -256,12 +265,14 @@
     align-items: center;
 }
 
-#notification-footer p {
-    margin: 0 0 0 30px;
-    padding: 0;
+#permission-footer p {
+    margin: 0 30px 0 30px;
+    padding: 10px 0;
+    text-align: left;
+    line-height: 1.3em;
 }
 
-#notification-footer .button-holder {
-    margin: 0 30px 0 0;
+#permission-footer .button-holder {
+    margin: 0 30px 0 30px;
 }
 
