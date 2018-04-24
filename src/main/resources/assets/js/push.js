@@ -6,10 +6,8 @@
 // Components - see templates/fragments/push.html
 var subscribeStatus = document.getElementById("subscribe-status");
 var subscribeButton = document.getElementById("subscribe-button");
-var pushForm = document.getElementById("push-form");
 var pushField = document.getElementById("push-field");
 var pushButton = document.getElementById("push-button");
-var permissionStatus = document.getElementById("permission-status");
 var permissionButton = document.getElementById("permission-button");
 
 // State
@@ -56,6 +54,7 @@ function initializeUI() {
     // Add button click listeners
     subscribeButton.addEventListener('click', clickSubscriptionButton);
     pushButton.addEventListener('click', clickPushButton);
+    permissionButton.addEventListener('click', clickPermissionButton);
 
     // Get the initial subscription state and store it
     swRegistration.pushManager.getSubscription()
@@ -68,11 +67,6 @@ function initializeUI() {
             subscriptionAuth = keys.auth;
 
             isSubscribed = subscriptionEndpoint && subscriptionKey && subscriptionAuth;
-            if (isSubscribed) {
-                console.log('User IS subscribed.');
-            } else {
-                console.log('User is NOT subscribed.');
-            }
             updateGUI();
         });
 }
@@ -80,35 +74,62 @@ function initializeUI() {
 
 
 /**
- * Update the visual elements in the GUI, depending on current subscription state
+ * Update the visual elements in the GUI, depending on current subscription state:
+ * Notifications.permissions may be "denied", "granted" or "default", and
+ * a subscription may or may not be active.
  */
-function updateGUI(doFade) {
+function updateGUI() {
+    console.log("Notification.permission: ", JSON.stringify(Notification.permission));
     if (Notification.permission === 'denied') {
-        subscribeStatus.textContent = 'Push Notifications are blocked';
-        subscribeButton.disabled = true;
-        pushForm.classList.add("disabled");
-        return;
-    }
+        if (isSubscribed) {
+            subscribeStatus.textContent = 'Subscribing, but permission is blocked';
+            permissionButton.textContent = 'Allow';
+            permissionButton.classList.remove("hidden");
+            subscribeButton.textContent = 'Unsubscribe';
+            subscribeButton.classList.remove("hidden");
 
-    if (isSubscribed) {
-        subscribeStatus.textContent = 'Subscribing to notifications';
-        subscribeButton.textContent = 'Unsubscribe';
-        pushForm.classList.remove("disabled");
-        if (doFade) {
-            pushForm.classList.add("fade");
+        } else {
+            subscribeStatus.textContent = 'Not subscribing, and push notifications are blocked';
+            permissionButton.classList.add("hidden");
+            subscribeButton.textContent = 'Allow and subscribe';
+            subscribeButton.classList.remove("hidden");
         }
 
-    } else {
-        subscribeStatus.textContent = 'Not subscribing to notifications';
-        subscribeButton.textContent = 'Subscribe';
-        pushForm.classList.add("disabled");
-        if (doFade) {
-            pushForm.classList.add("fade");
+    } else if (Notification.permission === 'default') {
+        if (isSubscribed) {
+            subscribeStatus.textContent = 'Subscribing, but permission is not determined';
+            permissionButton.textContent = 'Allow';
+            permissionButton.classList.remove("hidden");
+            subscribeButton.textContent = 'Unsubscribe and block';
+            subscribeButton.classList.remove("hidden");
+
+        } else {
+            subscribeStatus.textContent = 'Not subscribing, and push notifications are blocked';
+            permissionButton.classList.add("hidden");
+            subscribeButton.textContent = 'Allow and subscribe';
+            subscribeButton.classList.remove("hidden");
+        }
+
+    } else if (Notification.permission === 'granted') {
+        if (isSubscribed) {
+            subscribeStatus.textContent = 'Subscribing to notifications';
+            permissionButton.classList.add("hidden");
+            subscribeButton.textContent = 'Unsubscribe';
+            subscribeButton.classList.remove("hidden");
+
+        } else {
+            subscribeStatus.textContent = 'Not subscribing, but permission allowed';
+            permissionButton.classList.add("hidden");
+            subscribeButton.textContent = 'Subscribe';
+            subscribeButton.classList.remove("hidden");
         }
     }
-
     subscribeButton.disabled = false;
+    permissionButton.disabled = false;
 }
+
+
+
 
 
 // ----------------------------------  Basic click handlers:  ---------------------------------------
@@ -119,37 +140,46 @@ function updateGUI(doFade) {
 function clickSubscriptionButton(event) {
     event.target.blur();
     subscribeButton.disabled = true;
+
     if (isSubscribed) {
         unsubscribeUser();
+
     } else {
-        subscribeUser();
+        requestPermissionIfNeeded().then(function(permission){
+            if (permission === 'allowed') {
+                subscribeUser();
+            } else {
+
+            }
+        });
     }
 }
+
+
 
 function clickPermissionButton(event) {
     event.target.blur();
-    var enable = !this.pushEnabled;
-
-    this.updatingPush = true;
-    if (enable) {
-        this.notifService.requestNotificationPermission().then(() => {
-            this.notifService.subscribeUser().then((subscription) => {
-                this.setNotificationStatus(enable);
-                this.updateSubscriptionOnServer(subscription);
-                this.pushEnabled = enable;
-                this.updatingPush = false;
-            });
-        });
-
-    } else {
-        this.notifService.unsubscribeUser().then((subscription) => {
-            this.setNotificationStatus(enable);
-            this.removeSubscriptionOnServer(subscription);
-            this.pushEnabled = enable;
-            this.updatingPush = false;
-        });
-    }
+    permissionButton.disabled = true;
+    requestPermissionIfNeeded().then(function() {
+        updateGUI();
+    });
 }
+
+
+
+
+// ------------------------------------------------  Programmatically requesting permissions changes -----------------
+
+function requestPermissionIfNeeded() {
+    var permission = Notification.permission;
+    if (permission !== "granted") {
+        return Notification.requestPermission();
+    }
+    return Promise.resolve(permission);
+}
+
+
+
 
 
 // ------------------------------------------------  Adding a subscription:  -----------------------------------------
@@ -246,7 +276,7 @@ function updateSubscriptionOnServer(subscription) {
             } else {
                 console.warn("Server responded with status 200, but not with success=true");
             }
-            updateGUI(true);
+            updateGUI();
         },
 
         function fail (error) {
@@ -319,7 +349,7 @@ function removeSubscriptionOnServer() {
                 if (data.message) {
                     console.log(data.message);
                 }
-                updateGUI(true);
+                updateGUI();
             },
 
             error: function(data) {
