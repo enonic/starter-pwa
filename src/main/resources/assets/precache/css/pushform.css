@@ -2,8 +2,12 @@
     display: block;
     box-sizing: border-box;
     width: 100%;
-    height: 25vh;
+    height: 30vh;
     position: relative;
+}
+
+#page-content {
+    width: 100%;
 }
 
 .push-forms label {
@@ -11,21 +15,6 @@
     font-size: 15.5pt;
     line-height: 1.2em;
     padding-bottom: .4em;
-}
-
-.push-forms button {
-    padding: 6px 20px 8px;
-    background-color: #485bc3;
-    color: white;
-    font-size: 15pt;
-    border-radius: 3px;
-    border: none;
-    cursor: pointer;
-}
-
-.push-forms button:disabled {
-    background-color: #afafaf;
-    color: black;
 }
 
 .push-forms input {
@@ -40,26 +29,6 @@
     margin: 15px auto;
 }
 
-.push-forms .button-holder {
-    display: inline-block;
-    padding: 2px 0 0;
-}
-
-.push-forms .button-holder:hover {
-    display: inline-block;
-    padding: 0 0 2px;
-}
-.push-forms .button-holder:hover button:not(:disabled) {
-    box-shadow: 0 4px 10px rgba(0,0,0,.3);
-}
-.push-forms .button-holder:hover button:disabled {
-    margin-top: 2px;
-    cursor: default;
-}
-
-#page-content {
-    width: 100%;
-}
 
 #push-form p {
     width: 100%;
@@ -71,7 +40,40 @@
 
 
 
+#main-container .button-holder button {
+    padding: 6px 20px 8px;
+    background-color: #485bc3;
+    color: white;
+    font-size: 15pt;
+    border-radius: 3px;
+    border: none;
+    cursor: pointer;
+}
 
+#main-container .button-holder button:disabled {
+    background-color: #afafaf;
+    color: black;
+}
+
+#main-container .button-holder {
+    display: inline-block;
+    padding: 2px 0 0;
+}
+
+#main-container .button-holder:hover {
+    display: inline-block;
+    padding: 0 0 2px;
+}
+#main-container .button-holder:hover button:not(:disabled) {
+    box-shadow: 0 4px 10px rgba(0,0,0,.3);
+}
+#main-container .button-holder:hover button:disabled {
+    margin-top: 2px;
+    cursor: default;
+}
+
+
+/* ---------------------------------------------------------------------------------------------- */
 /* Fancy enable/disable animation for the push form depending on the subscription state: */
 
 #push-form.disabled {
@@ -234,3 +236,32 @@
         opacity: 1;
     }
 }
+
+
+
+/* ---------------------------------------------------------------------------------------------- */
+/* Notification footer: */
+
+#notification-footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0,0,0,.3);
+    padding: 10px 30px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#notification-footer p {
+    margin: 0 0 0 30px;
+    padding: 0;
+}
+
+#notification-footer .button-holder {
+    margin: 0 30px 0 0;
+}
+
