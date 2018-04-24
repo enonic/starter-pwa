@@ -1,6 +1,12 @@
+/**
+ * Server-side service for pushing notifications to all registered subscriptions.
+ * Exposes a POST endpoint at <domain:port>/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/push
+ */
+
+
 var notifications = require('/lib/notifications');
-var repo = require('/lib/repoWrapper');
-var pushKeys = require('/lib/pushKeys');
+var pushRepo = require('/lib/push/repo');
+var pushKeys = require('/lib/push/keys');
 
 /**
  * Service entry: Allows the client to POST a message to this service, which next will be pushed as a notification to all subscribing
@@ -64,13 +70,13 @@ exports.post = function (req) {
  * @returns {boolean} True if any subscriptions were found and pushed to, false if there were no subscriptions
  */
 function sendPushNotificationToAllSubscribers (message) {
-    var repoConn = repo.getRepoConnection();
+    var repoConn = pushRepo.getRepoConnection();
 
     var keyPair = pushKeys.getKeyPair();
     var subscriptions = repoConn.findChildren({
         start: 0,
         count: -1,
-        parentKey: repo.PUSH_SUBSCRIPTIONS_PATH
+        parentKey: pushRepo.PUSH_SUBSCRIPTIONS_PATH
     });
 
     if (subscriptions.total === 0) {

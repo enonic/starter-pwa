@@ -1,3 +1,8 @@
+/**
+ * Wrapper for handling push subscription storage.
+ * Common to lib/push.js and main.js.
+ */
+
 var repoLib = require('/lib/xp/repo');
 var nodeLib = require('/lib/xp/node');
 var contextLib = require('/lib/xp/context');

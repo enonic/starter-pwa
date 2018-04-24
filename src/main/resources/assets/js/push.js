@@ -1,3 +1,7 @@
+/**
+ * Client-side code for push notifications
+ */
+
 
 // Components
 var subscribeStatus = document.getElementById("subscribe-status");
@@ -13,33 +17,15 @@ var subscriptionKey = null;
 var subscriptionAuth = null;
 
 var swRegistration = null;
-var publicKey = null;
-var subscribeUrl = null;
-
-function readDOMData() {
-    var subscrData = document.getElementById("push-subscription-data");
-    subscribeUrl = subscrData.getAttribute("data-subscribe-url");
-    publicKey = subscrData.getAttribute("data-public-key");
-}
-
-function getPublicKey() {
-    if (publicKey == null) {
-        readDOMData();
-    }
-    return publicKey;
-}
-
-function getSubscribeUrl() {
-    if (subscribeUrl == null) {
-        readDOMData();
-    }
-    return subscribeUrl;
-}
 
 
 
 
-// Setup service worker
+// -------------------------------------------------------  Setup  --------------------------------------------------------------
+
+/**
+ * Setup the service worker and trigger initialization
+ */
 if ('serviceWorker' in navigator && 'PushManager' in window) {
     console.log('Service Worker and Push is supported');
 
@@ -71,13 +57,16 @@ if ('serviceWorker' in navigator && 'PushManager' in window) {
 }
 
 
+/**
+ * Initialization: add button click listeners, check the current subscription state and update GUI elements accordingly
+ */
 function initializeUI() {
 
     // Add button click listeners
     subscribeButton.addEventListener('click', clickSubscriptionButton);
     pushButton.addEventListener('click', clickPushButton);
 
-    // Get the initial subscription state and store itf
+    // Get the initial subscription state and store it
     swRegistration.pushManager.getSubscription()
         .then(function(subscr) {
             var subscription = JSON.parse(JSON.stringify(subscr || {}));
@@ -99,18 +88,9 @@ function initializeUI() {
 
 
 
-// -------------------------------------------------------------------------  Subscription section
-
-function clickSubscriptionButton() {
-    subscribeButton.disabled = true;
-    if (isSubscribed) {
-        unsubscribeUser();
-    } else {
-        subscribeUser();
-    }
-}
-
-// What should the button look like
+/**
+ * Update the visual elements in the GUI, depending on current subscription state
+ */
 function updateGUI(doFade) {
     if (Notification.permission === 'denied') {
         subscribeStatus.textContent = 'Push Notifications are blocked';
@@ -126,6 +106,7 @@ function updateGUI(doFade) {
         if (doFade) {
             pushForm.classList.add("fade");
         }
+
     } else {
         subscribeStatus.textContent = 'Not subscribing to notifications';
         subscribeButton.textContent = 'Subscribe';
@@ -139,6 +120,28 @@ function updateGUI(doFade) {
 }
 
 
+// -------------------------------------------------------------------------
+
+/**
+ * Click handler: when the user clicks the subscribe button, toggle a subscription
+ */
+function clickSubscriptionButton() {
+    subscribeButton.disabled = true;
+    if (isSubscribed) {
+        unsubscribeUser();
+    } else {
+        subscribeUser();
+    }
+}
+
+
+// ------------------------------------------------ Adding a subscription: -----------------------------------------
+
+/**
+ * Encodes the public key to a byte array, when adding a subscription
+ * @param base64String
+ * @returns {Uint8Array}
+ */
 function urlB64ToUint8Array(base64String) {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
     const base64 = (base64String + padding)
@@ -155,9 +158,18 @@ function urlB64ToUint8Array(base64String) {
 }
 
 
-// Make a new subscription
+/**
+ * Add a subscription, both to the service worker's push manager, and to the server's registry of active subscriptions.
+ * To test this locally, open the push page in two different browsers, subscribe in both of them, and send a message from one of them.
+ * Two notifications should appear.
+ */
 function subscribeUser() {
-    const applicationServerKey = urlB64ToUint8Array(getPublicKey());
+
+    var jquery = $ || wemjq;
+    var form = jquery('#subscribe-form');
+    var publicKey = form.attr("data-public-key");
+
+    const applicationServerKey = urlB64ToUint8Array(publicKey);
     swRegistration.pushManager.subscribe({
             userVisibleOnly: true,
             applicationServerKey: applicationServerKey
@@ -167,12 +179,78 @@ function subscribeUser() {
         })
         .catch(function(err) {
             console.error('Failed to subscribe the user: ', err);
+            if (!isSubscribed) {
+                swRegistration.pushManager.getSubscription()
+                    .then(function(subscription) {
+                        if (subscription) {
+                            return subscription.unsubscribe();
+                        }
+                    })
+            }
             updateGUI();
         });
 }
 
 
-// Remove the subscription from server
+/**
+ * Sends a request to the server for adding the client's subscription.
+ */
+function updateSubscriptionOnServer(subscription) {
+    if (!subscription) {
+        console.log("No subscription object to update");
+        return;
+    }
+
+    const subObj = JSON.parse(JSON.stringify(subscription));
+
+    const params = {
+        endpoint: subObj.endpoint,
+        key: subObj.keys.p256dh,
+        auth: subObj.keys.auth
+    };
+
+    var jquery = $ || wemjq;
+    var form = jquery('#subscribe-form');
+    jquery.post({
+        url: form.attr('action'),
+        data: params,
+        dataType: "json",
+
+    }).then(
+        function success(data) {
+            if (((data || {}).success === true)) {
+                console.log('Successfully subscribed to push notification');
+
+                subscriptionEndpoint = params.endpoint;
+                subscriptionKey = params.key;
+                subscriptionAuth = params.auth;
+                isSubscribed = true;
+
+            } else {
+                console.warn("Server responded with status 200, but not with success=true");
+            }
+            updateGUI(true);
+        },
+
+        function fail (error) {
+            console.error('Failed to subscribe to push notification.');
+            console.log({response:error});
+
+            isSubscribed = false;
+            updateGUI();
+        }
+    );
+}
+
+
+
+
+
+// ------------------------------------------------ Removing a subscription: -----------------------------------------
+
+/**
+ * Removes an existing subscription, first from the service worker's push manager, and then from the server's subscriptions registry.
+ */
 function unsubscribeUser() {
     swRegistration.pushManager.getSubscription()
         .then(function(subscription) {
@@ -188,6 +266,9 @@ function unsubscribeUser() {
 }
 
 
+/**
+ * Sends a request to the server for removing the client's subscription.
+ */
 function removeSubscriptionOnServer() {
     if (isSubscribed && subscriptionEndpoint && subscriptionKey && subscriptionAuth) {
 
@@ -199,8 +280,9 @@ function removeSubscriptionOnServer() {
         };
 
         var jquery = $ || wemjq;
+        var form = jquery('#subscribe-form');
         jquery.post({
-            url: getSubscribeUrl(),
+            url: form.attr('action'),
             data: params,
             dataType: "json",
 
@@ -238,56 +320,10 @@ function removeSubscriptionOnServer() {
     }
 }
 
-// Store the subscription on server
-function updateSubscriptionOnServer(subscription) {
-    if (!subscription) {
-        console.log("No subscription object to update");
-        return;
-    }
-
-    const subObj = JSON.parse(JSON.stringify(subscription));
-
-    const params = {
-        endpoint: subObj.endpoint,
-        key: subObj.keys.p256dh,
-        auth: subObj.keys.auth
-    };
-
-    var jquery = $ || wemjq;
-    jquery.post({
-        url: getSubscribeUrl(),
-        data: params,
-        dataType: "json",
-
-    }).then(
-        function success(data) {
-            if (((data || {}).success === true)) {
-                console.log('Successfully subscribed to push notification');
-
-                subscriptionEndpoint = params.endpoint;
-                subscriptionKey = params.key;
-                subscriptionAuth = params.auth;
-                isSubscribed = true;
-
-            } else {
-                console.warn("Server responded with status 200, but not with success=true");
-            }
-            updateGUI(true);
-        },
-
-        function fail (error) {
-            console.error('Failed to subscribe to push notification.');
-            console.log({response:error});
-
-            isSubscribed = false;
-            updateGUI();
-        }
-    );
-}
 
 
 
-// -------------------------------------------------------------------------------- Push section
+// --------------------------------------- Pushing a message to subscribing clients: -----------------------------------------
 
 function clickPushButton() {
     pushButton.disabled = true;

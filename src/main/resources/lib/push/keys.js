@@ -1,5 +1,10 @@
+/**
+ * Server-side authentication key handling.
+ * Common to lib/push.js and main.js.
+ */
+
 var notifications = require('/lib/notifications');
-var repo = require('/lib/repoWrapper');
+var pushRepo = require('/lib/push/repo');
 
 
 // --------------------------------------------------------------------------------  Initialization: key setup
@@ -20,12 +25,12 @@ var repo = require('/lib/repoWrapper');
  * @returns {Keypair}
  */
 exports.getKeyPair = function () {
-    var keyPair = repo.sudo(function () {
+    var keyPair = pushRepo.sudo(function () {
         return loadKeyPair();
     });
     if (!keyPair) {
         keyPair = notifications.generateKeyPair();
-        repo.sudo(function () {
+        pushRepo.sudo(function () {
             storeKeyPair(keyPair);
         });
     }
@@ -35,19 +40,19 @@ exports.getKeyPair = function () {
 
 
 var loadKeyPair = function () {
-    var repoConn = repo.getRepoConnection();
+    var repoConn = pushRepo.getRepoConnection();
 
-    var pushSubNode = repoConn.get(repo.PUSH_SUBSCRIPTIONS_PATH);
+    var pushSubNode = repoConn.get(pushRepo.PUSH_SUBSCRIPTIONS_PATH);
 
     return (pushSubNode) ? pushSubNode.keyPair : null;
 };
 
 
 var storeKeyPair = function (keyPair) {
-    var repoConn = repo.getRepoConnection();
+    var repoConn = pushRepo.getRepoConnection();
 
     repoConn.modify({
-        key: repo.PUSH_SUBSCRIPTIONS_PATH,
+        key: pushRepo.PUSH_SUBSCRIPTIONS_PATH,
         editor: function (node) {
             node.keyPair = {
                 publicKey: keyPair.publicKey,

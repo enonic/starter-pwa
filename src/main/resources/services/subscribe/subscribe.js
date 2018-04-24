@@ -1,4 +1,10 @@
-var repo = require('/lib/repoWrapper');
+/**
+ * Server-side service for adding or removing subscriptions.
+ * Exposes a POST endpoint at <domain:port>/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/subscribe
+ */
+
+
+var pushRepo = require('/lib/push/repo');
 
 
 /**
@@ -29,8 +35,8 @@ exports.post = function (req) {
     }
 
     var result = (req.params.cancelSubscription) ?
-        repo.sudo(function(){ return deleteSubscriptionNode(subscription); }) :
-        repo.sudo(function(){ return createSubscriptionNode(subscription); });
+        pushRepo.sudo(function(){ return deleteSubscriptionNode(subscription); }) :
+        pushRepo.sudo(function(){ return createSubscriptionNode(subscription); });
 
     if (result.status && Number(result.status) >= 400) {
         return result;
@@ -59,10 +65,10 @@ var getSubscriptionObj = function(params) {
 
 var createSubscriptionNode = function (subscription) {
     try {
-        var repoConn = repo.getRepoConnection();
+        var repoConn = pushRepo.getRepoConnection();
         var node = repoConn.create({
-            _parentPath: repo.PUSH_SUBSCRIPTIONS_PATH,
-            _permissions: repo.ROOT_PERMISSIONS,
+            _parentPath: pushRepo.PUSH_SUBSCRIPTIONS_PATH,
+            _permissions: pushRepo.ROOT_PERMISSIONS,
             subscription: subscription
         });
 
@@ -93,7 +99,7 @@ var createSubscriptionNode = function (subscription) {
 
 var deleteSubscriptionNode = function (subscription) {
     try {
-        var repoConn = repo.getRepoConnection();
+        var repoConn = pushRepo.getRepoConnection();
         var hits = repoConn.query({
             query: "subscription.auth = '" + subscription.auth + "' AND subscription.key = '" + subscription.key + "'"
         }).hits;

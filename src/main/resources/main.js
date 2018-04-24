@@ -3,11 +3,11 @@ var router = require('/lib/router')();
 var portalLib = require('/lib/xp/portal');
 var siteTitle = 'PWA Starter';
 var mustache = require('/lib/xp/mustache');
-var repo = require('/lib/repoWrapper');
+var pushRepo = require('/lib/push/repo');
 
-repo.initialize();
+pushRepo.initialize();
 
-var pushKeys = require('/lib/pushKeys');
+var pushKeys = require('/lib/push/keys');
 
 
 function getAppUrl() {
