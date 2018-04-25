@@ -6,7 +6,7 @@
     <div id="page-content">
 
         <form class="push-forms push disabled" id="push-form" data-th-action="${pushUrl}" onSubmit="return false;">
-            <label>Notify subscribers</label>
+            <label>Notify <span id="subscriber-count" data-th-text="${subscriberCount}">subscribers</span></label>
             <input type="text" id="push-field" name="message" autocomplete="off" placeholder="Say something..." />
             <div class="button-holder"><button id="push-button">Push</button></div>
             <p>For demonstration purposes.<br />Allowing the client to send push notifications to all subscribers like this is usually not recommended.</p>
@@ -22,7 +22,7 @@
         <form class="push-forms subscribe center"
               id="subscribe-form"
               data-th-action="${subscribeUrl}"
-              th:attr="data-public-key=${publicKey}"
+              th:attr="data-public-key=${publicKey},data-subscribercount-url=${subscriberCountUrl}"
               onSubmit="return false;">
             <label id="subscribe-status">Checking subscription and permissions...</label>
             <div class="button-holder"><button id="subscribe-button" class="hidden">Subscribe</button></div>

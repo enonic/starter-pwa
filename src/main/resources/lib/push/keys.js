@@ -26,41 +26,14 @@ var pushRepo = require('/lib/push/repo');
  */
 exports.getKeyPair = function () {
     var keyPair = pushRepo.sudo(function () {
-        return loadKeyPair();
+        return pushRepo.loadKeyPair();
     });
     if (!keyPair) {
         keyPair = notifications.generateKeyPair();
         pushRepo.sudo(function () {
-            storeKeyPair(keyPair);
+            pushRepo.storeKeyPair(keyPair);
         });
     }
 
     return keyPair;
 };
-
-
-var loadKeyPair = function () {
-    var repoConn = pushRepo.getRepoConnection();
-
-    var pushSubNode = repoConn.get(pushRepo.PUSH_SUBSCRIPTIONS_PATH);
-
-    return (pushSubNode) ? pushSubNode.keyPair : null;
-};
-
-
-var storeKeyPair = function (keyPair) {
-    var repoConn = pushRepo.getRepoConnection();
-
-    repoConn.modify({
-        key: pushRepo.PUSH_SUBSCRIPTIONS_PATH,
-        editor: function (node) {
-            node.keyPair = {
-                publicKey: keyPair.publicKey,
-                privateKey: keyPair.privateKey
-            };
-            return node;
-        }
-    });
-};
-
-

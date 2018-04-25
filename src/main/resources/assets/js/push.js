@@ -14,6 +14,7 @@ var isSubscribed = false;
 var subscriptionEndpoint = null;
 var subscriptionKey = null;
 var subscriptionAuth = null;
+var subscriberCountUrl = null;
 
 var swRegistration = null;
 
@@ -254,6 +255,7 @@ function updateSubscriptionOnServer(subscription) {
                 console.warn("Server responded with status 200, but not with success=true");
             }
             updateGUI();
+            broadcastSubscriberCountChange();
         },
 
         function fail (error) {
@@ -327,6 +329,7 @@ function removeSubscriptionOnServer() {
                     console.log(data.message);
                 }
                 updateGUI();
+                broadcastSubscriberCountChange();
             },
 
             error: function(data) {
@@ -387,4 +390,29 @@ function clickPushButton(event) {
 
 
 
-// -----------------------------------  Programmatically request permission changes:  --------------------------------------
+// -----------------------------------  Call to broadcast to all subscribers when the number of subscribers changes:  ----------------------
+
+function getSubscriberCountUrl() {
+    if (subscriberCountUrl === null) {
+        subscriberCountUrl = document.getElementById("subscribe-form").getAttribute("data-subscribercount-url");
+    }
+    return subscriberCountUrl;
+}
+
+function broadcastSubscriberCountChange() {
+    var jquery = $ || wemjq;
+    jquery.post({
+        url: getSubscriberCountUrl(),
+        data: "",
+        dataType: "json",
+
+    }).then(
+        function(response){},
+        function(err) {
+            console.log(err);
+        });
+}
+
+addEventListener("message", function(event) {
+    console.log("Message for you sir:", event);
+});

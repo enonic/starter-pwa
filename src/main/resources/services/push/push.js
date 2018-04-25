@@ -36,7 +36,9 @@ exports.post = function (req) {
             log.info(response.body.message);
 
         } else {
-            var succeeded = sendPushNotificationToAllSubscribers(req.params.message);
+            var succeeded = exports.sendPushNotificationToAllSubscribers({
+                text: req.params.message
+            });
             response.body = {
                 success: succeeded,
                 message: (succeeded) ? undefined : "No messages were pushed. See the server log.",
@@ -55,7 +57,6 @@ exports.post = function (req) {
     log.info(JSON.stringify({push_response:response}, null, 2));
 
     return response;
-
 };
 
 
@@ -63,41 +64,31 @@ exports.post = function (req) {
  * Iterate over all registered subscriptions and push a notification to them one by one. In real-world use, this should be done
  * asynchronously, e.g. using the XP task library.
  * @private
- * @param {string} message
- *
- * @throws Error if any notification coudn't be pushed
+ * @param {Object} payload
  *
  * @returns {boolean} True if any subscriptions were found and pushed to, false if there were no subscriptions
  */
-function sendPushNotificationToAllSubscribers (message) {
-    var repoConn = pushRepo.getRepoConnection();
-
-    var keyPair = pushKeys.getKeyPair();
-    var subscriptions = repoConn.findChildren({
-        start: 0,
-        count: -1,
-        parentKey: pushRepo.PUSH_SUBSCRIPTIONS_PATH
-    });
+exports.sendPushNotificationToAllSubscribers = function (payload) {
+    var subscriptions = pushRepo.getSubscriptions();
+    log.warning(subscriptions.total + ' subscriptions found');
 
     if (subscriptions.total === 0) {
-        log.warning('No subscriptions found');
         return false;
     }
 
-    log.info("Subscriptions:");
+    var keyPair = pushKeys.getKeyPair();
     for (var i = 0; i < subscriptions.hits.length; i++) {
-        var node = repoConn.get(subscriptions.hits[i].id);
+        var hit = subscriptions.hits[i];
+        var node = pushRepo.getSubscriptionById(hit.id);
 
         if (node && node.subscription) {
             log.info("\n" + JSON.stringify(node.subscription, null, 2));
-            sendPushNotification(keyPair, node.subscription, message);
+            sendPushNotification(keyPair, node.subscription, payload);
 
         } else {
-            log.info(JSON.stringify(subscriptions.hits[i], null, 2));
+            log.info(JSON.stringify(hit, null, 2));
         }
     }
-    log.info("\n\nSubscriptions:");
-
     return true;
 }
 
@@ -109,26 +100,22 @@ function sendPushNotificationToAllSubscribers (message) {
  * SHARE THE PRIVATE KEY, don't even write it in the code. In our example it's generated once and stored in a node in the repo.
  * @param {Object} subscription - unique identifier and authentication for the subscription. Contains the fields {@code endpoint,
  * {@code auth} and {@code key}.
- * @param {String} message - Message that will be wrapped in an object under the key {@code text} and sent out as the payload of the
+ * @param {Object} payload - Message that will be wrapped in an object under the key {@code text} and sent out as the payload of the
  * notification. The {@code payload} object can of course also be used to send general-purpose data.
- *
- * @throws Error if the notification coudn't be pushed
  */
-var sendPushNotification = function (keyPair, subscription, message) {
+var sendPushNotification = function (keyPair, subscription, payload) {
     notifications.sendAsync({
         privateKey: keyPair.privateKey,
         publicKey: keyPair.publicKey,
         endpoint: subscription.endpoint,
         auth: subscription.auth,
         receiverKey: subscription.key,
-        payload: {
-            text: message
-        },
+        payload: payload,
         success: function () {
             log.info('Push notification sent successfully');
         },
         error: function () {
-            throw Error("Could not send push notification: '" + message + "'");
+            throw Error("Could not send push notification payload: '" + JSON.stringify(payload) + "'");
         }
     });
 };

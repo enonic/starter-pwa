@@ -65,13 +65,7 @@ var getSubscriptionObj = function(params) {
 
 var createSubscriptionNode = function (subscription) {
     try {
-        var repoConn = pushRepo.getRepoConnection();
-        var node = repoConn.create({
-            _parentPath: pushRepo.PUSH_SUBSCRIPTIONS_PATH,
-            _permissions: pushRepo.ROOT_PERMISSIONS,
-            subscription: subscription
-        });
-
+        var node = pushRepo.storeSubscriptionAndGetNode(subscription);
         if (!node) {
             log.error("Tried creating subscripton node, but something seems wrong: " + JSON.stringify(
                 {
@@ -99,33 +93,26 @@ var createSubscriptionNode = function (subscription) {
 
 var deleteSubscriptionNode = function (subscription) {
     try {
-        var repoConn = pushRepo.getRepoConnection();
-        var hits = repoConn.query({
-            query: "subscription.auth = '" + subscription.auth + "' AND subscription.key = '" + subscription.key + "'"
-        }).hits;
-        if (!hits || hits.length < 1) {
+        var result = pushRepo.deleteSubscription(subscription);
+
+        if (result === "NOT_FOUND") {
             return {
                 status: 404,
                 message: "Subscription not found: auth='" + subscription.auth + ", key='" + subscription.key + "'",
             }
-        }
 
-        var ids = hits.map(function (hit) {
-            return hit.id;
-        });
-        var result = repoConn.delete(ids);
+        } else if (result === "SUCCESS") {
+            return {success: true};
 
-        if (result.length === ids.length) {
-            return {success: true,}
-
-        } else {
+        } else if (typeof result === 'string') {
             return {
                 status: 500,
                 message: "Some subscription nodes were not deleted",
-                nodeIds: ids.filter(function (id) {
-                    return result.indexOf(id) === -1;
-                }),
+                nodeIds: result,
             }
+
+        } else {
+            throw Error("Weird result from pushRepo.deleteSubscription:\n" + JSON.stringify({result:result}, null, 2) + "\n");
         }
 
     } catch (e) {

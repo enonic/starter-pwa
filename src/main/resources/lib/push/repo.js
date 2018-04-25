@@ -36,9 +36,6 @@ var ROOT_PERMISSIONS = [
     }
 ];
 
-exports.ROOT_PERMISSIONS = ROOT_PERMISSIONS;
-exports.PUSH_SUBSCRIPTIONS_PATH = PUSH_SUBSCRIPTIONS_PATH;
-
 
 
 // -------------------------------------------------------------------- Utility functions
@@ -48,15 +45,17 @@ exports.PUSH_SUBSCRIPTIONS_PATH = PUSH_SUBSCRIPTIONS_PATH;
  * @public
  * @param {Function} func - Nullary function
  */
-function sudo(func) {
+exports.sudo = function(func) {
     return contextLib.run({
         user: REPO_USER,
         principals: REPO_PRINCIPAL,
     }, func);
-}
+};
+
+
 
 /**
- * Returns a connection to the repo. Low-level permission if not part of functions that are wrapped in {@link sudo}.
+ * Returns a connection to the repo. Low-level permission, unless part of functions that are wrapped in {@link sudo}.
  * @public
  */
 function getRepoConnection() {
@@ -66,8 +65,6 @@ function getRepoConnection() {
     });
 }
 
-exports.getRepoConnection = getRepoConnection;
-exports.sudo = sudo;
 
 
 
@@ -81,7 +78,7 @@ exports.sudo = sudo;
 exports.initialize = function () {
     log.info('Initializing repository...');
 
-    sudo(doInitialize);
+    exports.sudo(doInitialize);
 
     log.info('OK - Repository initialized.');
 };
@@ -136,4 +133,83 @@ var nodeWithPathExists = function (repoConnection, path) {
     return result.total > 0;
 };
 
+exports.getSubscriptions = function() {
+    return getRepoConnection().findChildren({
+        start: 0,
+        count: -1,
+        parentKey: PUSH_SUBSCRIPTIONS_PATH
+    });
+};
 
+exports.getSubscriptionsCount = function() {
+    var kids = getRepoConnection().findChildren({
+        start: 0,
+        count: -1,
+        parentKey: PUSH_SUBSCRIPTIONS_PATH,
+    });
+    log.info(JSON.stringify({kids:kids}, null, 2));
+    return kids.total;
+};
+
+exports.getSubscriptionById = function(id) {
+    return getRepoConnection().get(id);
+};
+
+exports.storeSubscriptionAndGetNode = function(subscription) {
+    var repoConn = getRepoConnection();
+
+    var node = repoConn.create({
+        _parentPath: PUSH_SUBSCRIPTIONS_PATH,
+        _permissions: ROOT_PERMISSIONS,
+        subscription: subscription
+    });
+    repoConn.refresh();
+    return node;
+
+}
+
+exports.deleteSubscription = function(subscription) {
+    var repoConn = getRepoConnection();
+    var hits = repoConn.query({
+        query: "subscription.auth = '" + subscription.auth + "' AND subscription.key = '" + subscription.key + "'"
+    }).hits;
+    if (!hits || hits.length < 1) {
+        return "NOT_FOUND";
+    }
+
+    var ids = hits.map(function (hit) {
+        return hit.id;
+    });
+
+    var result = repoConn.delete(ids);
+    repoConn.refresh();
+
+    if (result.length === ids.length) {
+        return "SUCCESS";
+    } else {
+        return JSON.stringify(ids.filter(function (id) {
+            return result.indexOf(id) === -1;
+        }));
+    }
+};
+
+
+
+exports.loadKeyPair = function () {
+    var pushSubNode = getRepoConnection().get(PUSH_SUBSCRIPTIONS_PATH);
+    return (pushSubNode) ? pushSubNode.keyPair : null;
+};
+
+
+exports.storeKeyPair = function (keyPair) {
+    getRepoConnection().modify({
+        key: PUSH_SUBSCRIPTIONS_PATH,
+        editor: function (node) {
+            node.keyPair = {
+                publicKey: keyPair.publicKey,
+                privateKey: keyPair.privateKey
+            };
+            return node;
+        }
+    });
+};

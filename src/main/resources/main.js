@@ -20,14 +20,25 @@ function renderPage(pageId, title) {
         appUrl: getAppUrl(),
         pageId: pageId,
         title: title || siteTitle,
-
-        pushUrl: portalLib.serviceUrl({service: "push"}),
-        subscribeUrl: portalLib.serviceUrl({service: "subscribe"}),
-        publicKey: pushKeys.getKeyPair().publicKey,
     };
 
+    // Data only needed for the push-notifications page:
+    if (pageId === "push") {
+        model.pushUrl = portalLib.serviceUrl({service: "push"});
+        model.subscribeUrl = portalLib.serviceUrl({service: "subscribe"});
+        model.subscriberCountUrl = portalLib.serviceUrl({service: "broadcastsubscribers"});
+        model.publicKey = pushKeys.getKeyPair().publicKey;
+        model.subscriberCount = function(subscriptionsCount) {
+            log.info(JSON.stringify({subscriptionsCount:subscriptionsCount}, null, 2));
+            var subscribers = " subscriber" + (subscriptionsCount === 1 ? "" : "s");
+            return subscriptionsCount + subscribers;
+        }(pushRepo.getSubscriptionsCount());
+    }
+
+    log.info(JSON.stringify({model:model}, null, 2));
+
     return {
-        body: thymeleaf.render(resolve('templates/page.html'), model)
+        body: thymeleaf.render(resolve('templates/page.html'), model),
     };
 }
 
