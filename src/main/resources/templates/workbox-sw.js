@@ -10,9 +10,7 @@ const workboxSW = new self.WorkboxSW({
 workboxSW.precache([]);
 
 // Here we precache custom defined Urls
-workboxSW.precache([
-    '{{appUrl}}'
-]);
+workboxSW.precache(['{{appUrl}}']);
 
 
 /**
@@ -26,14 +24,8 @@ workboxSW.router.setDefaultHandler({
 /**
  * Push and subscribe services, however, shouldn't use cache at all.
  */
-workboxSW.router.registerRoute(
-    '/subscribe',
-    workboxSW.strategies.networkOnly(),
-    'POST');
-workboxSW.router.registerRoute(
-    '/push',
-    workboxSW.strategies.networkOnly(),
-    'POST');
+workboxSW.router.registerRoute('/subscribe', workboxSW.strategies.networkOnly(), 'POST');
+workboxSW.router.registerRoute('/push', workboxSW.strategies.networkOnly(), 'POST');
 
 
 /**
@@ -42,7 +34,7 @@ workboxSW.router.registerRoute(
 self.addEventListener('push', function(event) {
     console.log('[Service Worker] Push Received:');
 
-    var data = JSON.parse(event.data.text())
+    var data = JSON.parse(event.data.text());
     console.log(data);
 
     const title = '{{appName}}';

@@ -87,13 +87,8 @@
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
-}
-
-#permission-footer .button-holder:last-of-type {
-    margin-right: 30px;
-}
-#permission-footer .button-holder button {
-    margin: 0 0 0 30px;
+    padding: 0 30px;
+    box-sizing: border-box;
 }
 
 #permission-footer .push-forms label {
@@ -101,5 +96,13 @@
     line-height: 1.3em;
     text-align: left;
     padding: 10px 0;
-    margin: 0 30px 0 30px;
+    margin: 0 30px 0 0;
+}
+
+#subscribe-status.blocked {
+    color: #d21a1a;
+}
+
+#subscribe-status.subscribing {
+    color: #14a814;
 }
