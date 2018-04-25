@@ -79,7 +79,7 @@ function initializeUI() {
  * a subscription may or may not be active.
  */
 function updateGUI() {
-    console.log("Notification.permission: ", JSON.stringify(Notification.permission));
+    console.log("Notification.permission:", JSON.stringify(Notification.permission));
     if (Notification.permission === 'denied') {
         if (isSubscribed) {
             subscribeStatus.textContent = 'Subscribing, but permission is blocked';
@@ -104,7 +104,7 @@ function updateGUI() {
             subscribeButton.classList.remove("hidden");
 
         } else {
-            subscribeStatus.textContent = 'Not subscribing, and push notifications are blocked';
+            subscribeStatus.textContent = 'Not subscribing, and permission is not determined';
             permissionButton.classList.add("hidden");
             subscribeButton.textContent = 'Allow and subscribe';
             subscribeButton.classList.remove("hidden");
@@ -145,13 +145,17 @@ function clickSubscriptionButton(event) {
         unsubscribeUser();
 
     } else {
-        requestPermissionIfNeeded().then(function(permission){
-            if (permission === 'allowed') {
-                subscribeUser();
-            } else {
-
+        requestPermissionIfNeeded(
+            function(permission) {
+                console.log("New notification permission:", JSON.stringify(permission));
+                console.log("Confirmed notification permission:", JSON.stringify(Notification.permission));
+                if (permission === 'granted') {
+                    subscribeUser();
+                } else {
+                    updateGUI();
+                }
             }
-        });
+        );
     }
 }
 
@@ -160,24 +164,44 @@ function clickSubscriptionButton(event) {
 function clickPermissionButton(event) {
     event.target.blur();
     permissionButton.disabled = true;
-    requestPermissionIfNeeded().then(function() {
-        updateGUI();
-    });
+    doRequestPermission().then(updateGUI);
 }
-
 
 
 
 // ------------------------------------------------  Programmatically requesting permissions changes -----------------
 
-function requestPermissionIfNeeded() {
+function requestPermissionIfNeeded(callback) {
     var permission = Notification.permission;
     if (permission !== "granted") {
-        return Notification.requestPermission();
+        console.log("Requesting");
+        doRequestPermission().then(
+            function() {
+                callback();
+                console.log("Mkay");
+            }
+        );
     }
     return Promise.resolve(permission);
 }
 
+
+function doRequestPermission() {
+    return new Promise( (resolve, reject) => {
+        Notification.requestPermission().then((result) => {
+            console.log("Resolved. Result:", JSON.stringify(result));
+            if (result) {
+                resolve(result);
+            }
+        }).catch((ex) => {
+            console.log("Permission request rejected:");
+            console.error(ex);
+            if (reject) {
+                reject(ex);
+            }
+        });
+    });
+}
 
 
 
