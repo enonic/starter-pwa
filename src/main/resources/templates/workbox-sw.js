@@ -32,16 +32,16 @@ workboxSW.router.registerRoute('/push', workboxSW.strategies.networkOnly(), 'POS
  * Handles the event of receiving of a subscribed push notification
 */
 self.addEventListener('push', function(event) {
-    console.log('[Service Worker] Push Received:');
+    console.log('Push Received:');
 
     var data = JSON.parse(event.data.text());
-    console.log(data);
 
+    var iconUrl = '{{iconUrl}}';
     const title = '{{appName}}';
+
     const options = {
         body: data.text,
-        icon: 'images/icon.png',
-        badge: 'images/badge.png'
+        icon: iconUrl,
     };
 
     const notificationPromise = self.registration.showNotification(title, options);

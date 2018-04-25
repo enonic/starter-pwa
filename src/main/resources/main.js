@@ -45,6 +45,7 @@ function renderSW() {
             appUrl: appUrl,
             appVersion: app.version,
             appName: app.name,
+            iconUrl: portalLib.assetUrl({path: "/precache/icons/icon.png"}),
         })
     };
 }
