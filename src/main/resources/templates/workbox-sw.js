@@ -28,12 +28,13 @@ workboxSW.router.registerRoute('/subscribe', workboxSW.strategies.networkOnly(),
 workboxSW.router.registerRoute('/push', workboxSW.strategies.networkOnly(), 'POST');
 workboxSW.router.registerRoute('/broadcastsubscribers', workboxSW.strategies.networkOnly(), 'POST');
 
+var messageChannel = new MessageChannel();
 
 /**
  * Handles the event of receiving of a subscribed push notification
 */
 self.addEventListener('push', function(event) {
-    console.log('Push Received.');
+    console.log('\nPush Received:');
 
     var data = JSON.parse(event.data.text());
     console.log(JSON.stringify({data:data}));
@@ -53,10 +54,18 @@ self.addEventListener('push', function(event) {
     }
 
     if (data.subscriberCount != null) {
+        var data = JSON.stringify({subscriberCount:data.subscriberCount});
         self.clients.matchAll().then(function(clients) {
-            clients[0].postMessage(JSON.stringify({subscriberCount:data.subscriberCount}));
+            if (clients && clients.length > 0) {
+                console.log("Posting data message to the page");
+                clients[0].postMessage(data);
+
+            } else {
+                console.error("Can't update the DOM: serviceworker can't find a client (page)");
+            }
         });
     }
+
 });
 
 

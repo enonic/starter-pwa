@@ -106,3 +106,6 @@
 #subscribe-status.subscribing {
     color: #14a814;
 }
+#subscriber-count.live {
+    color: #3f50b5;
+}

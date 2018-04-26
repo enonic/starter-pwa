@@ -19,6 +19,7 @@ var subscriberCountUrl = null;
 var swRegistration = null;
 
 
+var jquery = $ || wemjq;
 
 
 // -------------------------------------------------------  Setup  --------------------------------------------------------------
@@ -71,9 +72,10 @@ function initializeUI() {
 }
 
 
+// -----------------------------------------------  Frequently used utility functions:  ---------------------------------------------
 
 /**
- * Update the visual elements in the GUI, depending on current subscription state.
+ * Update the visual elements in the GUI, depending on current subscription state and notification permission.
  */
 function updateGUI() {
     console.log("Updating GUI. Current notification.permission:", JSON.stringify(Notification.permission));
@@ -105,6 +107,19 @@ function updateGUI() {
 
 
 
+
+
+/**
+ * Post data to an API endpoint. If successful (as in, HTTP call was successful, but the response may contain warnings, error messages etc),
+ * trigger callbackSuccess with the response object. If not, trigger callbackFailure with the error.
+ */
+function postApiCall(url, data, callbackSuccess, callbackFailure) {
+        jquery.post({
+            url: url,
+            data: data || "",
+            dataType: "json",
+        }).then(callbackSuccess, callbackFailure);
+}
 
 
 // ----------------------------------  Basic click handlers:  ---------------------------------------
@@ -226,6 +241,8 @@ function updateSubscriptionOnServer(subscription) {
         return;
     }
 
+    var url = jquery('#subscribe-form').attr('action');
+
     const subObj = JSON.parse(JSON.stringify(subscription));
 
     const params = {
@@ -234,14 +251,10 @@ function updateSubscriptionOnServer(subscription) {
         auth: subObj.keys.auth
     };
 
-    var jquery = $ || wemjq;
-    var form = jquery('#subscribe-form');
-    jquery.post({
-        url: form.attr('action'),
-        data: params,
-        dataType: "json",
+    postApiCall(
+        url,
+        params,
 
-    }).then(
         function success(data) {
             if (((data || {}).success === true)) {
                 console.log('Successfully subscribed to push notification');
@@ -298,6 +311,7 @@ function unsubscribeUser() {
 function removeSubscriptionOnServer() {
     if (isSubscribed && subscriptionEndpoint && subscriptionKey && subscriptionAuth) {
 
+        var url = jquery('#subscribe-form').attr('action');
         const params = {
             cancelSubscription: true,
             endpoint: subscriptionEndpoint,
@@ -305,14 +319,11 @@ function removeSubscriptionOnServer() {
             auth: subscriptionAuth
         };
 
-        var jquery = $ || wemjq;
-        var form = jquery('#subscribe-form');
-        jquery.post({
-            url: form.attr('action'),
-            data: params,
-            dataType: "json",
+        postApiCall(
+            url,
+            params,
 
-            success: function(data) {
+            function(data) {
                 if (((data || {}).success === true)) {
                     console.log('Successfully unsubscribed from push notification');
 
@@ -332,14 +343,14 @@ function removeSubscriptionOnServer() {
                 broadcastSubscriberCountChange();
             },
 
-            error: function(data) {
+            function(data) {
                 console.error('Failed to unsubscribe from push notification.');
                 if (data.message) {
                     console.info(data.message);
                 }
                 updateGUI();
             }
-        });
+        );
 
 
     } else {
@@ -356,14 +367,12 @@ function clickPushButton(event) {
     event.target.blur();
     pushButton.disabled = true;
 
-    var jquery = $ || wemjq;
     var form = jquery('#push-form');
-    jquery.post({
-        url: form.attr('action'),
-        data: form.serialize(),
-        dataType: "json",
 
-    }).then(
+    postApiCall(
+        form.attr('action'),
+        form.serialize(),
+
         function success(data) {
             pushButton.disabled = false;
             pushField.disabled = false;
@@ -380,13 +389,13 @@ function clickPushButton(event) {
             pushButton.textContent = 'Push failed';
             console.warn("Push failed. See server log.");
             console.error(error);
-        },
+        }
     );
+
     pushField.disabled = true;
 
     return false;
 }
-
 
 
 
@@ -399,20 +408,46 @@ function getSubscriberCountUrl() {
     return subscriberCountUrl;
 }
 
-function broadcastSubscriberCountChange() {
-    var jquery = $ || wemjq;
-    jquery.post({
-        url: getSubscriberCountUrl(),
-        data: "",
-        dataType: "json",
 
-    }).then(
-        function(response){},
+function broadcastSubscriberCountChange() {
+    postApiCall(
+        getSubscriberCountUrl(),
+        null,
+        function(response){
+            if (response.subscriberCount != null) {
+                updateSubscriberCountInGUI(response.subscriberCount, false);
+            }
+
+        },
         function(err) {
-            console.log(err);
-        });
+            console.error(err);
+        }
+    );
 }
 
-addEventListener("message", function(event) {
-    console.log("Message for you sir:", event);
-});
+
+// Receiving broadcast data from the service worker, triggering a GUI update
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener("message", function(event) {
+        if (event.data != null) {
+            console.log("Page received data message:", event.data);
+            var data = JSON.parse(event.data);
+
+            if (data.subscriberCount != null) {
+                updateSubscriberCountInGUI(data.subscriberCount, true);
+            }
+        }
+    });
+}
+
+
+/** Updating subscriber count in the DOM */
+function updateSubscriberCountInGUI(subscriberCount, live) {
+    var element = document.getElementById("subscriber-count");
+    element.textContent = subscriberCount + " subscriber" + (subscriberCount === 1 ? "" : "s");
+    if (live) {
+        element.classList.add("live");
+    } else {
+        element.classList.remove("live");
+    }
+}
