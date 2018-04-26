@@ -10,8 +10,8 @@
                 <span class="subscriber-notify">Notify </span>
                 <span id="subscriber-count" data-th-text="${subscriberCount}">subscribers</span>
             </label>
-            <input type="text" id="push-field" name="message" autocomplete="off" placeholder="Say something..." disabled="${startDisabled}"/>
-            <div class="button-holder"><button id="push-button" disabled="${startDisabled}">Push</button></div>
+            <input type="text" id="push-field" name="message" autocomplete="off" placeholder="Say something..." data-th-disabled="${startDisabled}"/>
+            <div class="button-holder"><button id="push-button" data-th-disabled="${startDisabled}">Push</button></div>
             <p>For demonstration purposes.<br />Allowing the client to send push notifications to all subscribers like this is usually not recommended.</p>
         </form>
 

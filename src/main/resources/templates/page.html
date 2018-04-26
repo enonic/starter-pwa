@@ -39,7 +39,7 @@
     <header class="mdl-layout__header">
         <div class="mdl-layout__header-row">
             <!-- Title -->
-            <span class="mdl-layout-title" data-th-utext=${title}></span>
+            <span class="mdl-layout-title" id="page-title" data-th-utext=${title}></span>
         </div>
     </header>
 
@@ -80,8 +80,12 @@
                         Starter.notifyAboutNewVersion();
                     };
                     console.log('Service Worker registered with scope '  + reg.scope);
-                }, function() {
-                    console.log('Service Worker registration failure.');
+
+                }, function(err) {
+                    console.log('Service Worker registration failure:');
+                    console.error(err);
+
+                    document.getElementById("page-title").textContent = "Error: couldn't start the service worker."
                 });
         }
     }
