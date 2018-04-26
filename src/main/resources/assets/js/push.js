@@ -92,7 +92,7 @@ function updateGUI() {
     elemSubscribeButton.disabled = false;
 
     if (Notification.permission === 'denied') {
-        displayErrorStatus('Notifications are blocked. Unblock and reload page to subscribe.', true);
+        displayErrorStatus('Notifications are blocked. See your page settings.', true);
         elemSubscribeButton.textContent = 'Subscribe';
 
     } else {
@@ -122,10 +122,12 @@ function updateGUI() {
 function postApiCall(url, data, callbackSuccess, callbackFailure) {
         $.post({
             url: url,
-            data: data || "",
+            data: data,
             dataType: "json",
         }).then(callbackSuccess, callbackFailure);
 }
+
+
 
 
 /**
@@ -137,7 +139,8 @@ function postApiCall(url, data, callbackSuccess, callbackFailure) {
  */
 function displayErrorStatus(message, abort, err) {
     displayingError = true;
-        console.log("\nERROR: " + message);
+    console.warn("\nERROR: " + message);
+    
     if (err) {
         console.error(err);
     }
@@ -175,6 +178,7 @@ function clickSubscriptionButton(event) {
                     subscribeUser();
                 } else {
                     updateGUI();
+                    displayErrorStatus('Notifications are blocked. See your page settings.');
                 }
             })
             .catch(function(err) {
@@ -395,11 +399,13 @@ function clickPushButton(event) {
     elemPushField.disabled = true;
     displayingError = false;
 
-    console.log()
+
+    console.log(JSON.stringify({url:$pushForm.attr('action')}, null, 2));
+    console.log(JSON.stringify({data:elemPushField.value}, null, 2));
 
     postApiCall(
         $pushForm.attr('action'),
-        $pushForm.serialize(),
+        {message: elemPushField.value},
 
         function (data) {
             if ((data || {}).success === true) {
