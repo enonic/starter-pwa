@@ -140,7 +140,7 @@ function postApiCall(url, data, callbackSuccess, callbackFailure) {
 function displayErrorStatus(message, abort, err) {
     displayingError = true;
     console.warn("\nERROR: " + message);
-    
+
     if (err) {
         console.error(err);
     }
@@ -398,10 +398,6 @@ function clickPushButton(event) {
     elemPushButton.disabled = true;
     elemPushField.disabled = true;
     displayingError = false;
-
-
-    console.log(JSON.stringify({url:$pushForm.attr('action')}, null, 2));
-    console.log(JSON.stringify({data:elemPushField.value}, null, 2));
 
     postApiCall(
         $pushForm.attr('action'),
