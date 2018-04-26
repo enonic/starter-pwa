@@ -34,7 +34,7 @@ function renderPage(pageId, title) {
         model.pageContributions = {
             headEnd:
                 '<link rel="stylesheet" type="text/css" href="' + portalLib.assetUrl({path: 'precache/css/pushform.css'}) + '"/>' +
-                '<script type="text/javascript" src="' + portalLib.assetUrl({path: 'precache/push-bundle.js'}) + '" async></script>'
+                '<script defer type="text/javascript" src="' + portalLib.assetUrl({path: 'precache/push-bundle.js'}) + '"></script>'
         };
     }
 
