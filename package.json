@@ -31,5 +31,8 @@
     "style-loader": "^0.13.1",
     "webpack": "^3.10.0",
     "workbox-webpack-plugin": "^2.1.0"
+  },
+  "dependencies": {
+    "jquery": "^2.2.4"
   }
 }

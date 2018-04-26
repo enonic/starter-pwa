@@ -109,3 +109,9 @@
 #subscriber-count.live {
     color: #3f50b5;
 }
+#push-form.disabled {
+    opacity: .5;
+}
+#push-form.disabled label .subscriber-notify {
+    display: none;
+}

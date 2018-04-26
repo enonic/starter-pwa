@@ -17,20 +17,19 @@
     <meta name="Description" data-th-content="${title}">
 
     <script type="text/javascript" data-th-src="${portal.assetUrl({'_path=precache/js/material.min.js'})}" async></script>
-    <script type="text/javascript" data-th-src="${portal.assetUrl({'_path=precache/bundle.js'})}" async></script>
+    <script type="text/javascript" data-th-src="${portal.assetUrl({'_path=precache/app-bundle.js'})}" async></script>
+    <link rel="stylesheet" type="text/css" data-th-href="${portal.assetUrl({'_path=precache/bundle.css'})}">
 
     <link rel="stylesheet" type="text/css" data-th-href="${portal.assetUrl({'_path=precache/css/material.indigo-pink.min.css'})}">
-    <link rel="stylesheet" type="text/css" data-th-href="${portal.assetUrl({'_path=precache/bundle.css'})}">
     <link rel="stylesheet" type="text/css" data-th-href="${portal.assetUrl({'_path=precache/css/icon.css'})}">
-
-    <script type="text/javascript" data-th-src="${portal.assetUrl({'_path=precache/js/jquery-2.2.4.min.js'})}" async></script>
-    <link rel="stylesheet" type="text/css" data-th-href="${portal.assetUrl({'_path=precache/css/pushform.css'})}"/>
 
     <script type="text/javascript" data-th-if="${pageId=='main'}">
         if (!document.location.href.endsWith('/')) {
             document.location = document.location.href + "/";
         }
     </script>
+
+    <div data-th-if="${pageContributions and pageContributions.headEnd}" data-th-remove="tag" data-th-utext="${pageContributions.headEnd}"></div>
 
 </head>
 

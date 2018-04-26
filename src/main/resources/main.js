@@ -28,11 +28,14 @@ function renderPage(pageId, title) {
         model.subscribeUrl = portalLib.serviceUrl({service: "subscribe"});
         model.subscriberCountUrl = portalLib.serviceUrl({service: "broadcastsubscribers"});
         model.publicKey = pushKeys.getKeyPair().publicKey;
-        model.subscriberCount = function(subscriptionsCount) {
-            log.info(JSON.stringify({subscriptionsCount:subscriptionsCount}, null, 2));
-            var subscribers = " subscriber" + (subscriptionsCount === 1 ? "" : "s");
-            return subscriptionsCount + subscribers;
-        }(pushRepo.getSubscriptionsCount());
+        var subscriptionsCount = pushRepo.getSubscriptionsCount();
+        model.subscriberCount = subscriptionsCount + " subscriber" + (subscriptionsCount === 1 ? "" : "s");
+        model.startDisabled = subscriptionsCount === 0;
+        model.pageContributions = {
+            headEnd:
+                '<link rel="stylesheet" type="text/css" href="' + portalLib.assetUrl({path: 'precache/css/pushform.css'}) + '"/>' +
+                '<script type="text/javascript" src="' + portalLib.assetUrl({path: 'precache/push-bundle.js'}) + '" async></script>'
+        };
     }
 
     log.info(JSON.stringify({model:model}, null, 2));
@@ -86,6 +89,8 @@ router.get('/manifest.json', renderManifest);
 exports.get = function (req) {
     return router.dispatch(req);
 };
+
+
 
 
 

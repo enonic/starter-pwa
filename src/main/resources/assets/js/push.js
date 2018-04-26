@@ -2,12 +2,13 @@
  * Client-side code for push notifications
  */
 
+var $ = require('jquery');
 
 // Components - see templates/fragments/push.html
-var subscribeStatus = document.getElementById("subscribe-status");
-var subscribeButton = document.getElementById("subscribe-button");
-var pushField = document.getElementById("push-field");
-var pushButton = document.getElementById("push-button");
+var subscribeStatus = $("#subscribe-status")[0];
+var subscribeButton = $("#subscribe-button")[0];
+var pushField = $("#push-field")[0];
+var pushButton = $("#push-button")[0];
 
 // State
 var isSubscribed = false;
@@ -18,8 +19,6 @@ var subscriberCountUrl = null;
 
 var swRegistration = null;
 
-
-var jquery = $ || wemjq;
 
 
 // -------------------------------------------------------  Setup  --------------------------------------------------------------
@@ -114,7 +113,7 @@ function updateGUI() {
  * trigger callbackSuccess with the response object. If not, trigger callbackFailure with the error.
  */
 function postApiCall(url, data, callbackSuccess, callbackFailure) {
-        jquery.post({
+        $.post({
             url: url,
             data: data || "",
             dataType: "json",
@@ -204,10 +203,7 @@ function urlB64ToUint8Array(base64String) {
  * Two notifications should appear.
  */
 function subscribeUser() {
-
-    var jquery = $ || wemjq;
-    var form = jquery('#subscribe-form');
-    var publicKey = form.attr("data-public-key");
+    var publicKey = $('#subscribe-form').attr("data-public-key");
 
     const applicationServerKey = urlB64ToUint8Array(publicKey);
     swRegistration.pushManager.subscribe({
@@ -241,7 +237,7 @@ function updateSubscriptionOnServer(subscription) {
         return;
     }
 
-    var url = jquery('#subscribe-form').attr('action');
+    var url = $('#subscribe-form').attr('action');
 
     const subObj = JSON.parse(JSON.stringify(subscription));
 
@@ -311,7 +307,7 @@ function unsubscribeUser() {
 function removeSubscriptionOnServer() {
     if (isSubscribed && subscriptionEndpoint && subscriptionKey && subscriptionAuth) {
 
-        var url = jquery('#subscribe-form').attr('action');
+        var url = $('#subscribe-form').attr('action');
         const params = {
             cancelSubscription: true,
             endpoint: subscriptionEndpoint,
@@ -367,7 +363,7 @@ function clickPushButton(event) {
     event.target.blur();
     pushButton.disabled = true;
 
-    var form = jquery('#push-form');
+    var form = $('#push-form');
 
     postApiCall(
         form.attr('action'),
@@ -403,7 +399,7 @@ function clickPushButton(event) {
 
 function getSubscriberCountUrl() {
     if (subscriberCountUrl === null) {
-        subscriberCountUrl = document.getElementById("subscribe-form").getAttribute("data-subscribercount-url");
+        subscriberCountUrl = $("#subscribe-form").attr("data-subscribercount-url");
     }
     return subscriberCountUrl;
 }
@@ -443,11 +439,20 @@ if ('serviceWorker' in navigator) {
 
 /** Updating subscriber count in the DOM */
 function updateSubscriberCountInGUI(subscriberCount, live) {
-    var element = document.getElementById("subscriber-count");
+    var element = $("#subscriber-count")[0];
     element.textContent = subscriberCount + " subscriber" + (subscriberCount === 1 ? "" : "s");
     if (live) {
         element.classList.add("live");
     } else {
         element.classList.remove("live");
+    }
+    if (subscriberCount === 0) {
+        $("#push-form")[0].classList.add("disabled");
+        $("#push-field")[0].disabled = true;
+        $("#push-button")[0].disabled = true;
+    } else {
+        $("#push-form")[0].classList.remove("disabled");
+        $("#push-field")[0].disabled = false;
+        $("#push-button")[0].disabled = false;
     }
 }
