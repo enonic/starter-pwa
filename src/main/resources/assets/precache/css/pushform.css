@@ -1,0 +1,140 @@
+#page-content {
+    width: 100%;
+    margin-bottom: 50px;
+}
+
+
+.push-forms label {
+    display: block;
+    font-size: 15.5pt;
+    line-height: 1.2em;
+    padding-bottom: .4em;
+}
+
+.push-forms input {
+    display: block;
+    width: 95%;
+    max-width: 700px;
+    padding: 5px 15px;
+    text-align: center;
+    font-size: 13pt;
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid black;
+    margin: 15px auto;
+}
+
+
+#push-form p {
+    width: 100%;
+    max-width: 300px;
+    margin: 30px auto 0;
+    color: #777;
+    line-height: 1.3em;
+}
+
+.button-holder button {
+    height: 36px;
+    padding: 0 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #485bc3;
+    color: white;
+    font-size: 12pt;
+    border-radius: 3px;
+    border: none;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+.button-holder button:not(:disabled):hover {
+    background-color: #1382cb;;
+}
+.button-holder button:disabled {
+    background-color: #afafaf;
+    color: #444;
+}
+
+.button-holder {
+    display: inline-block;
+    padding: 2px 0 0;
+}
+.button-holder:hover button:disabled {
+    cursor: default;
+}
+
+
+
+
+/* ---------------------------------------------------------------------------------------------- */
+/* Notification footer: */
+
+#permission-footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0,0,0,.3);
+    padding: 10px 30px;
+}
+
+
+#permission-footer .center {
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-items: center;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+#subscribe-status {
+    font-size: 14pt;
+    line-height: 1.3em;
+    text-align: left;
+    padding: 10px 0;
+    margin: 0;
+    color: #777;
+}
+#subscribe-status.blocked {
+    color: #d21a1a;
+}
+#subscribe-status.subscribing {
+    color: #14a814;
+}
+#subscribe-button {
+    background-color: #14a814;
+}
+
+#subscribe-form > * {
+    margin: 5px 40px;
+}
+
+#subscribe-button.subscribing {
+    background-color: transparent;
+    color: #888;
+}
+
+#subscriber-count.live {
+    color: #285ebc
+}
+#subscribe-button:not(.subscribing):hover {
+    background-color: #28d11f;
+    color: white;
+}
+#subscribe-button.subscribing:hover {
+    background-color: #888;
+    color: white;
+}
+
+#push-form.disabled {
+    opacity: .5;
+}
+
+#push-form.disabled label .subscriber-notify {
+    display: none;
+}

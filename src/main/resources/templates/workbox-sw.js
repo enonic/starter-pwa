@@ -10,10 +10,64 @@ const workboxSW = new self.WorkboxSW({
 workboxSW.precache([]);
 
 // Here we precache custom defined Urls
-workboxSW.precache([
-    '{{appUrl}}'
-]);
+workboxSW.precache(['{{appUrl}}']);
 
+
+/**
+ * Sets the default caching strategy for the client: tries contacting the network first
+ */
 workboxSW.router.setDefaultHandler({
-    handler: workboxSW.strategies.networkFirst()
+    handler: workboxSW.strategies.networkFirst(),
+});
+
+
+/**
+ * API services, however, shouldn't use cache at all.
+ */
+workboxSW.router.registerRoute('/subscribe', workboxSW.strategies.networkOnly(), 'POST');
+workboxSW.router.registerRoute('/push', workboxSW.strategies.networkOnly(), 'POST');
+workboxSW.router.registerRoute('/broadcastsubscribers', workboxSW.strategies.networkOnly(), 'POST');
+
+var messageChannel = new MessageChannel();
+
+/**
+ * Handles the event of receiving of a subscribed push notification
+*/
+self.addEventListener('push', function(event) {
+
+    var data = JSON.parse(event.data.text());
+    var iconUrl = '{{iconUrl}}';
+    const title = '{{appName}}';
+
+    if (data.text) {
+        const options = {
+            body: data.text,
+            icon: iconUrl,
+        };
+
+        const notificationPromise = self.registration.showNotification(title, options);
+        event.waitUntil(notificationPromise);
+
+    }
+
+    if (data.subscriberCount != null) {
+        var subscriberData = JSON.stringify({subscriberCount:data.subscriberCount});
+        self.clients.matchAll().then(function(clients) {
+            if (clients && clients.length > 0) {
+                clients[0].postMessage(subscriberData);
+
+            } else {
+                console.error("Can't update the DOM: serviceworker can't find a client (page)");
+            }
+        });
+    }
+
+});
+
+
+/**
+ * Handles the event of the push notification being clicked on
+ */
+self.addEventListener('notificationclick', function(event) {
+    event.notification.close();
 });

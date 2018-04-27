@@ -8,34 +8,7 @@ module.exports = {
             snackbarContainer.MaterialSnackbar.showSnackbar(data);
         }
     },
-
-    initPushNotifications: function() {
-        if (!("Notification" in window)) {
-            console.log('Notification API not supported.');
-            return;
-        }
-
-        // Let's check whether notification permissions have already been granted
-        if (Notification.permission === "granted") {
-            // If it's okay let's create a notification
-            subscribeToPushNotifications();
-        }
-
-        // Otherwise, we need to ask the user for permission
-        else if (Notification.permission !== 'denied') {
-            Notification.requestPermission(function (permission) {
-                // If the user accepts, let's create a notification
-                if (permission === "granted") {
-                    subscribeToPushNotifications();
-                }
-            });
-        }
-    }
 };
-
-function subscribeToPushNotifications() {
-    console.log('Subscribed to notifications');
-}
 
 (function(){
     window.onload = function() {

@@ -15,14 +15,16 @@ const buildAssetsPath = path.join(__dirname, paths.buildAssets);
 const buildTemplatesPath = path.join(__dirname, paths.buildTemplates);
 
 module.exports = {
-
-    entry: path.join(assetsPath, 'js/app.js'),
+    entry: {
+        app: path.join(assetsPath, 'js/app.js'),
+        push: path.join(assetsPath, 'js/push.js'),
+    },
 
     output: {
         path: buildAssetsPath,
-        filename: 'precache/bundle.js',
+        filename: 'precache/[name]-bundle.js',
         libraryTarget: 'var',
-        library: 'Starter'
+        library: ['Starter', '[name]']
     },
 
     resolve: {
@@ -47,7 +49,6 @@ module.exports = {
             globPatterns: ['precache/**\/*'],
             swSrc: path.join(templatesPath, 'workbox-sw.js'),
             swDest: path.join(buildTemplatesPath, 'sw.js')
-        })
+        }),
     ]
-
 };

@@ -17,17 +17,20 @@
     <meta name="Description" data-th-content="${title}">
 
     <script type="text/javascript" data-th-src="${portal.assetUrl({'_path=precache/js/material.min.js'})}" async></script>
-    <script type="text/javascript" data-th-src="${portal.assetUrl({'_path=precache/bundle.js'})}" async></script>
+    <script type="text/javascript" data-th-src="${portal.assetUrl({'_path=precache/app-bundle.js'})}" async></script>
+    <link rel="stylesheet" type="text/css" data-th-href="${portal.assetUrl({'_path=precache/bundle.css'})}">
 
     <link rel="stylesheet" type="text/css" data-th-href="${portal.assetUrl({'_path=precache/css/material.indigo-pink.min.css'})}">
-    <link rel="stylesheet" type="text/css" data-th-href="${portal.assetUrl({'_path=precache/bundle.css'})}">
-    <link rel="stylesheet" type="text/css"  data-th-href="${portal.assetUrl({'_path=precache/css/icon.css'})}">
+    <link rel="stylesheet" type="text/css" data-th-href="${portal.assetUrl({'_path=precache/css/icon.css'})}">
 
     <script type="text/javascript" data-th-if="${pageId=='main'}">
         if (!document.location.href.endsWith('/')) {
             document.location = document.location.href + "/";
         }
     </script>
+
+    <div data-th-if="${pageContributions and pageContributions.headEnd}" data-th-remove="tag" data-th-utext="${pageContributions.headEnd}"></div>
+
 </head>
 
 <body>
@@ -36,7 +39,7 @@
     <header class="mdl-layout__header">
         <div class="mdl-layout__header-row">
             <!-- Title -->
-            <span class="mdl-layout-title" data-th-utext=${title}></span>
+            <span class="mdl-layout-title" id="page-title" data-th-utext=${title}></span>
         </div>
     </header>
 
@@ -74,11 +77,15 @@
                 .register(appUrl + 'sw.js', {scope: appUrl})
                 .then(function(reg) {
                     reg.onupdatefound = function() {
-                        Starter.notifyAboutNewVersion();
+                        Starter.app.notifyAboutNewVersion();
                     };
                     console.log('Service Worker registered with scope '  + reg.scope);
-                }, function() {
-                    console.log('Service Worker registration failure.');
+
+                }, function(err) {
+                    console.log('Service Worker registration failure:');
+                    console.error(err);
+
+                    document.getElementById("page-title").textContent = "Error: couldn't start the service worker."
                 });
         }
     }
