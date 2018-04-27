@@ -32,11 +32,11 @@ var displayingError = false;
  * Setup the service worker and trigger initialization
  */
 if ('serviceWorker' in navigator && 'PushManager' in window) {
-    console.log('Service Worker and Push is supported');
+   // Service Worker and Push is supported
     navigator.serviceWorker.ready
         .then(
             function(reg) {
-                console.log('Service Worker is ready', reg);
+                // Service Worker is ready
                 swRegistration = reg;
                 initializeUI();
 
@@ -71,7 +71,10 @@ function initializeUI() {
             subscriptionAuth = keys.auth;
 
             isSubscribed = subscriptionEndpoint && subscriptionKey && subscriptionAuth;
-            updateGUI();
+            if (isSubscribed) {
+                isSubscribed = updateSubscriptionOnServer(subscr);
+            }
+            updateGUI(isSubscribed);
         });
 }
 
@@ -83,34 +86,35 @@ function initializeUI() {
  */
 function updateGUI() {
     if (displayingError) {
-        console.log("Skipping display update in favor of error display. Click a button to reset.");
+        // Skipping GUI display update in favor of error display. Click a GUI button to reset
         return;
     }
 
-    console.log("Updating GUI. Current notification.permission:", JSON.stringify(Notification.permission));
     elemSubscribeButton.classList.remove("hidden");
     elemSubscribeButton.disabled = false;
 
     if (Notification.permission === 'denied') {
-        displayErrorStatus('Notifications are blocked. See your page settings.', true);
+        displayErrorStatus('Notifications are blocked. See your page settings.');
         elemSubscribeButton.textContent = 'Subscribe';
+        elemSubscribeButton.classList.remove("subscribing");
 
     } else {
         if (isSubscribed) {
-            elemSubscribeStatus.textContent = 'Subscribing to notifications';
+            elemSubscribeStatus.textContent = 'Subscribed to notifications';
             elemSubscribeStatus.classList.add("subscribing");
             elemSubscribeStatus.classList.remove("blocked");
             elemSubscribeButton.textContent = 'Unsubscribe';
+            elemSubscribeButton.classList.add("subscribing");
 
         } else {
-            elemSubscribeStatus.textContent = 'Not subscribing to notifications';
+            elemSubscribeStatus.textContent = 'Unsubscribed to notifications';
             elemSubscribeStatus.classList.remove("subscribing");
             elemSubscribeStatus.classList.remove("blocked");
             elemSubscribeButton.textContent = 'Subscribe';
+            elemSubscribeButton.classList.remove("subscribing");
         }
     }
 }
-
 
 
 
@@ -139,16 +143,19 @@ function postApiCall(url, data, callbackSuccess, callbackFailure) {
  */
 function displayErrorStatus(message, abort, err) {
     displayingError = true;
-    console.warn("\nERROR: " + message);
+
+    var log = (abort) ? console.error : console.warn;
+    log(message);
 
     if (err) {
         console.error(err);
     }
     elemSubscribeStatus.textContent = message;
     elemSubscribeStatus.classList.remove("subscribing");
-    elemSubscribeStatus.classList.add("blocked");
+    elemSubscribeStatus.classList.remove("blocked");
 
     if (abort) {
+        elemSubscribeStatus.classList.add("blocked");
         $pushForm[0].classList.add("disabled");
         elemPushField.disabled = true;
         elemPushButton.disabled = true;
@@ -173,12 +180,11 @@ function clickSubscriptionButton(event) {
     } else {
         requestPermissionIfNeeded()
             .then(function(permission) {
-                console.log("New notification permission was set:", JSON.stringify(permission));
+                // Setting new notification permission
                 if (permission === 'granted') {
                     subscribeUser();
                 } else {
                     updateGUI();
-                    displayErrorStatus('Notifications are blocked. See your page settings.');
                 }
             })
             .catch(function(err) {
@@ -202,7 +208,8 @@ function clickSubscriptionButton(event) {
 function requestPermissionIfNeeded() {
     var permission = Notification.permission;
     if (permission !== "granted") {
-        console.log("Requesting permission");
+        // Triggering a permission request.
+        // A popup should appear if the current permission is 'default', otherwise the permissions must be manually changed.
         return Notification.requestPermission();
     }
     return Promise.resolve(permission);
@@ -247,20 +254,10 @@ function subscribeUser() {
             userVisibleOnly: true,
             applicationServerKey: applicationServerKey
         })
-        .then(function(subscription) {
-            updateSubscriptionOnServer(subscription);
-        })
+        .then(updateSubscriptionOnServer)
         .catch(function(err) {
             displayErrorStatus('Failed to subscribe the user', false, err);
-            if (!isSubscribed) {
-                swRegistration.pushManager.getSubscription()
-                    .then(function(subscription) {
-                        if (subscription) {
-                            return subscription.unsubscribe();
-                        }
-                    })
-            }
-            updateGUI();
+            cancelSubscriptionLocally();
         });
 }
 
@@ -270,7 +267,8 @@ function subscribeUser() {
  */
 function updateSubscriptionOnServer(subscription) {
     if (!subscription) {
-        console.log("No subscription object to update");
+        displayErrorStatus('Subscription failed: no subscription object to update', true);
+        cancelSubscriptionLocally();
         return;
     }
 
@@ -290,13 +288,13 @@ function updateSubscriptionOnServer(subscription) {
 
         function (data) {
             if (((data || {}).success === true)) {
-                console.log('Successfully subscribed to push notification');
-
+                // Successfully subscribed to push notification
                 subscriptionEndpoint = params.endpoint;
                 subscriptionKey = params.key;
                 subscriptionAuth = params.auth;
                 isSubscribed = true;
 
+            // Log server messages/data deviations
             } else {
                 console.warn("Server response: status=200, but not with success=true. Response data:");
                 console.log(data);
@@ -304,17 +302,28 @@ function updateSubscriptionOnServer(subscription) {
             if (data.message) {
                 console.log(data.message);
             }
+
             updateGUI();
             broadcastSubscriberCountChange();
         },
 
         function (error) {
             isSubscribed = false;
-            displayErrorStatus('Failed to subscribe to push notification', false, error);
+            displayErrorStatus('Failed to subscribe to push notifications', true, error);
+            cancelSubscriptionLocally();
+            updateGUI();
         }
     );
 }
 
+function cancelSubscriptionLocally() {
+    swRegistration.pushManager.getSubscription()
+        .then(function(subscription) {
+            if (subscription) {
+                return subscription.unsubscribe();
+            }
+        });
+}
 
 
 
@@ -333,7 +342,7 @@ function unsubscribeUser() {
         })
         .then(removeSubscriptionOnServer)
         .catch(function(err) {
-            displayErrorStatus('Failed to unsubscribe the user', false, err);
+            displayErrorStatus('Failed to unsubscribe', false, err);
         });
 }
 
@@ -358,27 +367,28 @@ function removeSubscriptionOnServer() {
 
             function(data) {
                 if (((data || {}).success === true)) {
-                    console.log('Successfully unsubscribed from push notification');
-
+                    //Successfully unsubscribed from push notification
                     isSubscribed = false;
                     subscriptionEndpoint = null;
                     subscriptionKey = null;
                     subscriptionAuth = null;
 
+
+                // Log server messages/data deviations
                 } else {
                     console.warn("Server response: status=200, but not with success=true. Response data:");
                     console.log(data);
                 }
-
                 if (data.message) {
                     console.log(data.message);
                 }
+
                 updateGUI();
                 broadcastSubscriberCountChange();
             },
 
             function(err) {
-                displayErrorStatus('Failed to unsubscribe from push notification', false, err);
+                displayErrorStatus('Failed to unsubscribe from push notifications', true, err);
             }
         );
 
@@ -395,31 +405,38 @@ function removeSubscriptionOnServer() {
 
 function clickPushButton(event) {
     event.target.blur();
-    elemPushButton.disabled = true;
-    elemPushField.disabled = true;
     displayingError = false;
 
-    postApiCall(
-        $pushForm.attr('action'),
-        {message: elemPushField.value},
+    // Don't send empty messages.
+    if (((elemPushField.value || "") + "").trim() === "") {
+        displayErrorStatus('Empty message. Write something to push it.');
 
-        function (data) {
-            if ((data || {}).success === true) {
-                console.log("Push succeeded");
+    } else {
+        elemPushButton.disabled = true;
+        elemPushField.disabled = true;
+        postApiCall(
+            $pushForm.attr('action'),
+            {message: elemPushField.value},
 
-            } else {
-                console.warn("Server response: status=200, but not with success=true. Response data:");
-                console.log(data);
+            function (data) {
+                // Log server messages/data deviations
+                if ((data || {}).success === true) {
+                    console.log("Push succeeded");
+                } else {
+                    console.warn("Server response: status=200, but not with success=true. Response data:");
+                    console.log(data);
+                }
+
+                elemPushButton.disabled = false;
+                elemPushField.disabled = false;
+                elemPushField.value = "";
+            },
+
+            function (error) {
+                displayErrorStatus('Push failed.', true, error);
             }
-            elemPushButton.disabled = false;
-            elemPushField.disabled = false;
-            elemPushField.value = "";
-        },
-
-        function (error) {
-            displayErrorStatus('Push failed', false, error);
-        }
-    );
+        );
+    }
 
     return false;
 }
@@ -444,7 +461,6 @@ function broadcastSubscriberCountChange() {
             if (response.subscriberCount != null) {
                 updateSubscriberCountInGUI(response.subscriberCount, false);
             }
-
         },
         function(err) {
             displayErrorStatus("Failed to broadcast subscriber change", false, err);
@@ -457,7 +473,7 @@ function broadcastSubscriberCountChange() {
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.addEventListener("message", function(event) {
         if (event.data != null) {
-            console.log("Page received data message:", event.data);
+            // Page received data message
             var data = JSON.parse(event.data);
 
             if (data.subscriberCount != null) {

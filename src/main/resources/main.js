@@ -38,8 +38,6 @@ function renderPage(pageId, title) {
         };
     }
 
-    log.info(JSON.stringify({model:model}, null, 2));
-
     return {
         body: thymeleaf.render(resolve('templates/page.html'), model),
     };

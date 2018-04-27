@@ -34,11 +34,8 @@ var messageChannel = new MessageChannel();
  * Handles the event of receiving of a subscribed push notification
 */
 self.addEventListener('push', function(event) {
-    console.log('\nPush Received:');
 
     var data = JSON.parse(event.data.text());
-    console.log(JSON.stringify({data:data}));
-
     var iconUrl = '{{iconUrl}}';
     const title = '{{appName}}';
 
@@ -54,11 +51,10 @@ self.addEventListener('push', function(event) {
     }
 
     if (data.subscriberCount != null) {
-        var data = JSON.stringify({subscriberCount:data.subscriberCount});
+        var subscriberData = JSON.stringify({subscriberCount:data.subscriberCount});
         self.clients.matchAll().then(function(clients) {
             if (clients && clients.length > 0) {
-                console.log("Posting data message to the page");
-                clients[0].postMessage(data);
+                clients[0].postMessage(subscriberData);
 
             } else {
                 console.error("Can't update the DOM: serviceworker can't find a client (page)");
@@ -73,6 +69,5 @@ self.addEventListener('push', function(event) {
  * Handles the event of the push notification being clicked on
  */
 self.addEventListener('notificationclick', function(event) {
-    console.log('[Service Worker] Notification click Received.');
     event.notification.close();
 });

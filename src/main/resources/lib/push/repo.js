@@ -77,10 +77,7 @@ function getRepoConnection() {
  */
 exports.initialize = function () {
     log.info('Initializing repository...');
-
     exports.sudo(doInitialize);
-
-    log.info('OK - Repository initialized.');
 };
 
 var doInitialize = function () {
@@ -102,7 +99,6 @@ var createRepo = function () {
         id: REPO_NAME,
         rootPermissions: ROOT_PERMISSIONS
     });
-    log.info('OK - Repository created.');
 };
 
 var createSubscriptionNode = function () {
@@ -111,17 +107,15 @@ var createSubscriptionNode = function () {
     var pushSubscriptionsExist = nodeWithPathExists(repoConn, PUSH_SUBSCRIPTIONS_PATH);
 
     if (pushSubscriptionsExist) {
-        log.info('OK - Node exists: ' + PUSH_SUBSCRIPTIONS_PATH);
+        // Node exists
         return;
     }
 
-    log.info('Creating node: ' + PUSH_SUBSCRIPTIONS_PATH);
     repoConn.create({
         _name: PUSH_SUBSCRIPTIONS_PATH.slice(1),
         _parentPath: '/',
         _permissions: ROOT_PERMISSIONS
     });
-    log.info('OK - Node created.');
 };
 
 var nodeWithPathExists = function (repoConnection, path) {
@@ -147,7 +141,6 @@ exports.getSubscriptionsCount = function() {
         count: -1,
         parentKey: PUSH_SUBSCRIPTIONS_PATH,
     });
-    log.info(JSON.stringify({kids:kids}, null, 2));
     return kids.total;
 };
 
@@ -158,6 +151,14 @@ exports.getSubscriptionById = function(id) {
 exports.storeSubscriptionAndGetNode = function(subscription) {
     var repoConn = getRepoConnection();
 
+    // Prevent duplicates
+    var hits = repoConn.query({
+        query: "subscription.auth = '" + subscription.auth + "' AND subscription.key = '" + subscription.key + "' AND subscription.endpoint = '" + subscription.endpoint + "'",
+    }).hits;
+    if (hits && hits.length > 0) {
+        return repoConn.get(hits[0].id);
+    }
+
     var node = repoConn.create({
         _parentPath: PUSH_SUBSCRIPTIONS_PATH,
         _permissions: ROOT_PERMISSIONS,
@@ -165,8 +166,7 @@ exports.storeSubscriptionAndGetNode = function(subscription) {
     });
     repoConn.refresh();
     return node;
-
-}
+};
 
 exports.deleteSubscription = function(subscription) {
     var repoConn = getRepoConnection();

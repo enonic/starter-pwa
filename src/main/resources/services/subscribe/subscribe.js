@@ -24,6 +24,8 @@ var pushRepo = require('/lib/push/repo');
  * @returns {{body: Object, [status]: number, headers: Object}} HTTP Response object
  */
 exports.post = function (req) {
+    //log.info(JSON.stringify({subscribe_request:req}, null, 2));
+
     var subscription = getSubscriptionObj(req.params);
     if (!subscription) {
         var message = 'Missing/invalid subscription data in request';

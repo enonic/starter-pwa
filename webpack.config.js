@@ -14,66 +14,41 @@ const assetsPath = path.join(__dirname, paths.assets);
 const buildAssetsPath = path.join(__dirname, paths.buildAssets);
 const buildTemplatesPath = path.join(__dirname, paths.buildTemplates);
 
-module.exports = [
-    {
-        entry: path.join(assetsPath, 'js/app.js'),
+module.exports = {
+    entry: {
+        app: path.join(assetsPath, 'js/app.js'),
+        push: path.join(assetsPath, 'js/push.js'),
+    },
 
-        output: {
-            path: buildAssetsPath,
-            filename: 'precache/app-bundle.js',
-            libraryTarget: 'var',
-            library: 'Starter'
-        },
+    output: {
+        path: buildAssetsPath,
+        filename: 'precache/[name]-bundle.js',
+        libraryTarget: 'var',
+        library: ['Starter', '[name]']
+    },
 
-        resolve: {
-            extensions: ['.js', '.less']
-        },
+    resolve: {
+        extensions: ['.js', '.less']
+    },
 
-        module: {
-            rules: [
-                {
-                    test: /.less$/,
-                    loader: extractTextPlugin.extract({
-                        fallback: 'style-loader',
-                        use: "css-loader!less-loader"
-                    })
-                }
-            ]
-        },
-        plugins: [
-            new extractTextPlugin('precache/bundle.css'),
-            new workboxPlugin({
-                globDirectory: buildAssetsPath,
-                globPatterns: ['precache/**\/*'],
-                swSrc: path.join(templatesPath, 'workbox-sw.js'),
-                swDest: path.join(buildTemplatesPath, 'sw.js')
-            }),
+    module: {
+        rules: [
+            {
+                test: /.less$/,
+                loader: extractTextPlugin.extract({
+                    fallback: 'style-loader',
+                    use: "css-loader!less-loader"
+                })
+            }
         ]
     },
-    {
-        entry: path.join(assetsPath, 'js/push.js'),
-
-        devtool: "eval-source-map",
-
-        output: {
-            path: buildAssetsPath,
-            filename: 'precache/push-bundle.js',
-        },
-
-        resolve: {
-            extensions: ['.js', '.less']
-        },
-
-        module: {
-            rules: [
-                {
-                    test: /.less$/,
-                    loader: extractTextPlugin.extract({
-                        fallback: 'style-loader',
-                        use: "css-loader!less-loader"
-                    })
-                }
-            ]
-        },
-    }
-];
+    plugins: [
+        new extractTextPlugin('precache/bundle.css'),
+        new workboxPlugin({
+            globDirectory: buildAssetsPath,
+            globPatterns: ['precache/**\/*'],
+            swSrc: path.join(templatesPath, 'workbox-sw.js'),
+            swDest: path.join(buildTemplatesPath, 'sw.js')
+        }),
+    ]
+};

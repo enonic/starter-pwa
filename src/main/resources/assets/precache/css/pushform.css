@@ -34,29 +34,30 @@
 }
 
 .button-holder button {
-    padding: 6px 20px 8px;
+    height: 36px;
+    padding: 0 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     background-color: #485bc3;
     color: white;
-    font-size: 15pt;
+    font-size: 12pt;
     border-radius: 3px;
     border: none;
     cursor: pointer;
+    text-transform: uppercase;
 }
-
+.button-holder button:not(:disabled):hover {
+    background-color: #1382cb;;
+}
 .button-holder button:disabled {
     background-color: #afafaf;
-    color: black;
+    color: #444;
 }
 
 .button-holder {
     display: inline-block;
     padding: 2px 0 0;
-}
-
-.button-holder:hover button:not(:disabled) {
-    position: relative;
-    top: -2px;
-    box-shadow: 0 4px 10px rgba(0,0,0,.3);
 }
 .button-holder:hover button:disabled {
     cursor: default;
@@ -85,33 +86,55 @@
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    justify-content: space-between;
+    justify-content: space-evenly;
     align-items: center;
-    padding: 0 30px;
+    padding: 0;
     box-sizing: border-box;
 }
 
-#permission-footer .push-forms label {
+#subscribe-status {
     font-size: 14pt;
     line-height: 1.3em;
     text-align: left;
     padding: 10px 0;
-    margin: 0 30px 0 0;
+    margin: 0;
+    color: #777;
 }
-
 #subscribe-status.blocked {
     color: #d21a1a;
 }
-
 #subscribe-status.subscribing {
     color: #14a814;
 }
-#subscriber-count.live {
-    color: #3f50b5;
+#subscribe-button {
+    background-color: #14a814;
 }
+
+#subscribe-form > * {
+    margin: 5px 40px;
+}
+
+#subscribe-button.subscribing {
+    background-color: transparent;
+    color: #888;
+}
+
+#subscriber-count.live {
+    color: #285ebc
+}
+#subscribe-button:not(.subscribing):hover {
+    background-color: #28d11f;
+    color: white;
+}
+#subscribe-button.subscribing:hover {
+    background-color: #888;
+    color: white;
+}
+
 #push-form.disabled {
     opacity: .5;
 }
+
 #push-form.disabled label .subscriber-notify {
     display: none;
 }

@@ -18,7 +18,7 @@ var pushKeys = require('/lib/push/keys');
  * @returns {{body: Object, status: number, headers: Object}} HTTP Response object
  */
 exports.post = function (req) {
-    log.info(JSON.stringify({push_request:req}, null, 2));
+    //log.info(JSON.stringify({push_request:req}, null, 2));
 
     var response = {
         status: 200,
@@ -33,7 +33,6 @@ exports.post = function (req) {
             response.body = {
                 message: 'Empty message received - nothing to send',
             };
-            log.info(response.body.message);
 
         } else {
             var succeeded = exports.sendPushNotificationToAllSubscribers({
@@ -54,8 +53,6 @@ exports.post = function (req) {
         };
     }
 
-    log.info(JSON.stringify({push_response:response}, null, 2));
-
     return response;
 };
 
@@ -70,27 +67,28 @@ exports.post = function (req) {
  */
 exports.sendPushNotificationToAllSubscribers = function (payload) {
     var subscriptions = pushRepo.getSubscriptions();
-    log.warning(subscriptions.total + ' subscriptions found');
 
     if (subscriptions.total === 0) {
         return false;
     }
 
+    var actuallySent = 0;
     var keyPair = pushKeys.getKeyPair();
     for (var i = 0; i < subscriptions.hits.length; i++) {
         var hit = subscriptions.hits[i];
         var node = pushRepo.getSubscriptionById(hit.id);
 
         if (node && node.subscription) {
-            log.info("\n" + JSON.stringify(node.subscription, null, 2));
             sendPushNotification(keyPair, node.subscription, payload);
+            actuallySent++;
 
         } else {
+            log.info("Found a subscription hit that doesn't seem to have a subscription in it:");
             log.info(JSON.stringify(hit, null, 2));
         }
     }
-    return true;
-}
+    return (actuallySent > 0);
+};
 
 
 /**
@@ -112,7 +110,7 @@ var sendPushNotification = function (keyPair, subscription, payload) {
         receiverKey: subscription.key,
         payload: payload,
         success: function () {
-            log.info('Push notification sent successfully');
+            //log.info('Push notification sent successfully');
         },
         error: function () {
             throw Error("Could not send push notification payload: '" + JSON.stringify(payload) + "'");
