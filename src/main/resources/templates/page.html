@@ -77,7 +77,7 @@
                 .register(appUrl + 'sw.js', {scope: appUrl})
                 .then(function(reg) {
                     reg.onupdatefound = function() {
-                        Starter.notifyAboutNewVersion();
+                        Starter.app.notifyAboutNewVersion();
                     };
                     console.log('Service Worker registered with scope '  + reg.scope);
 
