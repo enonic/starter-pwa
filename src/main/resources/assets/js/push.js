@@ -107,7 +107,7 @@ function updateGUI() {
             elemSubscribeButton.classList.add("subscribing");
 
         } else {
-            elemSubscribeStatus.textContent = 'Unsubscribed to notifications';
+            elemSubscribeStatus.textContent = 'Unsubscribed from notifications';
             elemSubscribeStatus.classList.remove("subscribing");
             elemSubscribeStatus.classList.remove("blocked");
             elemSubscribeButton.textContent = 'Subscribe';
