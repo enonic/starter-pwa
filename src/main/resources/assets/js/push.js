@@ -157,9 +157,6 @@ function displayErrorStatus(message, abort, err) {
     if (abort) {
         elemSubscribeStatus.classList.add("blocked");
         $pushForm[0].classList.add("disabled");
-        elemPushField.disabled = true;
-        elemPushButton.disabled = true;
-
         elemSubscribeButton.classList.add("hidden");
     }
 }
@@ -494,11 +491,7 @@ function updateSubscriberCountInGUI(subscriberCount, live) {
     }
     if (subscriberCount === 0) {
         $pushForm[0].classList.add("disabled");
-        elemPushField.disabled = true;
-        elemPushButton.disabled = true;
     } else {
         $pushForm[0].classList.remove("disabled");
-        elemPushField.disabled = false;
-        elemPushButton.disabled = false;
     }
 }

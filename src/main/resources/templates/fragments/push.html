@@ -14,7 +14,6 @@
             <div class="button-holder"><button id="push-button" data-th-disabled="${startDisabled}">Push</button></div>
             <p>For demonstration purposes.<br />Allowing the client to send push notifications to all subscribers like this is usually not recommended.</p>
         </form>
-
     </div>
 
     <div data-th-replace="/templates/fragments/common::fragment-no-javascript"></div>
@@ -28,6 +27,8 @@
             <label id="subscribe-status">Checking subscription and permissions...</label>
             <div class="button-holder"><button id="subscribe-button" class="hidden">Subscribe</button></div>
         </form>
+
+        <div class="offline-message center"><p>Offline: push notifications are disabled.</p></div>
     </div>
 </div>
 

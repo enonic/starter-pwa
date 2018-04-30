@@ -9,6 +9,7 @@
     font-size: 15.5pt;
     line-height: 1.2em;
     padding-bottom: .4em;
+    color: #333;
 }
 
 .push-forms input {
@@ -47,22 +48,14 @@
     cursor: pointer;
     text-transform: uppercase;
 }
-.button-holder button:not(:disabled):hover {
+.button-holder button:hover {
     background-color: #1382cb;;
-}
-.button-holder button:disabled {
-    background-color: #afafaf;
-    color: #444;
 }
 
 .button-holder {
     display: inline-block;
     padding: 2px 0 0;
 }
-.button-holder:hover button:disabled {
-    cursor: default;
-}
-
 
 
 
@@ -131,10 +124,57 @@
     color: white;
 }
 
+
+
+/* --------------------------------------------  Push-form disabled or offline  ----------------------------- */
+
+#main-container.offline #push-form,
 #push-form.disabled {
     opacity: .5;
 }
 
+#main-container.offline #push-form *,
+#push-form.disabled * {
+    pointer-events:none;
+}
+
+#main-container.offline #push-form button,
+#push-form.disabled button {
+    background-color: #afafaf;
+    color: #444;
+}
+
 #push-form.disabled label .subscriber-notify {
+    display: none;
+}
+#push-form.disabled #subscriber-count.live,
+#main-container.offline #subscriber-count.live {
+    color: #333;
+}
+
+
+
+/* ----------------------------------------------------------------------------------------------- */
+/* Footer: offline disabling: */
+
+#permission-footer .offline-message {
+    display: none;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-items: center;
+}
+#permission-footer .offline-message p {
+    margin: 0;
+    font-size: 14pt;
+    color: #d21a1a;
+    line-height: 1.3em;
+    padding: 15px 0;
+}
+
+#main-container.offline #permission-footer .offline-message {
+    display: flex;
+}
+#main-container.offline #subscribe-form {
     display: none;
 }
