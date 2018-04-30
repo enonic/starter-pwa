@@ -14,19 +14,18 @@ workboxSW.precache(['{{appUrl}}']);
 
 
 /**
- * Sets the default caching strategy for the client: tries contacting the network first
+ * Sets the caching strategy for the client: tries contacting the network first
  */
-workboxSW.router.setDefaultHandler({
-    handler: workboxSW.strategies.networkFirst(),
-});
-
+workboxSW.router.registerRoute(new RegExp('^/[a-z\-]*$'), workboxSW.strategies.networkFirst(), 'GET');
 
 /**
- * API services, however, shouldn't use cache at all.
+ * No caching for services
  */
-workboxSW.router.registerRoute('/subscribe', workboxSW.strategies.networkOnly(), 'POST');
-workboxSW.router.registerRoute('/push', workboxSW.strategies.networkOnly(), 'POST');
-workboxSW.router.registerRoute('/broadcastsubscribers', workboxSW.strategies.networkOnly(), 'POST');
+workboxSW.router.registerRoute(new RegExp('^/_/service/.*'), workboxSW.strategies.networkOnly(), 'POST');
+workboxSW.router.registerRoute(new RegExp('^/_/service/.*'), workboxSW.strategies.networkOnly(), 'GET');
+workboxSW.router.registerRoute(new RegExp('^/_/service/.*'), workboxSW.strategies.networkOnly(), 'HEAD');
+workboxSW.router.registerRoute(new RegExp('^/_/service/.*'), workboxSW.strategies.networkOnly(), 'DELETE');
+workboxSW.router.registerRoute(new RegExp('^/_/service/.*'), workboxSW.strategies.networkOnly(), 'PUT');
 
 var messageChannel = new MessageChannel();
 
@@ -61,7 +60,6 @@ self.addEventListener('push', function(event) {
             }
         });
     }
-
 });
 
 
