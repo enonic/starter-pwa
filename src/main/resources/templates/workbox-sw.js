@@ -12,20 +12,17 @@ workboxSW.precache([]);
 // Here we precache custom defined Urls
 workboxSW.precache(['{{appUrl}}']);
 
-
 /**
  * Sets the caching strategy for the client: tries contacting the network first
  */
-workboxSW.router.registerRoute(new RegExp('^/[a-z\-]*$'), workboxSW.strategies.networkFirst(), 'GET');
-
-/**
- * No caching for services
- */
-workboxSW.router.registerRoute(new RegExp('^/_/service/.*'), workboxSW.strategies.networkOnly(), 'POST');
-workboxSW.router.registerRoute(new RegExp('^/_/service/.*'), workboxSW.strategies.networkOnly(), 'GET');
-workboxSW.router.registerRoute(new RegExp('^/_/service/.*'), workboxSW.strategies.networkOnly(), 'HEAD');
-workboxSW.router.registerRoute(new RegExp('^/_/service/.*'), workboxSW.strategies.networkOnly(), 'DELETE');
-workboxSW.router.registerRoute(new RegExp('^/_/service/.*'), workboxSW.strategies.networkOnly(), 'PUT');
+workboxSW.router.registerRoute("{{appUrl}}offline", workboxSW.strategies.networkFirst());
+workboxSW.router.registerRoute("{{appUrl}}push", workboxSW.strategies.networkFirst());
+workboxSW.router.registerRoute("{{appUrl}}cache-first", workboxSW.strategies.networkFirst());
+workboxSW.router.registerRoute("{{appUrl}}background-sync", workboxSW.strategies.networkFirst());
+workboxSW.router.registerRoute("{{appUrl}}bluetooth", workboxSW.strategies.networkFirst());
+workboxSW.router.registerRoute("{{appUrl}}audio", workboxSW.strategies.networkFirst());
+workboxSW.router.registerRoute("{{appUrl}}video", workboxSW.strategies.networkFirst());
+workboxSW.router.registerRoute("{{appUrl}}webrtc", workboxSW.strategies.networkFirst());
 
 var messageChannel = new MessageChannel();
 
@@ -41,7 +38,7 @@ self.addEventListener('push', function(event) {
     if (data.text) {
         const options = {
             body: data.text,
-            icon: iconUrl,
+            icon: iconUrl
         };
 
         const notificationPromise = self.registration.showNotification(title, options);
