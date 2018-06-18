@@ -1,5 +1,7 @@
 require('../css/styles.less');
 require("../css/background-sync.less");
+const Sync = require('./sync/Sync');
+let sync = new Sync();
 
 module.exports = {
     notifyAboutNewVersion: function() {
@@ -20,6 +22,13 @@ module.exports = {
         }
 
         const toggleOnlineStatus = function () {
+            if (navigator.onLine) {
+
+                if ('serviceWorker' in navigator) {
+                    sync.syncOfflineMemos();
+                    console.log("SW Online")
+                }
+            }
             mainContainer.classList.toggle("online", navigator.onLine);
             mainContainer.classList.toggle("offline", !navigator.onLine);
         };

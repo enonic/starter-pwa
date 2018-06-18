@@ -43,7 +43,6 @@ function renderPage(pageId, title) {
     };
 }
 
-
 function renderSW() {
     var appUrl = getAppUrl();
 
@@ -61,6 +60,8 @@ function renderSW() {
         })
     };
 }
+
+
 
 function renderManifest() {
 

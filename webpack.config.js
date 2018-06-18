@@ -6,7 +6,7 @@ const paths = {
     templates: 'src/main/resources/templates/',
     assets: 'src/main/resources/assets/',
     buildAssets: 'build/resources/main/assets/',
-    buildTemplates: 'build/resources/main/templates/'
+    buildTemplates: 'build/resources/main/lib/pwa/'
 };
 
 const templatesPath = path.join(__dirname, paths.templates);
