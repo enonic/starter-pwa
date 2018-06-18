@@ -2,10 +2,9 @@ import LogModel from "../model/LogModel";
 import TekstModel from "../model/TekstModel";
 
 
-
 export default class Sync {
-    constructor(){}
     static syncOfflineMemos() {
+        /*
         LogModel.getAll('time', LogModel.DESCENDING).then((logs) => {
             let syncMemos = [];
             let asyncUpdates = [];
@@ -20,10 +19,10 @@ export default class Sync {
                     syncMemos.push(log.memoKey);
 
                     asyncUpdates.push(
-                        MemoModel.get(log.memoKey).then((localMemo) => {
+                        TekstModel.get(log.memoKey).then((localMemo) => {
                             if (localMemo) {
-                                return MemoModel.put(localMemo).then(() => {
-                                    return MemoModel.delete(log.memoKey, MemoModel.getIndexedDBInstance());
+                                return TekstModel.put(localMemo).then(() => {
+                                    return TekstModel.delete(log.memoKey, TekstModel.getIndexedDBInstance());
                                 })
                             }
                         })
@@ -32,14 +31,16 @@ export default class Sync {
                     syncMemos.push(log.memoKey);
 
                     asyncUpdates.push(
-                        MemoModel.delete(log.memoKey)
+                        TekstModel.delete(log.memoKey)
                     );
                 }
             });
 
             LogModel.deleteAll();
-            asyncUpdates.push(MemoModel.deleteAll(MemoModel.getIndexedDBInstance()));  
+            asyncUpdates.push(TekstModel.deleteAll(TekstModel.getIndexedDBInstance()));  
         });
+        */
+        console.log("Sync function not implemented..")
 
     }
 }

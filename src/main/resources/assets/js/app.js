@@ -1,6 +1,6 @@
 require('../css/styles.less');
-const Sync = require('./sync/Sync');
-let sync = new Sync();
+var Sync = require('./sync/Sync').default;
+var TekstController = require('./controller/TekstController').default;
 
 module.exports = {
     notifyAboutNewVersion: function() {
@@ -19,12 +19,13 @@ module.exports = {
         if (!mainContainer) {
             return;
         }
+        new TekstController();
 
         const toggleOnlineStatus = function () {
             if (navigator.onLine) {
 
                 if ('serviceWorker' in navigator) {
-                    sync.syncOfflineMemos();
+                    Sync.syncOfflineMemos();
                     console.log("SW Online")
                 }
             }
