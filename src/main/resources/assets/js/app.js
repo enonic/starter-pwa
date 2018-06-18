@@ -1,5 +1,11 @@
+// Stylesheets
 require('../css/styles.less');
 require("../css/background-sync.less");
+
+// Scripts 
+require('./background-sync'); 
+
+
 const Sync = require('./sync/Sync');
 let sync = new Sync();
 
