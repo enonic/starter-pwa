@@ -1,4 +1,8 @@
+// Stylesheets
 require('../css/styles.less');
+require("../css/background-sync.less");
+require('./background-sync'); 
+
 var Sync = require('./sync/Sync').default;
 var TekstController = require('./controller/TekstController').default;
 

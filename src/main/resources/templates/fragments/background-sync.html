@@ -1,15 +1,22 @@
 <!DOCTYPE html>
 <html>
+
 <body>
 
-<div data-th-fragment="fragment-background-sync" data-th-remove="tag">
-    
-    <div>
-        Background-sync
-        <button id="test">click me</button>
-    </div>
-    <div data-th-replace="/templates/fragments/common::fragment-no-javascript"></div>
-</div>
+	<div data-th-fragment="fragment-background-sync" data-th-remove="tag">
+	    <div class="todo-app__container">
+	        <!-- Input section -->
+	        <div class="todo-app__input">
+	            <input id="add-todo-text" type="text" placeholder="New todo" tabindex="1">
+	            <button id="add-todo-button" tabindex="3">Add</button>
+	        </div>
+	        <!-- Item section -->
+	        <div id="todo-app__item-area" class="todo-app__item-area">
+	            <!-- Stored todos show up here -->
+	        </div>
+	    </div>
+	</div>
 
 </body>
+
 </html>

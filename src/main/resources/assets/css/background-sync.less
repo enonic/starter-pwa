@@ -1,0 +1,99 @@
+/* TODO: Clean up classnames */
+
+@breakpoint_desktop: 1025px;
+@darkshade: rgba(255, 255, 255, 0.015);
+/* TODO-APP*/
+
+.todo-app__container {
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+    position: absolute;
+    width: 98vw;
+    height: 80vh;
+    bottom: 10vh;
+    border: solid black 1px;
+}
+
+@media (min-width: @breakpoint_desktop) {
+    .todo-app__container {
+        width: 60vw;
+        height: 50vh;
+        bottom: 10vh;
+    }
+}
+
+/*container for the input*/
+
+.todo-app__input {
+    display: flex;
+    height: 5vh;
+}
+
+.todo-app__input>input {
+    flex: 0.6;
+    font-size: 2em;
+    transition-duration: 0.5s;
+    background-color: @darkshade;
+}
+
+.todo-app__input>input:focus {
+    background-color: whitesmoke;
+}
+
+.todo-app__input>button {
+    flex: 0.4;
+    border: solid 1px black;
+    font-size: 1.5em; 
+}
+
+@media (min-width: @breakpoint_desktop) {
+    .todo-app__input {
+        height: 3vh;
+    }
+    .todo-app___input input {
+        flex: 0.8;
+    }
+    .todo-app___input button {
+        flex: 0.2;
+    }
+}
+
+/*container for the items */
+
+.todo-app__item-area {
+    margin-top: 10px;
+}
+
+/*item in list*/
+
+.todo-app__item {
+    display: flex;
+    font-size: 1.5em;
+    border-bottom: solid .5px;
+    border-top: solid .5px;
+    padding: 5px;
+}
+
+.todo-app__item input {
+    zoom: 2.5;
+    flex: 0.2;
+    align-self: right;
+}
+
+/*Line through when box is checked*/
+
+.todo-app__item>input:checked+div {
+    text-decoration: line-through;
+}
+
+.todo-app__item div {
+    flex: 0.8;
+    text-align: left;
+    display: flex;
+}
+
+.todo-app__item * {
+    /*display: inline*/
+    flex: 0.5;
+}
+
+/* END, TODO-APP*/
