@@ -26,14 +26,10 @@ export default class MemoModel extends Model {
 
         super(key);
 
-        this.title = data.title || 'Untitled Memo';
-        this.description = data.description || null;
+        this.message = data.title || 'Untitled Memo';
         this.url = data.url || MemoModel.makeURL();
-        this.audio = data.audio || null;
-        this.volumeData = data.volumeData || null;
         this.time = data.time || Date.now();
         this.modifiedTime = data.time || null;
-        this.transcript = data.transcript || null;
     }
 
     static makeURL() {
