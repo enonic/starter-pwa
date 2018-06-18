@@ -42,7 +42,7 @@ export default class MemoModel extends Model {
 
         return url;
     }
-
+    /*
     static get UPDATED() {
         return 'MemoModel-updated';
     }
@@ -55,7 +55,7 @@ export default class MemoModel extends Model {
         return !this.isOnline() ?
             IndexedDBInstance() : RepoDBInstance();
     }
-
+    */
     static getAll(index, order) {
 
         if (!this.isOnline()) {
@@ -80,7 +80,7 @@ export default class MemoModel extends Model {
             return super.getAll(index, order, RepoDBInstance());
         }
     }
-
+    /*
     static get(key) {
         return super.get(key, IndexedDBInstance()).then((memo) => {
             return memo ? memo : super.get(key, RepoDBInstance());
@@ -133,5 +133,5 @@ export default class MemoModel extends Model {
             
         });
     }
-
+    */
 }
