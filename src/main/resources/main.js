@@ -4,7 +4,6 @@ var portalLib = require('/lib/xp/portal');
 var siteTitle = 'PWA Starter';
 var mustache = require('/lib/xp/mustache');
 var pushRepo = require('/lib/push/repo');
-var swController = require('/lib/pwa/sw-controller');
 
 pushRepo.initialize();
 
@@ -44,6 +43,23 @@ function renderPage(pageId, title) {
     };
 }
 
+function renderSW() {
+    var appUrl = getAppUrl();
+
+    return {
+        headers: {
+            'Service-Worker-Allowed': appUrl
+        },
+        contentType: 'application/javascript',
+        // sw.js will be generated during build by Workbox from webpack.config.js
+        body: mustache.render(resolve('/templates/sw.js'), {
+            appUrl: appUrl,
+            appVersion: app.version,
+            appName: app.name,
+            iconUrl: portalLib.assetUrl({path: "/precache/icons/icon.png"}),
+        })
+    };
+}
 
 
 
@@ -66,7 +82,7 @@ router.get('/bluetooth', function() { return renderPage('bluetooth', 'Bluetooth 
 router.get('/audio', function() { return renderPage('audio', 'Audio capabilities'); });
 router.get('/video', function() { return renderPage('video', 'Video capabilities'); });
 router.get('/webrtc', function() { return renderPage('webrtc', 'WebRTC functionality'); });
-router.get('/sw.js', swController.get);
+router.get('/sw.js', renderSW);
 router.get('/manifest.json', renderManifest);
 
 exports.get = function (req) {

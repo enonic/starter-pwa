@@ -4,7 +4,7 @@ import TekstModel from "../model/TekstModel";
 
 
 export default class Sync {
-
+    constructor(){}
     static syncOfflineMemos() {
         LogModel.getAll('time', LogModel.DESCENDING).then((logs) => {
             let syncMemos = [];
@@ -40,5 +40,6 @@ export default class Sync {
             LogModel.deleteAll();
             asyncUpdates.push(MemoModel.deleteAll(MemoModel.getIndexedDBInstance()));  
         });
+
     }
 }
