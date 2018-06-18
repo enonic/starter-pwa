@@ -1,7 +1,63 @@
+/* TODO: Clean up classnames */
+
+@breakpoint_desktop: 1025px;
+/* TODO-APP*/
+
 .todo-app__container {
-    background-color: orange;
+    position: absolute;
+    width: 100vw;
+    border: solid black 1px;
 }
 
-.todo-app__container div input {
-    background-color: red;
+@media (min-width: @breakpoint_desktop) {
+    .todo-app__container {
+        width: 60vw;
+        height: 50vh;
+        bottom: 10vh;
+    }
 }
+
+/*container for the input*/
+
+.todo-app__input {
+    display: flex;
+    height: 3vh;
+}
+
+.todo-app__input>input {
+    flex: 0.8;
+    font-size: 2em;
+}
+
+.todo-app__input>button {
+    flex: 0.2;
+    border: solid 1px black;
+}
+
+/*container for the items */
+
+.todo-app__item-area {
+    color: red;
+    border: solid red;
+}
+
+/*item in list*/
+
+.todo-app__item {
+    display: flex;
+}
+
+.todo-app__item input {
+    flex: 0.4;
+    align-self: right;
+}
+
+.todo-app__item div {
+    flex: 0.6;
+}
+
+.todo-app__item * {
+    display: inline;
+}
+
+/* END, TODO-APP*/

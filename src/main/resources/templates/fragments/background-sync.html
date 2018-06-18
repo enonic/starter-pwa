@@ -4,14 +4,30 @@
 <body>
 
     <div data-th-fragment="fragment-background-sync" data-th-remove="tag">
-        <h1>Background Sync Demo</h1>
         <div class="todo-app__container">
-            <div>
+            <!-- Input section -->
+            <div class="todo-app__input">
                 <input type="text" placeholder="New todo" tabindex="1">
-                <button tabindex="2">Add</button>
+                <button id="add-todo-button" tabindex="2">Add</button>
             </div>
-            <div>
+            <!-- Item section -->
+            <div class="todo-app__item-area">
                 <!-- Stored todos show up here -->
+                <!-- TEST ITEMS --> 
+                <div class="todo-app__item">
+                    <input type="checkbox">
+                    <div>
+                        <small>DATE</small>
+                        <div>Item 1, test</div>
+                    </div>
+                </div>
+                <div class="todo-app__item">
+                    <input type="checkbox">
+                    <div>
+                        <small>DATE</small>
+                        <div>Item 2, test</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
