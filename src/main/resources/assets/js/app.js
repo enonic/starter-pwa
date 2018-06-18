@@ -1,4 +1,5 @@
 require('../css/styles.less');
+require("../css/background-sync.less");
 
 module.exports = {
     notifyAboutNewVersion: function() {
