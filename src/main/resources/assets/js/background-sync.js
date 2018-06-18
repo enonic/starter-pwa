@@ -4,12 +4,16 @@
  * 3. listeners
  */
 
+// BUG: remove only runs once. Figure out. 
+
 
 
 
 let registeredTodos = [];
 
-
+/**
+ * Adds a todo to the lsit 
+ */
 let addTodo = () => {
     const now = new Date();
     const inputfield = document.getElementById("add-todo-text");
@@ -19,6 +23,7 @@ let addTodo = () => {
     if (inputfield.value !== "") {
         registeredTodos.push({ text: inputfield.value, date: date });
         updateTodoView();
+        updateRemoveListeners(); 
         inputfield.value = "";
     } else {
         // let user know something was wrong 
@@ -29,13 +34,35 @@ let addTodo = () => {
     }
 }
 
-let removeTodo = (event) => {
+/**
+ * Removes the item associated with the clicked button 
+ */
+let removeTodo = (event) => {    
     /**
      * Find the element with DOM api 
      * Loop through register. 
      * Update view 
      */
-    throw "not implemented";
+    const text = event.target.parentNode.children[0].innerHTML;
+    const date = event.target.parentNode.children[1].innerHTML; 
+    const removed = {text, date}; // search for this 
+
+    
+    for(let i in registeredTodos){
+        /*
+        console.log(registeredTodos[i].text + " - " + removed.text); 
+        console.log(removed.text === registeredTodos[i].text); 
+        console.log(registeredTodos[i].date + " - " + removed.date); 
+        console.log(removed.date === registeredTodos[i].date); 
+        console.log("-----------");
+        */
+
+        if (registeredTodos[i].text + " - " + removed.text && removed.date === registeredTodos[i].date) {
+            registeredTodos.splice(i, 1);
+            updateTodoView();
+            return; //do not check more than neccecary
+        }
+    }    
 }
 
 /**
@@ -62,10 +89,13 @@ let updateTodoView = () => {
 }
 
 
-// Listeners 
-document.getElementById("add-todo-button").onclick = addTodo; 
-// document.getElementsByClassName("remove-todo-button").onclick = removeTodo; 
-for(button of document.getElementsByClassName("remove-todo-button")) {
-    button.onclick = removeTodo; 
+let updateRemoveListeners = () => {
+    for (button of document.getElementsByClassName("remove-todo-button")) {
+        button.onclick = removeTodo;
+    }
 }
 
+
+// Listeners
+document.getElementById("add-todo-button").onclick = addTodo;
+updateRemoveListeners();
