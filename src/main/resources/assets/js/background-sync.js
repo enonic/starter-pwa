@@ -60,7 +60,7 @@ let removeTodo = (event) => {
         if (registeredTodos[i].text + " - " + removed.text && removed.date === registeredTodos[i].date) {
             registeredTodos.splice(i, 1);
             updateTodoView();
-            return; //do not check more than neccecary
+            return; //do not check more items than neccecary
         }
     }    
 }
@@ -98,4 +98,10 @@ let updateRemoveListeners = () => {
 
 // Listeners
 document.getElementById("add-todo-button").onclick = addTodo;
+document.onkeydown = (event) => {
+                        //enter
+    if(event.keyCode === 13) {
+        addTodo(); 
+    }
+}
 updateRemoveListeners();
