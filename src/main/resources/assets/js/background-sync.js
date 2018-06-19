@@ -26,7 +26,7 @@ class TodoItem {
         this.text = text; 
         this.date = date; 
         this.isChecked = isChecked; 
-        this.id = Math.random(1, 1000); // NOTE: endre senere 
+        this.id = new Date().valueOf(); // unique id
     }
 
     getFormattedDate() {
