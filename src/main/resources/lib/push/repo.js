@@ -91,6 +91,7 @@ var doInitialize = function () {
         throw Error('Something went wrong when creating (and/or getting) repo:' + REPO_NAME);
     }
 
+    //Creates repositories
     createSubscriptionNode();
     createBackgroundSyncNode(); 
 };
@@ -189,15 +190,7 @@ exports.storeSubscriptionAndGetNode = function(subscription) {
 
 exports.storeBackgroundSyncItemAndGetNode = function (item) {
     var repoConn = getRepoConnection();
-    /* 
-    // Prevent duplicates
-    var hits = repoConn.query({
-        query: "subscription.auth = '" + subscription.auth + "' AND subscription.key = '" + subscription.key + "' AND subscription.endpoint = '" + subscription.endpoint + "'",
-    }).hits;
-    if (hits && hits.length > 0) {
-        return repoConn.get(hits[0].id);
-    }
-    */ 
+    
     var node = repoConn.create({
         _parentPath: BACKGROUND_SYNC_PATH,
         _permissions: ROOT_PERMISSIONS,

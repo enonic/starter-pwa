@@ -24,11 +24,11 @@ var pushRepo = require('/lib/push/repo');
  * @returns {{body: Object, [status]: number, headers: Object}} HTTP Response object
  */
 exports.post = function (req) {
-    //log.info(JSON.stringify({subscribe_request:req}, null, 2));
+   
     
-    var item = getItemObj(req.params);
-    if (!item) {
-        var message = 'Missing/invalid item data in request';
+    var todoItem = getItemObj(req.params);
+    if (!todoItem) {
+        var message = 'Missing/invalid todoItem data in request';
         log.warning(message);
         return {
             status: 400,
@@ -36,7 +36,7 @@ exports.post = function (req) {
         };
     }
 
-    var result = createTodoNode(item);
+    var result = createTodoNode(todoItem);
 
     if (result.status && Number(result.status) >= 400) {
         return result;
@@ -52,14 +52,17 @@ exports.post = function (req) {
 
 exports.get = function (req){
 
-    var item = getItemObj(req.params);
-    if (!item) {
+    var todoItem = getItemObj(req.params);
+    if (!todoItem) {
         var message = "Missing/invalid item data in request";
         log.warning(message);
-        return { status: 400, message: message };
+        return { 
+            status: 400,
+            message: message 
+        };
     }
 
-    var result = deleteTodoNode(item);
+    var result = deleteTodoNode(todoItem);
 
     if (result.status && Number(result.status) >= 400) {
         return result;
@@ -80,19 +83,19 @@ var getItemObj = function (params) {
     };
 };
 
-var createTodoNode = function (item) {
+var createTodoNode = function (todoItem) {
     try {
-        var itemNode = pushRepo.storeBackgroundSyncItemAndGetNode(item);
-        if (!itemNode) {
-            log.error("Tried creating todo node, but something seems wrong: " + JSON.stringify(
+        var Node = pushRepo.storeBackgroundSyncItemAndGetNode(todoItem);
+        if (!Node) {
+            log.error("Tried creating Todo node, but something seems wrong: " + JSON.stringify(
                 {
-                    incoming_subscription: subscription,
-                    resulting_node: node
+                    incoming_subscription: todoItem,
+                    resulting_node: Node
                 }, null, 2));
             t
             return {
                 status: 500,
-                message: "Couldn't create todo node",
+                message: "Couldn't create Todo node",
             }
 
         } else {
@@ -103,18 +106,18 @@ var createTodoNode = function (item) {
         log.error(e);
         return {
             status: 500,
-            message: "Couldn't create todo node",
+            message: "Couldn't create Todo node",
         };
     }
 };
 
-var deleteTodoNode = function (item) {
+var deleteTodoNode = function (todoItem) {
     try {
-        var result = pushRepo.deleteTodo(item);
+        var result = pushRepo.deleteTodo(todoItem);
         if (result === "NOT_FOUND") {
             return {
                 status: 404,
-                message: "Subscription not found: auth='" + subscription.auth + ", key='" + subscription.key + "'",
+                message: "todoItem not found",
             }
 
         } else if (result === "SUCCESS") {
@@ -123,12 +126,10 @@ var deleteTodoNode = function (item) {
         } else if (typeof result === 'string') {
             return {
                 status: 500,
-                message: "Some subscription nodes were not deleted",
+                message: "Some nodes were not deleted",
                 nodeIds: result,
             }
 
-        } else if (result === "test") {
-            return {success: "det var ingen i hits"}
         } 
         else {
             throw Error("Weird result from pushRepo.deleteSubscription:\n" + JSON.stringify({ result: result }, null, 2) + "\n");
@@ -138,7 +139,7 @@ var deleteTodoNode = function (item) {
         log.error(e);
         return {
             status: 500,
-            message: "Couldn't delete subscription node",
+            message: "Couldn't delete node",
         };
     }
 };
