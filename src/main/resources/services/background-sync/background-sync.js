@@ -25,9 +25,10 @@ var pushRepo = require('/lib/push/repo');
  */
 exports.post = function (req) {
     //log.info(JSON.stringify({subscribe_request:req}, null, 2));
-    var subscription = getSubscriptionObj(req.params);
-    if (!subscription) {
-        var message = 'Missing/invalid subscription data in request';
+    
+    var item = getItemObj(req.params);
+    if (!item) {
+        var message = 'Missing/invalid item data in request';
         log.warning(message);
         return {
             status: 400,
@@ -35,9 +36,7 @@ exports.post = function (req) {
         };
     }
 
-    var result = (req.params.cancelSubscription) ?
-        pushRepo.sudo(function(){ return deleteSubscriptionNode(subscription); }) :
-        pushRepo.sudo(function(){ return createSubscriptionNode(subscription); });
+    var result = createTodoNode(item);
 
     if (result.status && Number(result.status) >= 400) {
         return result;
@@ -51,51 +50,67 @@ exports.post = function (req) {
     };
 };
 
-var getSubscriptionObj = function(params) {
-    if (!params.auth || !params.endpoint || !params.key) {
-        log.warning("Invalid subscription object parameters - missing auth, endpoint and/or key");
-        return null;
+exports.get = function (req){
+
+    var item = getItemObj(req.params);
+    if (!item) {
+        var message = "Missing/invalid item data in request";
+        log.warning(message);
+        return { status: 400, message: message };
     }
 
+    var result = deleteTodoNode(item);
+
+    if (result.status && Number(result.status) >= 400) {
+        return result;
+    }
+
+    return { body: result, 
+        headers: { 
+            "Content-Type": "application/json" 
+        } 
+    };
+}
+
+
+var getItemObj = function (params) {
+
     return {
-        auth: params.auth,
-        endpoint: params.endpoint,
-        key: params.key
+        data: params
     };
 };
 
-var createSubscriptionNode = function (subscription) {
+var createTodoNode = function (item) {
     try {
-        var node = pushRepo.storeSubscriptionAndGetNode(subscription);
-        if (!node)  {
-            log.error("Tried creating subscripton node, but something seems wrong: " + JSON.stringify(
+        var itemNode = pushRepo.storeBackgroundSyncItemAndGetNode(item);
+        if (!itemNode) {
+            log.error("Tried creating todo node, but something seems wrong: " + JSON.stringify(
                 {
-                    incoming_subscription:subscription,
-                    resulting_node:node
+                    incoming_subscription: subscription,
+                    resulting_node: node
                 }, null, 2));
-t
+            t
             return {
                 status: 500,
-                message: "Couldn't create subscription node",
+                message: "Couldn't create todo node",
             }
 
         } else {
-            return {success: true};
+            return { success: true };
         }
 
     } catch (e) {
         log.error(e);
         return {
             status: 500,
-            message: "Couldn't create subscription node",
+            message: "Couldn't create todo node",
         };
     }
 };
 
-var deleteSubscriptionNode = function (subscription) {
+var deleteTodoNode = function (item) {
     try {
-        var result = pushRepo.deleteSubscription(subscription);
-
+        var result = pushRepo.deleteTodo(item);
         if (result === "NOT_FOUND") {
             return {
                 status: 404,
@@ -103,7 +118,7 @@ var deleteSubscriptionNode = function (subscription) {
             }
 
         } else if (result === "SUCCESS") {
-            return {success: true};
+            return { success: true };
 
         } else if (typeof result === 'string') {
             return {
@@ -112,8 +127,11 @@ var deleteSubscriptionNode = function (subscription) {
                 nodeIds: result,
             }
 
-        } else {
-            throw Error("Weird result from pushRepo.deleteSubscription:\n" + JSON.stringify({result:result}, null, 2) + "\n");
+        } else if (result === "test") {
+            return {success: "det var ingen i hits"}
+        } 
+        else {
+            throw Error("Weird result from pushRepo.deleteSubscription:\n" + JSON.stringify({ result: result }, null, 2) + "\n");
         }
 
     } catch (e) {

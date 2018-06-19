@@ -270,7 +270,7 @@ function updateSubscriptionOnServer(subscription) {
     }
 
     var url = $subscribeForm.attr('action');
-
+    console.log("url", url)
     const subObj = JSON.parse(JSON.stringify(subscription));
 
     const params = {
@@ -416,6 +416,7 @@ function clickPushButton(event) {
             {message: elemPushField.value},
 
             function (data) {
+                console.log("url", $pushForm.attr("action"));
                 // Log server messages/data deviations
                 if ((data || {}).success === true) {
                     console.log("Push succeeded");
