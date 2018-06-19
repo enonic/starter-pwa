@@ -3,8 +3,8 @@ require('../css/styles.less');
 require("../css/background-sync.less");
 require('./background-sync'); 
 
-var Sync = require('./sync/Sync').default;
-var TekstController = require('./controller/TekstController').default;
+//var Sync = require('./sync/Sync').default;
+//var TekstController = require('./controller/TekstController').default;
 
 module.exports = {
     notifyAboutNewVersion: function() {
@@ -23,16 +23,16 @@ module.exports = {
         if (!mainContainer) {
             return;
         }
-        new TekstController();
+  //      new TekstController();
 
         const toggleOnlineStatus = function () {
-            if (navigator.onLine) {
+    /*        if (navigator.onLine) {
 
                 if ('serviceWorker' in navigator) {
                     Sync.syncOfflineMemos();
                     console.log("SW Online")
                 }
-            }
+            }*/
             mainContainer.classList.toggle("online", navigator.onLine);
             mainContainer.classList.toggle("offline", !navigator.onLine);
         };
