@@ -14,6 +14,7 @@ var contextLib = require('/lib/xp/context');
 var REPO_NAME = app.name;
 var REPO_BRANCH = 'master';
 var PUSH_SUBSCRIPTIONS_PATH = '/push';
+var BACKGROUND_SYNC_PATH = '/background-sync'; 
 var REPO_USER = {
     login: 'su',
     userStore: 'system'
@@ -91,6 +92,7 @@ var doInitialize = function () {
     }
 
     createSubscriptionNode();
+    createBackgroundSyncNode(); 
 };
 
 var createRepo = function () {
@@ -117,6 +119,23 @@ var createSubscriptionNode = function () {
         _permissions: ROOT_PERMISSIONS
     });
 };
+
+var createBackgroundSyncNode = function() {
+    var repoConn = getRepoConnection();
+
+    var backgroundSyncExist = nodeWithPathExists(repoConn, BACKGROUND_SYNC_PATH);
+
+    if (backgroundSyncExist) {
+        // Node exists
+        return;
+    }
+
+    repoConn.create({
+        _name: BACKGROUND_SYNC_PATH.slice(1),
+        _parentPath: '/',
+        _permissions: ROOT_PERMISSIONS
+    });
+}
 
 var nodeWithPathExists = function (repoConnection, path) {
     var result = repoConnection.query({
@@ -168,6 +187,26 @@ exports.storeSubscriptionAndGetNode = function(subscription) {
     return node;
 };
 
+exports.storeBackgroundSyncItemAndGetNode = function (item) {
+    var repoConn = getRepoConnection();
+    /* 
+    // Prevent duplicates
+    var hits = repoConn.query({
+        query: "subscription.auth = '" + subscription.auth + "' AND subscription.key = '" + subscription.key + "' AND subscription.endpoint = '" + subscription.endpoint + "'",
+    }).hits;
+    if (hits && hits.length > 0) {
+        return repoConn.get(hits[0].id);
+    }
+    */ 
+    var node = repoConn.create({
+        _parentPath: BACKGROUND_SYNC_PATH,
+        _permissions: ROOT_PERMISSIONS,
+        item: item
+    });
+    repoConn.refresh();
+    return node;
+};
+
 exports.deleteSubscription = function(subscription) {
     var repoConn = getRepoConnection();
     var hits = repoConn.query({
@@ -193,6 +232,45 @@ exports.deleteSubscription = function(subscription) {
     }
 };
 
+exports.deleteTodo = function (item) {
+
+    var repoConn = getRepoConnection();
+    /*
+    var hits = repoConn.query({
+      query:
+        "subscription.auth = '" +
+        "hg21SwfDrOXzxiXeuh1Uxg" +
+        "' AND subscription.key = '" +
+        "BLING_gbvsVcPsqNzjb593a67RZKmjOsZtpcjh74vMjNak8f_UdIBLnrlT8q4zAzuuNJOorPc2B-c7hmCpfG_MM" +
+        "'"
+    }).hits;
+    @*/
+    var hits = repoConn.query({
+        query:
+            "item.data.id = '" +
+            item.data.id +
+            "'"
+    }).hits;
+    
+    if (!hits || hits.length < 1) {
+        return "test";
+    }
+
+    var ids = hits.map(function (hit) {
+        return hit.id;
+    });
+
+    var result = repoConn.delete(ids);
+    repoConn.refresh();
+
+    if (result.length === ids.length) {
+        return "SUCCESS";
+    } else {
+        return JSON.stringify(ids.filter(function (id) {
+            return result.indexOf(id) === -1;
+        }));
+    }
+};
 
 
 exports.loadKeyPair = function () {

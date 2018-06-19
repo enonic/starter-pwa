@@ -36,8 +36,11 @@ function renderPage(pageId, title) {
                 '<link rel="stylesheet" type="text/css" href="' + portalLib.assetUrl({path: 'precache/css/pushform.css'}) + '"/>' +
                 '<script defer type="text/javascript" src="' + portalLib.assetUrl({path: 'precache/push-bundle.js'}) + '"></script>'
         };
+    
     }
-
+    if (pageId === "background-sync") {
+        model.pushUrl = portalLib.serviceUrl({ service: "background-sync" });
+    }
     return {
         body: thymeleaf.render(resolve('templates/page.html'), model),
     };
