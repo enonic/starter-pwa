@@ -37,7 +37,8 @@ let addTodo = () => {
 /**
  * Removes the item associated with the clicked button 
  */
-let removeTodo = (event) => {    
+let removeTodo = (event) => {   
+    console.log("remove kjører");  
     /**
      * Find the element with DOM api 
      * Loop through register. 
@@ -60,6 +61,7 @@ let removeTodo = (event) => {
         if (registeredTodos[i].text + " - " + removed.text && removed.date === registeredTodos[i].date) {
             registeredTodos.splice(i, 1);
             updateTodoView();
+            updateRemoveListeners(); 
             return; //do not check more items than neccecary
         }
     }    
