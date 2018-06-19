@@ -21,7 +21,7 @@ class TodoItem {
      * @param {string} text 
      * @param {string} date
      * @param {boolean} isChecked 
-     */
+     */               // remove if works
     constructor(text, date, isChecked) {
         this.text = text; 
         this.date = date; 
@@ -51,14 +51,12 @@ let searchAndApply = (todoItem, callback) => {
  * Adds a todo to the lsit 
  */
 let addTodo = () => {
-    const date = new Date();
     const inputfield = document.getElementById("add-todo-text");
     
 
     // Only add if user actually entered something 
     if (inputfield.value !== "") {
-        const item = new TodoItem(inputfield.value, date, false);
-        console.log(item); 
+        const item = new TodoItem(inputfield.value, new Date(), false);
         registeredTodos.push(item); 
         
         postApiCall(
@@ -71,8 +69,7 @@ let addTodo = () => {
         );
         
         updateTodoView();
-        updateRemoveListeners();
-        updateCheckListeners();  
+        updateAllListeners();   
         inputfield.value = "";
     } else {
         // let user know something was wrong 
@@ -85,26 +82,27 @@ let addTodo = () => {
 
 /**
  * Removes the item associated with the clicked button 
+ * @param event may be event or TodoItem
  */
 let removeTodo = (event) => {   
     /**
-     * Find the element with DOM api 
+     * Find the element data with DOM api 
+     * 
      * Loop through register. 
      * Update view 
      */
-    const text = event.target.parentNode.children[0].innerHTML;
+    const text = event.target.parentNode.children[0].value;
     const date = event.target.parentNode.children[1].innerHTML; 
-    const removed = new TodoItem(text, date); // search for this 
+    const removed = new TodoItem(text, date, false); // search for this 
     
-    for(let i in registeredTodos){
+    for(let i in registeredTodos){ 
         if (registeredTodos[i].text + " - " + removed.text && removed.date === registeredTodos[i].getFormattedDate()) {
             deleteApiCall(
                 "/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/background-sync", 
                 registeredTodos[i]);
             registeredTodos.splice(i, 1);
             updateTodoView();
-            updateRemoveListeners();
-            updateCheckListeners();
+            updateAllListeners(); 
             return; //do not check more items than neccecary
         }
     }    
@@ -124,7 +122,7 @@ let updateTodoView = () => {
             <div class="todo-app__item">
                 <input class="todo-app__checkbox" type="checkbox">
                 <div style="text-decoration:${todo.isChecked ? "line-through" : "none"}">
-                    <div>${todo.text}</div>
+                    <input class="todo-app__textfield" value="${todo.text}"></input>
                     <div>${todo.getFormattedDate()}</div>
                     <button class="remove-todo-button">Remove</button>
                 </div>
@@ -134,15 +132,23 @@ let updateTodoView = () => {
 }
 
 
+/**
+ * Runs when an item is changed 
+ */
+let itemEdited = (event) => {
+    /**
+     * Remove the old entry from- and add the new one to the database  
+     */
+    console.log(event.target.value + " - blured and should save!");
+}
+
+
 
 let checkTodo = (checkboxElement) => {
-    console.log("checkTodo kjører"); 
-    console.log(checkboxElement); 
     const htmlContent = checkboxElement.parentNode.children[1];
                                 // Text           Date
-    const todoItem = new TodoItem(htmlContent[0], htmlContent[1], checkboxElement.checked);
+    const todoItem = new TodoItem(htmlContent[0], htmlContent[1], checkboxElement.checked); 
     searchAndApply(todoItem, todoItem.isChecked = !checkbox.isChecked);
-    console.log(todoItem.isChecked); 
     updateTodoView(); 
     updateCheckListeners(); 
 }
@@ -158,13 +164,24 @@ let updateCheckListeners = () => {
     const checkboxes = document.getElementsByClassName("todo-app__checkbox"); 
     if(checkboxes) {
         for (checkbox of checkboxes) {
-            checkbox.onchange = () => { // separate this part to another function 
+            checkbox.onchange = () => { 
                 checkTodo(checkbox); 
             }
         }
     }
 }
 
+let updateTextfieldListeners = () => {
+    for(textfield of document.getElementsByClassName("todo-app__textfield")){
+        textfield.onchange = itemEdited; 
+    }
+}
+
+let updateAllListeners = () => {
+    updateRemoveListeners(); 
+    updateCheckListeners(); 
+    updateTextfieldListeners(); 
+}
 
 // Listeners
 document.getElementById("add-todo-button").onclick = addTodo;
@@ -193,6 +210,6 @@ function deleteApiCall(url, data) {
     data : data,
     dataType: "json",
     type: "get"
-  }).then((result) => {console.log(result)});
+  }).then((result) => {console.log(result)}); // should be okay to remove this.
 }
 
