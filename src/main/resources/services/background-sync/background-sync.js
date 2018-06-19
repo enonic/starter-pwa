@@ -75,6 +75,31 @@ exports.get = function (req){
     };
 }
 
+exports.put = function (req) {
+
+    var todoItem = getItemObj(req.params);
+    if (!todoItem) {
+        var message = "Missing/invalid item data in request";
+        log.warning(message);
+        return {
+            status: 400,
+            message: message
+        };
+    }
+
+    var result = changeTodoNode(todoItem);
+
+    if (result.status && Number(result.status) >= 400) {
+        return result;
+    }
+
+    return {
+        body: result,
+        headers: {
+            "Content-Type": "application/json"
+        }
+    };
+}
 
 var getItemObj = function (params) {
 
@@ -82,6 +107,8 @@ var getItemObj = function (params) {
         data: params
     };
 };
+
+
 
 var createTodoNode = function (todoItem) {
     try {
@@ -143,3 +170,36 @@ var deleteTodoNode = function (todoItem) {
         };
     }
 };
+
+var changeTodoNode = function (todoItem) {
+    try {
+        var result = pushRepo.replaceTodo(todoItem);
+        if (result === "NOT_FOUND") {
+            return {
+                status: 404,
+                message: "todoItem not found",
+            }
+
+        } else if (result === "SUCCESS") {
+            return { success: true };
+
+        } else if (typeof result === 'string') {
+            return {
+                status: 500,
+                message: "Some nodes were not deleted",
+                nodeIds: result,
+            }
+
+        }
+        else {
+            throw Error("Weird result from pushRepo.deleteSubscription:\n" + JSON.stringify({ result: result }, null, 2) + "\n");
+        }
+
+    } catch (e) {
+        log.error(e);
+        return {
+            status: 500,
+            message: "Couldn't delete node",
+        };
+    }
+}

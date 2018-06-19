@@ -11,7 +11,7 @@
 var $ = require("jquery");
 
 let registeredTodos = [];
-
+const repoUrl = "/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/background-sync";
 /**
  * Model of a TodoItem 
  */
@@ -41,8 +41,19 @@ class TodoItem {
  */
 let searchAndApply = (todoItem, callback) => {
     for(let i in registeredTodos) {
-        if (registeredTodos[i].text + " - " + todoItem.text && todoItem.date === registeredTodos[i].getFormattedDate()) {
+        if (registeredTodos[i].i == todoItem.id) {
             callback(registeredTodos[i]); 
+        }
+    }
+}
+
+/**
+ * Search for TodoItem and use callback 
+ */
+let searchAndApplyByid = (id, callback) => {
+    for (let i in registeredTodos) {
+        if (registeredTodos[i].id == id) {
+            callback(registeredTodos[i]);
         }
     }
 }
@@ -60,7 +71,7 @@ let addTodo = () => {
         registeredTodos.push(item); 
         
         postApiCall(
-            "/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/background-sync",
+            repoUrl,
             {   text: inputfield.value,
                 date : item.date,  
                 isChecked : item.isChecked,
@@ -98,7 +109,7 @@ let removeTodo = (event) => {
     for(let i in registeredTodos){ 
         if (registeredTodos[i].text + " - " + removed.text && removed.date === registeredTodos[i].getFormattedDate()) {
             deleteApiCall(
-                "/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/background-sync", 
+                repoUrl, 
                 registeredTodos[i]);
             registeredTodos.splice(i, 1);
             updateTodoView();
@@ -123,7 +134,7 @@ let updateTodoView = () => {
                 <input class="todo-app__checkbox" type="checkbox">
                 <div style="text-decoration:${todo.isChecked ? "line-through" : "none"}">
                     <input class="todo-app__textfield" value="${todo.text}"></input>
-                    <div>${todo.getFormattedDate()}</div>
+                    <div id="${todo.id}">${todo.getFormattedDate()}</div>
                     <button class="remove-todo-button">Remove</button>
                 </div>
             </div>
@@ -136,10 +147,12 @@ let updateTodoView = () => {
  * Runs when an item is changed 
  */
 let itemEdited = (event) => {
-    /**
-     * Remove the old entry from- and add the new one to the database  
-     */
-    console.log(event.target.value + " - blured and should save!");
+    const id = event.target.parentNode.children[1].id;
+    var todoItem = searchAndApplyByid(id, (item) => {
+        console.log(item); 
+        putApiCall(repoUrl, item);
+    }); 
+    ;
 }
 
 
@@ -205,11 +218,21 @@ function postApiCall(url, data) {
 }
 
 function deleteApiCall(url, data) {
-  $.ajax({
-    url: url, 
-    data : data,
-    dataType: "json",
-    type: "get"
-  }).then((result) => {console.log(result)}); // should be okay to remove this.
+    $.ajax({
+        url: url, 
+        data : data,
+        dataType: "json",
+        type: "get"
+    }).then((result) => {console.log(result)}); // should be okay to remove this.
 }
 
+// combine with get? 
+function putApiCall(url, data) {
+    console.log(repoUrl); 
+    $.ajax({
+        url: url,
+        data: data,
+        dataType: "json",
+        type: "put"
+    }).then((result) => { console.log(result) }); // should be okay to remove this.
+}

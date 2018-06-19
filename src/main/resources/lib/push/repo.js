@@ -228,16 +228,6 @@ exports.deleteSubscription = function(subscription) {
 exports.deleteTodo = function (item) {
 
     var repoConn = getRepoConnection();
-    /*
-    var hits = repoConn.query({
-      query:
-        "subscription.auth = '" +
-        "hg21SwfDrOXzxiXeuh1Uxg" +
-        "' AND subscription.key = '" +
-        "BLING_gbvsVcPsqNzjb593a67RZKmjOsZtpcjh74vMjNak8f_UdIBLnrlT8q4zAzuuNJOorPc2B-c7hmCpfG_MM" +
-        "'"
-    }).hits;
-    @*/
     var hits = repoConn.query({
         query:
             "item.data.id = '" +
@@ -246,7 +236,7 @@ exports.deleteTodo = function (item) {
     }).hits;
     
     if (!hits || hits.length < 1) {
-        return "test";
+        return "NOT_FOUND";
     }
 
     var ids = hits.map(function (hit) {
@@ -254,6 +244,36 @@ exports.deleteTodo = function (item) {
     });
 
     var result = repoConn.delete(ids);
+    repoConn.refresh();
+
+    if (result.length === ids.length) {
+        return "SUCCESS";
+    } else {
+        return JSON.stringify(ids.filter(function (id) {
+            return result.indexOf(id) === -1;
+        }));
+    }
+};
+
+exports.replaceTodo = function (item) {
+
+    var repoConn = getRepoConnection();
+    var hits = repoConn.query({
+        query:
+            "item.data.id = '" +
+            item.data.id +
+            "'"
+    }).hits;
+
+    if (!hits || hits.length < 1) {
+        return "NOT_FOUND";
+    }
+
+    var ids = hits.map(function (hit) {
+        return hit.id;
+    });
+                            //replace
+    var result = repoConn.put(ids);
     repoConn.refresh();
 
     if (result.length === ids.length) {
