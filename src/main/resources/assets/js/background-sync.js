@@ -30,7 +30,9 @@ class TodoItem {
     }
 
     getFormattedDate() {
-        return this.date.getDate() + "/" + (this.date.getMonth() + 1) + "/" + this.date.getFullYear();
+        return  ""
+        + this.date.getHours() + ":" + this.date.getMinutes() + " " 
+        + this.date.getDate() + "/" + (this.date.getMonth() + 1) + "/" + this.date.getFullYear();
     }
 }
 
