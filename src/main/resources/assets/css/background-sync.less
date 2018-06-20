@@ -5,7 +5,7 @@
 /* TODO-APP*/
 
 #todo-app__container {
-    display: none; 
+    display: none;
     font-family: "Roboto", "Helvetica", "Arial", sans-serif;
     position: absolute;
     width: 98vw;
@@ -43,7 +43,7 @@
 .todo-app__input>button {
     flex: 0.4;
     border: solid 1px black;
-    font-size: 1.5em; 
+    font-size: 1.5em;
 }
 
 @media (min-width: @breakpoint_desktop) {
@@ -74,16 +74,16 @@
     padding: 5px;
 }
 
+.todo-app__checkbox {
+    background-repeat: no-repeat;
+}
+
+
+
 .todo-app__item input {
     zoom: 2.5;
     flex: 0.2;
     align-self: right;
-}
-
-/*Line through when box is checked*/
-
-.todo-app__item>input:checked+div {
-    text-decoration: line-through;
 }
 
 .todo-app__item div {

@@ -280,7 +280,8 @@ exports.replaceTodo = function (item) {
     var editor = function(node) {
         //log.info(JSON.stringify(node,null,4)); 
         //node.data.text = "EDITED"; 
-        node.item.data.text = item.data.text; 
+        node.item.data.text = item.data.text;
+        node.item.data.isChecked = item.data.isChecked; 
         return node; 
     }
     
@@ -318,3 +319,26 @@ exports.storeKeyPair = function (keyPair) {
         }
     });
 };
+
+exports.getAllTodos = function() {
+    var repoConn = getRepoConnection();
+    var hits = repoConn.query({
+        query: "item.data.type = 'TodoItem'"
+        
+    }).hits;
+    
+    if (!hits || hits.length < 1) {
+        return "NOT_FOUND";
+    }
+    
+    var todoItems = hits.map(function(hit) {
+        return repoConn.get(hit.id);
+    });
+    //log.info(JSON.stringify(todoItems, null, 4));
+    if (todoItems) {
+        return todoItems;
+    } else {
+        return "NOT_FOUND";
+    }
+
+}

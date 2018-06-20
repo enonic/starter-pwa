@@ -99,6 +99,64 @@ exports.put = function (req) {
     };
 }
 
+exports.get = function(req) {
+    // Get all from repo 
+    
+    var result = getAllTodoItems();
+    //log.info(JSON.stringify(result, null, 4));
+    if (result.status && Number(result.status) >= 400) {
+        return result;
+    }
+    return {
+        body: {TodoItems : result},
+        headers: {
+            "Content-Type": "application/json"
+        }
+    };
+}
+
+// The user should get items in the same order as received 
+var sortItems = function (items){
+    
+    items.sort(function (a, b) {
+        //log.info(JSON.stringify(a.item.data.id, null, 4));
+        return a.item.data.id - b.item.data.id;
+    });
+    
+    return items
+}
+
+
+var getAllTodoItems = function() {
+    try {
+        var result = pushRepo.getAllTodos();
+        if (result === "NOT_FOUND") {
+            return {
+                status: 404,
+                message: "todoItem not found",
+            }
+
+        } else if (typeof result === 'string') {
+            return {
+                status: 500,
+                message: "Some nodes were not found",
+                nodeIds: result,
+            }
+        } 
+        else {
+            return sortItems(result)
+        }
+
+    } catch (e) {
+        log.error(e);
+        return {
+            status: 500,
+            message: "Couldn't delete node",
+        };
+    }
+
+}
+
 var getItemObj = function (params) {
 
     return {
@@ -202,3 +260,4 @@ var changeTodoNode = function (todoItem) {
         };
     }
 }
+

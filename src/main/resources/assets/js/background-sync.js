@@ -22,14 +22,18 @@ class TodoItem {
      * @param {string} date
      * @param {boolean} isChecked 
      */               
-    constructor(text, date, isChecked) {
+    constructor(text, date, isChecked, id) {
         this.text = text; 
         this.date = date; 
-        this.isChecked = isChecked; 
-        this.id = new Date().valueOf(); // unique id
+        this.isChecked = isChecked;
+        this.id = (!id ? new Date().valueOf() : id); // unique id}
     }
 
     getFormattedDate() {
+        //pulled as string from repo as string 
+        //if (typeof this.date === "string") {
+        //    this.date = Date.parse(this.date); 
+        //}
         return  ""
         + this.date.getHours() + ":" + this.date.getMinutes() + " " 
         + this.date.getDate() + "/" + (this.date.getMonth() + 1) + "/" + this.date.getFullYear();
@@ -65,7 +69,8 @@ let addTodo = () => {
             {   text: inputfield.value,
                 date : item.date,  
                 isChecked : item.isChecked,
-                id: item.id
+                id: item.id, 
+                type : "TodoItem"
             }
         );
         
@@ -117,11 +122,15 @@ let updateTodoView = () => {
     let outputArea = document.getElementById("todo-app__item-area");
     //no duplicate renders
     outputArea.innerHTML = ""; 
-
+    console.log(registeredTodos)
     for (todo of registeredTodos) {
         outputArea.innerHTML += `
             <div class="todo-app__item">
-                <input class="todo-app__checkbox" type="checkbox">
+                <label class="todo-app__checkbox" style=" background-image: ${
+                todo.isChecked ? "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-checked.gif)" : "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-unchecked.gif)"
+                }
+                
+                "></label>
                 <div style="text-decoration:${todo.isChecked ? "line-through" : "none"}">
                     <input class="todo-app__textfield" value="${todo.text}"></input>
                     <div id="${todo.id}">${todo.getFormattedDate()}</div>
@@ -132,6 +141,10 @@ let updateTodoView = () => {
     }
 }
 
+/*
+"url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-checked.gif)" : "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-unchecked.gif)"
+
+*/
 
 /**
  * Runs when an item is changed 
@@ -152,11 +165,14 @@ let itemEdited = (event) => {
 let checkTodo = (checkboxElement) => {
     const id = checkboxElement.parentNode.children[1].children[1].id;
     searchAndApply(id, item => {
-        item.isChecked = !item.isChecked; 
+        
+        item.isChecked = !item.isChecked;    
+        putApiCall(repoUrl, item);
     }); 
+    
     updateTodoView(); 
     updateAllListeners(); 
-    throw "is not updated in database. Use putApiCall, once that is working."; 
+    //throw "is not updated in database. Use putApiCall, once that is working."; 
 }
 
 
@@ -169,9 +185,9 @@ let updateRemoveListeners = () => {
 let updateCheckListeners = () => {    
     const checkboxes = document.getElementsByClassName("todo-app__checkbox"); 
     if(checkboxes) {
-        for (checkbox of checkboxes) {
-            checkbox.onchange = () => { 
-                checkTodo(checkbox); 
+        for (let checkbox of checkboxes) {
+            checkbox.onclick = () => { 
+                checkTodo(checkbox);
             }
         }
     }
@@ -198,11 +214,18 @@ document.onkeydown = (event) => {
     }
 }
 document.getElementById("todo-app__startButton").onclick = () => {
+    document.getElementById("todo-app__startButton").style.display = "none"; 
     document.getElementById("todo-app__container").style.display = "block"; 
+    getApiCall(repoUrl, todoItems => updateFromRepo(todoItems.TodoItems)); 
 }
 
-let getAllFromRepo = () => {
-
+let updateFromRepo = (todoItems) => {
+    for(let node of todoItems) {
+        var data = node.item.data                    // date and isChecked is stored as strings, not as Date/boolean
+        registeredTodos.push(new TodoItem(data.text, new Date(data.date), (data.isChecked === "true"), data.id)); 
+    }
+    updateTodoView();
+    updateAllListeners(); 
 }
 /**
  * Post data to an API endpoint. If successful (as in, HTTP call was successful, but the response may contain warnings, error messages etc),
@@ -231,4 +254,11 @@ function putApiCall(url, data) {
         dataType: "json",
         type: "put"
     }).then((result) => { console.log(result) }); // should be okay to remove this.
+}
+// gets all items from repo
+function getApiCall(url, callback) {
+    $.ajax({
+        url: url,
+        type: "get"
+    }).then(callback); 
 }
