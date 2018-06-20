@@ -4,7 +4,8 @@
 @darkshade: rgba(255, 255, 255, 0.015);
 /* TODO-APP*/
 
-.todo-app__container {
+#todo-app__container {
+    display: none; 
     font-family: "Roboto", "Helvetica", "Arial", sans-serif;
     position: absolute;
     width: 98vw;
@@ -14,7 +15,7 @@
 }
 
 @media (min-width: @breakpoint_desktop) {
-    .todo-app__container {
+    #todo-app__container {
         width: 60vw;
         height: 50vh;
         bottom: 10vh;

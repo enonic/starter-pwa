@@ -24,7 +24,6 @@ var pushRepo = require('/lib/push/repo');
  * @returns {{body: Object, [status]: number, headers: Object}} HTTP Response object
  */
 exports.post = function (req) {
-   
     
     var todoItem = getItemObj(req.params);
     if (!todoItem) {
@@ -50,8 +49,7 @@ exports.post = function (req) {
     };
 };
 
-exports.get = function (req){
-
+exports.delete = function (req){
     var todoItem = getItemObj(req.params);
     if (!todoItem) {
         var message = "Missing/invalid item data in request";

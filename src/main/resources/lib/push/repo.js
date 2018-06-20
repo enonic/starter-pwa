@@ -226,7 +226,6 @@ exports.deleteSubscription = function(subscription) {
 };
 
 exports.deleteTodo = function (item) {
-
     var repoConn = getRepoConnection();
     var hits = repoConn.query({
         query:

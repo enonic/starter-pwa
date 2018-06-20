@@ -197,7 +197,13 @@ document.onkeydown = (event) => {
         addTodo(); 
     }
 }
+document.getElementById("todo-app__startButton").onclick = () => {
+    document.getElementById("todo-app__container").style.display = "block"; 
+}
 
+let getAllFromRepo = () => {
+
+}
 /**
  * Post data to an API endpoint. If successful (as in, HTTP call was successful, but the response may contain warnings, error messages etc),
  * trigger callbackSuccess with the response object. If not, trigger callbackFailure with the error.
@@ -212,10 +218,8 @@ function postApiCall(url, data) {
 
 function deleteApiCall(url, data) {
     $.ajax({
-        url: url, 
-        data : data,
-        dataType: "json",
-        type: "get"
+        url: url + "?" + $.param({ id: data.id }),
+        type: "delete"
     }).then((result) => {console.log(result)}); // should be okay to remove this.
 }
 
