@@ -190,7 +190,7 @@ exports.storeSubscriptionAndGetNode = function(subscription) {
 
 exports.storeBackgroundSyncItemAndGetNode = function (item) {
     var repoConn = getRepoConnection();
-    
+
     var node = repoConn.create({
         _parentPath: BACKGROUND_SYNC_PATH,
         _permissions: ROOT_PERMISSIONS,
@@ -255,16 +255,18 @@ exports.deleteTodo = function (item) {
     }
 };
 
-exports.replaceTodo = function (item) {
 
+
+exports.replaceTodo = function (item) {
     var repoConn = getRepoConnection();
+
     var hits = repoConn.query({
         query:
             "item.data.id = '" +
             item.data.id +
             "'"
     }).hits;
-
+    
     if (!hits || hits.length < 1) {
         return "NOT_FOUND";
     }
@@ -272,11 +274,24 @@ exports.replaceTodo = function (item) {
     var ids = hits.map(function (hit) {
         return hit.id;
     });
-                            //replace
-    var result = repoConn.put(ids);
-    repoConn.refresh();
 
-    if (result.length === ids.length) {
+    //replace
+
+
+    var editor = function(node) {
+        //log.info(JSON.stringify(node,null,4)); 
+        //node.data.text = "EDITED"; 
+        node.item.data.text = item.data.text; 
+        return node; 
+    }
+    
+    var result = repoConn.modify({
+        key: ids[0], 
+        editor : editor
+    });
+    repoConn.refresh();
+    
+    if (result) {
         return "SUCCESS";
     } else {
         return JSON.stringify(ids.filter(function (id) {

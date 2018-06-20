@@ -21,7 +21,7 @@ class TodoItem {
      * @param {string} text 
      * @param {string} date
      * @param {boolean} isChecked 
-     */               // remove if works
+     */               
     constructor(text, date, isChecked) {
         this.text = text; 
         this.date = date; 
@@ -139,7 +139,7 @@ let updateTodoView = () => {
 let itemEdited = (event) => {
     const id = event.target.parentNode.children[1].id;
     var todoItem = searchAndApply(id, (item) => {
-        console.log(item); 
+        item.text = event.target.value; 
         putApiCall(repoUrl, item);
     }); 
     ;
@@ -153,7 +153,6 @@ let checkTodo = (checkboxElement) => {
     const id = checkboxElement.parentNode.children[1].children[1].id;
     searchAndApply(id, item => {
         item.isChecked = !item.isChecked; 
-        console.log(item); 
     }); 
     updateTodoView(); 
     updateAllListeners(); 
@@ -222,7 +221,6 @@ function deleteApiCall(url, data) {
 
 // combine with get? 
 function putApiCall(url, data) {
-    console.log(repoUrl); 
     $.ajax({
         url: url,
         data: data,

@@ -174,6 +174,7 @@ var deleteTodoNode = function (todoItem) {
 var changeTodoNode = function (todoItem) {
     try {
         var result = pushRepo.replaceTodo(todoItem);
+        return {result : result}; 
         if (result === "NOT_FOUND") {
             return {
                 status: 404,
