@@ -37,20 +37,10 @@ class TodoItem {
 }
 
 /**
- * Search for TodoItem and use callback 
+ * Search for TodoItem based on ID and use callback 
+ * @param {string} id item identifier 
  */
-let searchAndApply = (todoItem, callback) => {
-    for(let i in registeredTodos) {
-        if (registeredTodos[i].i == todoItem.id) {
-            callback(registeredTodos[i]); 
-        }
-    }
-}
-
-/**
- * Search for TodoItem and use callback 
- */
-let searchAndApplyByid = (id, callback) => {
+let searchAndApply = (id, callback) => {
     for (let i in registeredTodos) {
         if (registeredTodos[i].id == id) {
             callback(registeredTodos[i]);
@@ -148,7 +138,7 @@ let updateTodoView = () => {
  */
 let itemEdited = (event) => {
     const id = event.target.parentNode.children[1].id;
-    var todoItem = searchAndApplyByid(id, (item) => {
+    var todoItem = searchAndApply(id, (item) => {
         console.log(item); 
         putApiCall(repoUrl, item);
     }); 
@@ -156,14 +146,18 @@ let itemEdited = (event) => {
 }
 
 
-
+/**
+ * Takes the DOM element and makes it TodoItem counterpart checked/unchecked
+ */
 let checkTodo = (checkboxElement) => {
-    const htmlContent = checkboxElement.parentNode.children[1];
-                                // Text           Date
-    const todoItem = new TodoItem(htmlContent[0], htmlContent[1], checkboxElement.checked); 
-    searchAndApply(todoItem, todoItem.isChecked = !checkbox.isChecked);
+    const id = checkboxElement.parentNode.children[1].children[1].id;
+    searchAndApply(id, item => {
+        item.isChecked = !item.isChecked; 
+        console.log(item); 
+    }); 
     updateTodoView(); 
-    updateCheckListeners(); 
+    updateAllListeners(); 
+    throw "is not updated in database. Use putApiCall, once that is working."; 
 }
 
 
