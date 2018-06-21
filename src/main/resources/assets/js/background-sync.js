@@ -26,6 +26,7 @@ class TodoItem {
         this.text = text; 
         this.date = date; 
         this.isChecked = isChecked;
+        // only give new ID of old one is not supplied 
         this.id = (!id ? new Date().valueOf() : id); // unique id}
     }
 
@@ -122,17 +123,14 @@ let updateTodoView = () => {
     let outputArea = document.getElementById("todo-app__item-area");
     //no duplicate renders
     outputArea.innerHTML = ""; 
-    console.log(registeredTodos)
     for (todo of registeredTodos) {
         outputArea.innerHTML += `
             <div class="todo-app__item">
-                <label class="todo-app__checkbox" style=" background-image: ${
-                todo.isChecked ? "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-checked.gif)" : "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-unchecked.gif)"
-                }
+                <label class="todo-app__checkbox" style=" background-image: ${todo.isChecked ? "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-checked.gif)" : "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-unchecked.gif)"}
                 
                 "></label>
                 <div style="text-decoration:${todo.isChecked ? "line-through" : "none"}">
-                    <input class="todo-app__textfield" value="${todo.text}"></input>
+                    <label class="todo-app__textfield" value="${todo.text}">${todo.text}</label>
                     <div id="${todo.id}">${todo.getFormattedDate()}</div>
                     <button class="remove-todo-button">Remove</button>
                 </div>
@@ -143,6 +141,7 @@ let updateTodoView = () => {
 
 /*
 "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-checked.gif)" : "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-unchecked.gif)"
+                    <input class="todo-app__textfield" value="${todo.text}"></input>
 
 */
 
@@ -155,7 +154,7 @@ let itemEdited = (event) => {
         item.text = event.target.value; 
         putApiCall(repoUrl, item);
     }); 
-    ;
+    changeInputToLabel(); 
 }
 
 
@@ -194,12 +193,45 @@ let updateCheckListeners = () => {
 }
 
 let updateTextfieldListeners = () => {
-    for(textfield of document.getElementsByClassName("todo-app__textfield")){
-        textfield.onchange = itemEdited; 
+    for(let textfield of document.getElementsByClassName("todo-app__textfield")){
+        textfield.onclick = () => changeLabelToInput(textfield); 
+        //textfield.onchange = itemEdited; 
     }
 }
 
+let updateInputFieldListeners = () => {
+    for (let inputfield of document.getElementsByClassName("todo-app__inputfield")) {
+        inputfield.onchange = itemEdited;
+    }
+}
+
+// refactor -> similar to changeInputToLabel
+let changeLabelToInput = (textfield) => {
+    let label = textfield.innerHTML;
+    let parent = textfield.parentNode; 
+
+    let input = document.createElement("input"); 
+    input.className = "todo-app__inputfield"; 
+    input.value = label; 
+    parent.replaceChild(input, parent.childNodes[1]);
+    
+    updateInputFieldListeners(); 
+}
+
+let changeInputToLabel = () => {
+    let input = document.getElementsByClassName("todo-app__inputfield")[0]; 
+    let parent = input.parentNode;
+
+    let label = document.createElement("label");
+    label.className = "todo-app__textfield";
+    label.innerHTML = input.value;
+    parent.replaceChild(label, parent.childNodes[1]);
+
+    updateTextfieldListeners(); 
+}
+
 let updateAllListeners = () => {
+    // refarctor all the ones using classes -> repeating a lot right now 
     updateRemoveListeners(); 
     updateCheckListeners(); 
     updateTextfieldListeners(); 
@@ -243,7 +275,7 @@ function deleteApiCall(url, data) {
     $.ajax({
         url: url + "?" + $.param({ id: data.id }),
         type: "delete"
-    }).then((result) => {console.log(result)}); // should be okay to remove this.
+    })
 }
 
 // combine with get? 
@@ -253,7 +285,7 @@ function putApiCall(url, data) {
         data: data,
         dataType: "json",
         type: "put"
-    }).then((result) => { console.log(result) }); // should be okay to remove this.
+    })
 }
 // gets all items from repo
 function getApiCall(url, callback) {
