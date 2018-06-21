@@ -172,7 +172,7 @@ var createTodoNode = function (todoItem) {
         if (!Node) {
             log.error("Tried creating Todo node, but something seems wrong: " + JSON.stringify(
                 {
-                    incoming_subscription: todoItem,
+                    incoming_TodoItem: todoItem,
                     resulting_node: Node
                 }, null, 2));
             t

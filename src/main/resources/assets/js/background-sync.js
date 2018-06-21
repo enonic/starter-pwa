@@ -30,6 +30,7 @@ class TodoItem {
         // only give new ID of old one is not supplied 
         this.id = (!id ? new Date().valueOf() : id); // unique id}
         this.synced = (!synced ? false : synced); 
+        console.log("assigned : ", this.synced, " stored : ", synced); 
     }
 
     getFormattedDate() {
@@ -136,6 +137,11 @@ let updateTodoView = () => {
     //no duplicate renders
     outputArea.innerHTML = ""; 
     for (let todo of registeredTodos) {
+        if(todo.synced) {
+            console.log(todo.text, " is synced");            
+        } else {
+            console.log(todo.text, " is not synced");
+        }
         outputArea.innerHTML += `
             <div class="todo-app__item">
                 <label class="todo-app__checkbox" style=" background-image: ${todo.isChecked ? "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-checked.gif)" : "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-unchecked.gif)"}
@@ -260,13 +266,24 @@ document.onkeydown = (event) => {
 document.getElementById("todo-app__startButton").onclick = () => {
     document.getElementById("todo-app__startButton").style.display = "none"; 
     document.getElementById("todo-app__container").style.display = "block"; 
+    getItemsFromOfflineDB(updateFromOfflineDB);
     getApiCall(repoUrl, todoItems => updateFromRepo(todoItems.TodoItems)); 
 }
+
+let updateFromOfflineDB = (todoItems) => {
+    for (let item of todoItems) {
+        var data = item.value   
+        registeredTodos.push(new TodoItem(data.text, data.date, data.isChecked, data.id, data.synced));
+    }
+    updateTodoView();
+    updateAllListeners();
+}
+
 
 let updateFromRepo = (todoItems) => {
     for(let node of todoItems) {
         var data = node.item.data                    // date and isChecked is stored as strings, not as Date/boolean
-        registeredTodos.push(new TodoItem(data.text, new Date(data.date), (data.isChecked === "true"), data.id)); 
+        registeredTodos.push(new TodoItem(data.text, new Date(data.date), (data.isChecked === "true"), data.id, data.synced)); 
     }
     updateTodoView();
     updateAllListeners(); 
@@ -276,11 +293,12 @@ let updateFromRepo = (todoItems) => {
  * trigger callbackSuccess with the response object. If not, trigger callbackFailure with the error.
  */
 function postApiCall(url, data) {
+    
     $.post({
         url: url,
         data: data,
-        dataType: "json",
-    })
+        dataType: "json"
+    }).then(result => (data.synced = (result.success === true)))
 }
 
 // ------------------------------
@@ -320,7 +338,15 @@ let addToOfflineStorage = (todoItem) => {
     //NOTE:  try adding something and run
     //console.log(dbInstance); 
     //dbInstance.add("TodoMemo", {id : "testid"}, "testid");
+    todoItem.synced = false; 
     IndexedDBInstance().then(instance => {
         instance.add("TodoModel", todoItem).then(r => console.log(r));  
     }).catch(error => console.log(error));  
+}
+
+
+let getItemsFromOfflineDB = function (callback) {
+    IndexedDBInstance().then(instance => {
+        instance.getAll("TodoModel").then(callback); 
+    }); 
 }
