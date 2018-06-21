@@ -15,7 +15,7 @@
  *
  */
 
-import ConfigManagerInstance from '../ConfigManager';
+import ConfigManagerInstance from './Config';
 
 export default function IndexedDBInstance() {
 
@@ -52,7 +52,7 @@ class OfflineDatabase {
     }
 
     open() {
-
+        console.log("hello")
         if (this.db_)
             return Promise.resolve(this.db_);
 
@@ -284,5 +284,5 @@ class OfflineDatabase {
 
         });
     }
-
+    
 }

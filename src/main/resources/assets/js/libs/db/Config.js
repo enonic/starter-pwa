@@ -15,9 +15,7 @@
  * limitations under the License.
  */
 
-import Config from '../config/Config';
-
-export default function ConfigManagerInstance() {
+function ConfigManagerInstance() {
 
     if (typeof window.ConfigManagerInstance_ !== 'undefined')
         return Promise.resolve(window.ConfigManagerInstance_);
@@ -46,3 +44,24 @@ class ConfigManager {
     }
 
 }
+
+const Config = {
+    name: 'TodoMemo',
+    version: 1,
+    stores: {
+        'TodoModel': {
+            properties: {
+                keyPath: 'id'
+            },
+            indexes: {
+                text:       { unique : false }, 
+                date:       { unique : false },
+                isChecked : { unique : false }, 
+                id :        { unique : true  }, 
+                type :      { unique : false }
+            }
+        }
+    }
+};
+
+export default ConfigManagerInstance;

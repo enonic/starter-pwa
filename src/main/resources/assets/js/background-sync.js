@@ -9,6 +9,7 @@
 
 
 var $ = require("jquery");
+import IndexedDBInstance from "./libs/db/IndexedDB";
 
 let registeredTodos = [];
 const repoUrl = "/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/background-sync";
@@ -22,12 +23,13 @@ class TodoItem {
      * @param {string} date
      * @param {boolean} isChecked 
      */               
-    constructor(text, date, isChecked, id) {
+    constructor(text, date, isChecked, id, synced) {
         this.text = text; 
         this.date = date; 
         this.isChecked = isChecked;
         // only give new ID of old one is not supplied 
         this.id = (!id ? new Date().valueOf() : id); // unique id}
+        this.synced = (!synced ? false : synced); 
     }
 
     getFormattedDate() {
@@ -59,6 +61,8 @@ let searchAndApply = (id, callback) => {
 let addTodo = () => {
     const inputfield = document.getElementById("add-todo-text");
     
+    // IF offline, make an item that indicates being offline. 
+
 
     // Only add if user actually entered something 
     if (inputfield.value !== "") {
@@ -249,6 +253,9 @@ document.getElementById("todo-app__startButton").onclick = () => {
     document.getElementById("todo-app__startButton").style.display = "none"; 
     document.getElementById("todo-app__container").style.display = "block"; 
     getApiCall(repoUrl, todoItems => updateFromRepo(todoItems.TodoItems)); 
+
+    var dbInstance = IndexedDBInstance(); 
+    dbInstance.then((db) => db.open())
 }
 
 let updateFromRepo = (todoItems) => {
