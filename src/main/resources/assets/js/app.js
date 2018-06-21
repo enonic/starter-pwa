@@ -23,7 +23,6 @@ module.exports = {
         if (!mainContainer) {
             return;
         }
-  //      new TekstController();
 
         const toggleOnlineStatus = function () {
     /*        if (navigator.onLine) {

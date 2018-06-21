@@ -52,7 +52,6 @@ class OfflineDatabase {
     }
 
     open() {
-        console.log("hello")
         if (this.db_)
             return Promise.resolve(this.db_);
 
@@ -153,6 +152,31 @@ class OfflineDatabase {
                 var dbTransaction = db.transaction(storeName, 'readwrite');
                 var dbStore = dbTransaction.objectStore(storeName);
                 var dbRequest = dbStore.put(value, key);
+
+                dbTransaction.oncomplete = (e) => {
+                    resolve(dbRequest.result);
+                }
+
+                dbTransaction.onabort =
+                    dbTransaction.onerror = (e) => {
+                        reject(e);
+                    }
+
+            });
+
+        });
+
+    } 
+
+    add(storeName, value) {
+        
+        return this.open().then((db) => {
+
+            return new Promise((resolve, reject) => {
+
+                var dbTransaction = db.transaction(storeName, 'readwrite');
+                var dbStore = dbTransaction.objectStore(storeName);
+                var dbRequest = dbStore.add(value/*, key*/);
 
                 dbTransaction.oncomplete = (e) => {
                     resolve(dbRequest.result);

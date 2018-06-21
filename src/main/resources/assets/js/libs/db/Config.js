@@ -54,11 +54,7 @@ const Config = {
                 keyPath: 'id'
             },
             indexes: {
-                text:       { unique : false }, 
-                date:       { unique : false },
-                isChecked : { unique : false }, 
-                id :        { unique : true  }, 
-                type :      { unique : false }
+                todoItem: { unique : false }
             }
         }
     }

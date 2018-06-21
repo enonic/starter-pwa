@@ -62,22 +62,30 @@ let addTodo = () => {
     const inputfield = document.getElementById("add-todo-text");
     
     // IF offline, make an item that indicates being offline. 
-
+    
 
     // Only add if user actually entered something 
     if (inputfield.value !== "") {
         const item = new TodoItem(inputfield.value, new Date(), false);
-        registeredTodos.push(item); 
-        
-        postApiCall(
-            repoUrl,
-            {   text: inputfield.value,
-                date : item.date,  
-                isChecked : item.isChecked,
-                id: item.id, 
-                type : "TodoItem"
-            }
-        );
+        registeredTodos.push(item);
+
+        if (!navigator.onLine){
+            // adding item to offlinedatabase
+            addToOfflineStorage(item)
+            
+        } else {
+            // adding data to online repo
+            postApiCall(
+                repoUrl,
+                {
+                    text: inputfield.value,
+                    date: item.date,
+                    isChecked: item.isChecked,
+                    id: item.id,
+                    type: "TodoItem"
+                }
+            );
+        }
         
         updateTodoView();
         updateAllListeners();   
@@ -127,7 +135,7 @@ let updateTodoView = () => {
     let outputArea = document.getElementById("todo-app__item-area");
     //no duplicate renders
     outputArea.innerHTML = ""; 
-    for (todo of registeredTodos) {
+    for (let todo of registeredTodos) {
         outputArea.innerHTML += `
             <div class="todo-app__item">
                 <label class="todo-app__checkbox" style=" background-image: ${todo.isChecked ? "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-checked.gif)" : "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-unchecked.gif)"}
@@ -180,7 +188,7 @@ let checkTodo = (checkboxElement) => {
 
 
 let updateRemoveListeners = () => {
-    for (button of document.getElementsByClassName("remove-todo-button")) {
+    for (let button of document.getElementsByClassName("remove-todo-button")) {
         button.onclick = removeTodo;
     }
 }
@@ -253,9 +261,6 @@ document.getElementById("todo-app__startButton").onclick = () => {
     document.getElementById("todo-app__startButton").style.display = "none"; 
     document.getElementById("todo-app__container").style.display = "block"; 
     getApiCall(repoUrl, todoItems => updateFromRepo(todoItems.TodoItems)); 
-
-    var dbInstance = IndexedDBInstance(); 
-    dbInstance.then((db) => db.open())
 }
 
 let updateFromRepo = (todoItems) => {
@@ -277,6 +282,10 @@ function postApiCall(url, data) {
         dataType: "json",
     })
 }
+
+// ------------------------------
+// Online storage in Enonic Repo: 
+// ------------------------------
 
 function deleteApiCall(url, data) {
     $.ajax({
@@ -300,4 +309,18 @@ function getApiCall(url, callback) {
         url: url,
         type: "get"
     }).then(callback); 
+}
+
+// ------------------------------
+// Offline storage in IndexDB 
+// ------------------------------
+
+let addToOfflineStorage = (todoItem) => {
+    //const dbInstance = IndexedDBInstance().then(instance => instance)
+    //NOTE:  try adding something and run
+    //console.log(dbInstance); 
+    //dbInstance.add("TodoMemo", {id : "testid"}, "testid");
+    IndexedDBInstance().then(instance => {
+        instance.add("TodoModel", todoItem).then(r => console.log(r));  
+    }).catch(error => console.log(error));  
 }
