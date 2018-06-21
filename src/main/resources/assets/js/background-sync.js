@@ -132,7 +132,7 @@ let updateTodoView = () => {
                 <div style="text-decoration:${todo.isChecked ? "line-through" : "none"}">
                     <label class="todo-app__textfield" value="${todo.text}">${todo.text}</label>
                     <div id="${todo.id}">${todo.getFormattedDate()}</div>
-                    <button class="remove-todo-button">Remove</button>
+                    <button class="remove-todo-button">X</button>
                 </div>
             </div>
         `;
