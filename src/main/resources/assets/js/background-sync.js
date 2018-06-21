@@ -8,11 +8,9 @@
 // BUG: remove only runs once. Figure out. 
 
 
-var $ = require("jquery");
 import IndexedDBInstance from "./libs/db/IndexedDB";
 
 let registeredTodos = [];
-const repoUrl = "/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/background-sync";
 /**
  * Model of a TodoItem 
  */
@@ -30,7 +28,6 @@ class TodoItem {
         // only give new ID of old one is not supplied 
         this.id = (!id ? new Date().valueOf() : id); // unique id}
         this.synced = (!synced ? false : synced); 
-        console.log("assigned : ", this.synced, " stored : ", synced); 
     }
 
     getFormattedDate() {
@@ -57,24 +54,19 @@ let searchAndApply = (id, callback) => {
 }
 
 /**
- * Adds a todo to the lsit 
+ * Adds a todo to the list. 
  */
 let addTodo = () => {
     const inputfield = document.getElementById("add-todo-text");
-    
-    // IF offline, make an item that indicates being offline. 
-    
+        // Only add if user actually entered something 
+    if (inputfield.value !== ""){
 
-    // Only add if user actually entered something 
-    if (inputfield.value !== "") {
+        
         const item = new TodoItem(inputfield.value, new Date(), false);
         registeredTodos.push(item);
-
-        if (!navigator.onLine){
-            // adding item to offlinedatabase
-            addToOfflineStorage(item)
-            
-        } else {
+        addToOfflineStorage(item)
+        console.log("adding")
+        /*  Implement in sync function when online
             // adding data to online repo
             postApiCall(
                 repoUrl,
@@ -86,11 +78,9 @@ let addTodo = () => {
                     type: "TodoItem"
                 }
             );
-        }
-        
+            */
         updateTodoView();
         updateAllListeners();   
-        inputfield.value = "";
     } else {
         // let user know something was wrong 
         inputfield.style.border = "solid red";
@@ -108,25 +98,23 @@ let removeTodo = (event) => {
     /**
      * Find the element data with DOM api 
      * 
-     * Loop through register. 
+     * Loop through register and remove from local 
      * Update view 
      */
-    const text = event.target.parentNode.children[0].value;
-    const date = event.target.parentNode.children[1].innerHTML; 
-    const removed = new TodoItem(text, date, false); // search for this 
-    
-    for(let i in registeredTodos){ 
-        if (registeredTodos[i].text + " - " + removed.text && removed.date === registeredTodos[i].getFormattedDate()) {
-            deleteApiCall(
-                repoUrl, 
-                registeredTodos[i]);
-            registeredTodos.splice(i, 1);
+    const id = parseInt(event.target.parentNode.children[1].id); 
+
+    for(let todoItem of registeredTodos){ 
+        if (todoItem.id === id) {
+            
+            removeFromOfflineStorage(todoItem)
+            //deleteApiCall(repoUrl, todoItem)
+            registeredTodos.splice(registeredTodos.indexOf(todoItem), 1);
             updateTodoView();
-            updateAllListeners(); 
+            updateAllListeners();
             return; //do not check more items than neccecary
         }
-    }    
-}
+    }
+}    
 
 /**
  * Updates the list view 
@@ -137,11 +125,6 @@ let updateTodoView = () => {
     //no duplicate renders
     outputArea.innerHTML = ""; 
     for (let todo of registeredTodos) {
-        if(todo.synced) {
-            console.log(todo.text, " is synced");            
-        } else {
-            console.log(todo.text, " is not synced");
-        }
         outputArea.innerHTML += `
             <div class="todo-app__item">
                 <label class="todo-app__checkbox" style=" background-image: ${todo.isChecked ? "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-checked.gif)" : "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-unchecked.gif)"}
@@ -157,12 +140,6 @@ let updateTodoView = () => {
     }
 }
 
-/*
-"url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-checked.gif)" : "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-unchecked.gif)"
-                    <input class="todo-app__textfield" value="${todo.text}"></input>
-
-*/
-
 /**
  * Runs when an item is changed 
  */
@@ -170,7 +147,8 @@ let itemEdited = (event) => {
     const id = event.target.parentNode.children[1].id;
     var todoItem = searchAndApply(id, (item) => {
         item.text = event.target.value; 
-        putApiCall(repoUrl, item);
+        //putApiCall(repoUrl, item);
+        editItemToOfflineStorage(item);
     }); 
     changeInputToLabel(); 
 }
@@ -183,8 +161,9 @@ let checkTodo = (checkboxElement) => {
     const id = checkboxElement.parentNode.children[1].children[1].id;
     searchAndApply(id, item => {
         
-        item.isChecked = !item.isChecked;    
-        putApiCall(repoUrl, item);
+        item.isChecked = !item.isChecked;
+        editItemToOfflineStorage(item);    
+        //putApiCall(repoUrl, item);
     }); 
     
     updateTodoView(); 
@@ -267,10 +246,10 @@ document.getElementById("todo-app__startButton").onclick = () => {
     document.getElementById("todo-app__startButton").style.display = "none"; 
     document.getElementById("todo-app__container").style.display = "block"; 
     getItemsFromOfflineDB(updateFromOfflineDB);
-    getApiCall(repoUrl, todoItems => updateFromRepo(todoItems.TodoItems)); 
 }
 
 let updateFromOfflineDB = (todoItems) => {
+    console.log("update")
     for (let item of todoItems) {
         var data = item.value   
         registeredTodos.push(new TodoItem(data.text, data.date, data.isChecked, data.id, data.synced));
@@ -279,55 +258,10 @@ let updateFromOfflineDB = (todoItems) => {
     updateAllListeners();
 }
 
-
-let updateFromRepo = (todoItems) => {
-    for(let node of todoItems) {
-        var data = node.item.data                    // date and isChecked is stored as strings, not as Date/boolean
-        registeredTodos.push(new TodoItem(data.text, new Date(data.date), (data.isChecked === "true"), data.id, data.synced)); 
-    }
-    updateTodoView();
-    updateAllListeners(); 
-}
 /**
  * Post data to an API endpoint. If successful (as in, HTTP call was successful, but the response may contain warnings, error messages etc),
  * trigger callbackSuccess with the response object. If not, trigger callbackFailure with the error.
  */
-function postApiCall(url, data) {
-    
-    $.post({
-        url: url,
-        data: data,
-        dataType: "json"
-    }).then(result => (data.synced = (result.success === true)))
-}
-
-// ------------------------------
-// Online storage in Enonic Repo: 
-// ------------------------------
-
-function deleteApiCall(url, data) {
-    $.ajax({
-        url: url + "?" + $.param({ id: data.id }),
-        type: "delete"
-    })
-}
-
-// combine with get? 
-function putApiCall(url, data) {
-    $.ajax({
-        url: url,
-        data: data,
-        dataType: "json",
-        type: "put"
-    })
-}
-// gets all items from repo
-function getApiCall(url, callback) {
-    $.ajax({
-        url: url,
-        type: "get"
-    }).then(callback); 
-}
 
 // ------------------------------
 // Offline storage in IndexDB 
@@ -340,8 +274,9 @@ let addToOfflineStorage = (todoItem) => {
     //dbInstance.add("TodoMemo", {id : "testid"}, "testid");
     todoItem.synced = false; 
     IndexedDBInstance().then(instance => {
-        instance.add("TodoModel", todoItem).then(r => console.log(r));  
-    }).catch(error => console.log(error));  
+        instance.add("TodoModel", todoItem) 
+    })
+
 }
 
 
@@ -350,3 +285,19 @@ let getItemsFromOfflineDB = function (callback) {
         instance.getAll("TodoModel").then(callback); 
     }); 
 }
+
+let removeFromOfflineStorage = function (todoItem, callback){
+    IndexedDBInstance().then(instance => {
+        instance.delete("TodoModel", todoItem.id)
+    }); 
+}
+
+let editItemToOfflineStorage = function (todoItem){
+    IndexedDBInstance().then(instance => {
+        instance.put("TodoModel",todoItem)
+    }); 
+}
+
+export default {
+    getItemsFromOfflineDB: getItemsFromOfflineDB
+};

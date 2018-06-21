@@ -24,7 +24,7 @@ var pushRepo = require('/lib/push/repo');
  * @returns {{body: Object, [status]: number, headers: Object}} HTTP Response object
  */
 exports.post = function (req) {
-    
+    log.info("post")
     var todoItem = getItemObj(req.params);
     if (!todoItem) {
         var message = 'Missing/invalid todoItem data in request';

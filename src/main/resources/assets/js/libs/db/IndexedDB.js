@@ -143,7 +143,7 @@ class OfflineDatabase {
         });
     }
 
-    put(storeName, value, key) {
+    put(storeName, value) {
 
         return this.open().then((db) => {
 
@@ -151,7 +151,7 @@ class OfflineDatabase {
 
                 var dbTransaction = db.transaction(storeName, 'readwrite');
                 var dbStore = dbTransaction.objectStore(storeName);
-                var dbRequest = dbStore.put(value, key);
+                var dbRequest = dbStore.put(value);
 
                 dbTransaction.oncomplete = (e) => {
                     resolve(dbRequest.result);
@@ -267,7 +267,6 @@ class OfflineDatabase {
         return this.open().then((db) => {
 
             return new Promise((resolve, reject) => {
-
                 var dbTransaction = db.transaction(storeName, 'readwrite');
                 var dbStore = dbTransaction.objectStore(storeName);
 
@@ -279,8 +278,15 @@ class OfflineDatabase {
                     dbTransaction.onerror = (e) => {
                         reject(e);
                     }
-
-                dbStore.delete(key);
+                if (this.get(storeName, key)){
+                    dbStore.delete(key);
+                } else {
+                    reject({
+                        status : 404,
+                        message : "NOT FOUND"
+                    })
+                }
+                
 
             });
         });

@@ -191,7 +191,6 @@ exports.storeSubscriptionAndGetNode = function(subscription) {
 exports.storeBackgroundSyncItemAndGetNode = function (item) {
     var repoConn = getRepoConnection();
     item.data.synced = true
-    log.info(log.info(JSON.stringify(item.data, null, 4)));
     var node = repoConn.create({
         _parentPath: BACKGROUND_SYNC_PATH,
         _permissions: ROOT_PERMISSIONS,

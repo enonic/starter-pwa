@@ -1,46 +1,78 @@
-import LogModel from "../model/LogModel";
-import TekstModel from "../model/TekstModel";
+import backgroundSync from "../background-sync.js";
+var $ = require("jquery");
 
+const repoUrl = "/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/background-sync";
 
 export default class Sync {
-    static syncOfflineMemos() {
+    static syncOfflineTodoItems() {
+        console.log("sync kjører"); 
         /*
-        LogModel.getAll('time', LogModel.DESCENDING).then((logs) => {
-            let syncMemos = [];
-            let asyncUpdates = [];
+            
+            get all elements from repo
+            delete all elements in repo
+            add all elements to repo from db
 
-            logs.forEach((log) => {
 
-                if (syncMemos.indexOf(log.memoKey) >= 0) {
-                    return;
-                }
-
-                if (log.type == LogModel.OPERATION_TYPES.CREATED || log.type == LogModel.OPERATION_TYPES.UPDATED) {
-                    syncMemos.push(log.memoKey);
-
-                    asyncUpdates.push(
-                        TekstModel.get(log.memoKey).then((localMemo) => {
-                            if (localMemo) {
-                                return TekstModel.put(localMemo).then(() => {
-                                    return TekstModel.delete(log.memoKey, TekstModel.getIndexedDBInstance());
-                                })
-                            }
-                        })
-                    );
-                } else if (log.type == LogModel.OPERATION_TYPES.DELETED) {
-                    syncMemos.push(log.memoKey);
-
-                    asyncUpdates.push(
-                        TekstModel.delete(log.memoKey)
-                    );
-                }
-            });
-
-            LogModel.deleteAll();
-            asyncUpdates.push(TekstModel.deleteAll(TekstModel.getIndexedDBInstance()));  
-        });
         */
-        console.log("Sync function not implemented..")
+        //loop through repo and delete
+        getApiCall(repoUrl,(items) => {
+            for( let item of items){
+                deleteApiCall(repoUrl, item);//deleting (hopefully)
+            }
+            //items.foreach( item =>{
+            //    deleteApiCall(repoUrl, item);//deleting (hopefully)
+            //})
+        })
+
+        backgroundSync.getItemsFromOfflineDB((items) => {
+            for(let item of items) {
+                //adding items
+                postApiCall(repoUrl,item) // adding to repo
+            }
+        })
+
+
+        // ------------------------------
+        // Online storage in Enonic Repo: 
+        // ------------------------------
+
+        // adds element to repo
+        function postApiCall(url, data) {
+            $.post({
+                url: url,
+                data: data,
+                dataType: "json"
+            }).then(result => (data.synced = (result.success === true)))
+        }
+
+        // delete item on repo
+        function deleteApiCall(url, data) {
+            $.ajax({
+                url: url + "?" + $.param({ id: data.id }),
+                type: "delete"
+            })
+        }
+
+        // gets all items from repo
+        function getApiCall(url, callback) {
+            $.ajax({
+                url: url,
+                type: "get"
+            }).then(callback);
+        }
+
+        /*
+        function putApiCall(url, data) {
+            $.ajax({
+                url: url,
+                data: data,
+                dataType: "json",
+                type: "put"
+            })
+        }
+        */
+        
+        
 
     }
 }
