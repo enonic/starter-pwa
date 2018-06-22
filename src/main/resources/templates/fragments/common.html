@@ -17,6 +17,7 @@
             <a class="mdl-navigation__link" data-th-href="${appUrl + 'webrtc'}" data-th-classappend="${pageId == 'webrtc' ? 'mdl-typography--font-black' : ''}">WebRTC</a>
         </nav>
         <p class="app-version" data-th-utext="${'v.' + version}"></p>
+        
     </div>
 </div>
 
@@ -28,12 +29,12 @@
     </div>
     <div data-th-replace="common::fragment-no-javascript"></div>
 </div>
-
 <div data-th-fragment="fragment-no-javascript" data-th-remove="tag">
     <noscript>
         <p id="js-disabled">Javascript is disabled.<br> PWA features of this application are not available.</p>
     </noscript>
 </div>
+
 
 </body>
 </html>

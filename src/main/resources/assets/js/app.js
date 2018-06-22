@@ -3,7 +3,9 @@ require('../css/styles.less');
 require("../css/background-sync.less");
 require('./background-sync'); 
 
+var ToasterInstance = require("./libs/Toaster").default;
 var Sync = require('./sync/Sync').default;
+
 //var TekstController = require('./controller/TekstController').default;
 
 module.exports = {
@@ -29,7 +31,10 @@ module.exports = {
                 if ('serviceWorker' in navigator) {
                     Sync.syncOfflineTodoItems();
                 }
-            }
+            } else {
+                ToasterInstance().then(toaster => {
+                    toaster.toast('Connection is off.');
+            })};
             mainContainer.classList.toggle("online", navigator.onLine);
             mainContainer.classList.toggle("offline", !navigator.onLine);
         };
