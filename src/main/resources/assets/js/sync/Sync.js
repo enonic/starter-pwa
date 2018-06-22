@@ -3,8 +3,10 @@ var $ = require("jquery");
 
 const repoUrl = "/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/background-sync";
 
+
 export default class Sync {
     static syncOfflineTodoItems() {
+        console.log("sync kjører")
         /*
             
             get all elements from repo
@@ -71,7 +73,6 @@ export default class Sync {
             })
         }
         */
-        
         
 
     }

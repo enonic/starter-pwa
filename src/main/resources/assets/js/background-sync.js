@@ -9,6 +9,7 @@
 
 
 import IndexedDBInstance from "./libs/db/IndexedDB";
+import Sync from "./sync/Sync"
 
 let registeredTodos = [];
 /**
@@ -124,8 +125,7 @@ let removeTodo = (event) => {
  */
 let updateTodoView = () => {
     let outputArea = document.getElementById("todo-app__item-area");
-    //no duplicate renders
-    outputArea.innerHTML = ""; 
+    outputArea.innerHTML = "";
     for (let todo of registeredTodos) {
         outputArea.innerHTML += `
             <div style="background-color:${todo.synced ? "green" : "red"}" class="todo-app__item">
@@ -200,7 +200,8 @@ let updateTextfieldListeners = () => {
 
 let updateInputFieldListeners = () => {
     for (let inputfield of document.getElementsByClassName("todo-app__inputfield")) {
-        inputfield.onchange = itemEdited;
+        //inputfield.onchange = itemEdited;
+        inputfield.onblur = itemEdited; 
     }
 }
 
@@ -208,7 +209,7 @@ let updateInputFieldListeners = () => {
 let changeLabelToInput = (textfield) => {
     let label = textfield.innerHTML;
     let parent = textfield.parentNode; 
-
+    console.log("parent", parent)
     let input = document.createElement("input"); 
     input.className = "todo-app__inputfield"; 
     input.value = label; 
@@ -219,6 +220,7 @@ let changeLabelToInput = (textfield) => {
 }
 
 let changeInputToLabel = () => {
+    console.log("change input triggered")
     let input = document.getElementsByClassName("todo-app__inputfield")[0]; 
     let parent = input.parentNode;
 
