@@ -39,7 +39,10 @@ export default class Sync {
                 url: url,
                 data: data,
                 dataType: "json"
-            }).then(result => (data.synced = (result.success === true)))
+            }).then(result => {
+                data.synced = (result.success === true)
+                backgroundSync.editItemToOfflineStorage(data)
+            })
         }
 
         // delete item on repo

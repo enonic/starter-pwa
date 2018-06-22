@@ -128,7 +128,7 @@ let updateTodoView = () => {
     outputArea.innerHTML = ""; 
     for (let todo of registeredTodos) {
         outputArea.innerHTML += `
-            <div class="todo-app__item">
+            <div style="background-color:${todo.synced ? "green" : "red"}" class="todo-app__item">
                 <label class="todo-app__checkbox" style=" background-image: ${todo.isChecked ? "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-checked.gif)" : "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-unchecked.gif)"}
                 
                 "></label>
@@ -304,5 +304,6 @@ let editItemToOfflineStorage = function (todoItem){
 }
 
 export default {
-    getItemsFromOfflineDB: getItemsFromOfflineDB
+    getItemsFromOfflineDB: getItemsFromOfflineDB,
+    editItemToOfflineStorage: editItemToOfflineStorage
 };
