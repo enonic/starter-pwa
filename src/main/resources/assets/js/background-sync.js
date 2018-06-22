@@ -66,7 +66,8 @@ let addTodo = () => {
         const item = new TodoItem(inputfield.value, new Date(), false);
         registeredTodos.push(item);
         addToOfflineStorage(item)
-        console.log("adding")
+        inputfield.value = "";
+        
         /*  Implement in sync function when online
             // adding data to online repo
             postApiCall(
@@ -212,6 +213,7 @@ let changeLabelToInput = (textfield) => {
     input.className = "todo-app__inputfield"; 
     input.value = label; 
     parent.replaceChild(input, parent.childNodes[1]);
+    input.focus();
     
     updateInputFieldListeners(); 
 }
@@ -239,7 +241,8 @@ let updateAllListeners = () => {
 document.getElementById("add-todo-button").onclick = addTodo;
 document.onkeydown = (event) => {
                         //enter
-    if(event.keyCode === 13) {
+    const inputfield = document.getElementById("add-todo-text");  
+    if (event.keyCode === 13 && document.activeElement === inputfield) {
         addTodo(); 
     }
 }

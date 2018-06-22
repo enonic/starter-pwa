@@ -308,7 +308,6 @@ exports.getAllTodos = function() {
         query: "item.data.type = 'TodoItem'"
     }).hits;
 
-    //log.info(JSON.stringify(hits, null, 4));
 
     if (!hits || hits.length < 1) {
         return "NOT_FOUND";

@@ -16,6 +16,7 @@ export default class Sync {
         //loop through repo and delete
         getApiCall(repoUrl,(items) => {
             for (let item of items.TodoItems){
+                console.log(item)
                 deleteApiCall(repoUrl, item);//deleting (hopefully)
             }
         })
