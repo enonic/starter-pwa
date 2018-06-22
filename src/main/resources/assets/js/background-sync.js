@@ -28,6 +28,7 @@ class TodoItem {
         // only give new ID of old one is not supplied 
         this.id = (!id ? new Date().valueOf() : id); // unique id}
         this.synced = (!synced ? false : synced); 
+        this.type = "TodoItem"; 
     }
 
     getFormattedDate() {
@@ -245,6 +246,7 @@ document.onkeydown = (event) => {
 document.getElementById("todo-app__startButton").onclick = () => {
     document.getElementById("todo-app__startButton").style.display = "none"; 
     document.getElementById("todo-app__container").style.display = "block"; 
+                        // callback adding items to reisteredTodos when they are fetche
     getItemsFromOfflineDB(updateFromOfflineDB);
 }
 

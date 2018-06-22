@@ -73,7 +73,6 @@ class OnlineDatabase {
     put(storeName, value, key) {
 
         return new Promise((resolve, reject) => {
-
             var fd = new FormData();
             fd.append('value', value.toJson());
             fd.append('key', value.url);
@@ -156,7 +155,7 @@ class OnlineDatabase {
     }
 
     getAll(storeName, index, order) {
-
+        
         return new Promise((resolve, reject) => {
 
             var xhr = new XMLHttpRequest();

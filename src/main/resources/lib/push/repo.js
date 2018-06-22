@@ -190,7 +190,6 @@ exports.storeSubscriptionAndGetNode = function(subscription) {
 
 exports.storeBackgroundSyncItemAndGetNode = function (item) {
     var repoConn = getRepoConnection();
-    item.data.synced = true
     var node = repoConn.create({
         _parentPath: BACKGROUND_SYNC_PATH,
         _permissions: ROOT_PERMISSIONS,
@@ -226,32 +225,15 @@ exports.deleteSubscription = function(subscription) {
 };
 
 exports.deleteTodo = function (item) {
+
+    //TODO:!!! Add error handling!!
+
     var repoConn = getRepoConnection();
-    var hits = repoConn.query({
-        query:
-            "item.data.id = '" +
-            item.data.id +
-            "'"
-    }).hits;
     
-    if (!hits || hits.length < 1) {
-        return "NOT_FOUND";
-    }
-
-    var ids = hits.map(function (hit) {
-        return hit.id;
-    });
-
-    var result = repoConn.delete(ids);
+    var result = repoConn.delete(item.data.id);
     repoConn.refresh();
-
-    if (result.length === ids.length) {
-        return "SUCCESS";
-    } else {
-        return JSON.stringify(ids.filter(function (id) {
-            return result.indexOf(id) === -1;
-        }));
-    }
+    return "SUCCESS";
+    
 };
 
 
@@ -324,13 +306,15 @@ exports.getAllTodos = function() {
     var repoConn = getRepoConnection();
     var hits = repoConn.query({
         query: "item.data.type = 'TodoItem'"
-        
     }).hits;
-    
+
+    //log.info(JSON.stringify(hits, null, 4));
+
     if (!hits || hits.length < 1) {
         return "NOT_FOUND";
     }
-    
+
+
     var todoItems = hits.map(function(hit) {
         return repoConn.get(hit.id);
     });

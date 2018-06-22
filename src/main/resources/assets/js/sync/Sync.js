@@ -5,7 +5,6 @@ const repoUrl = "/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/ba
 
 export default class Sync {
     static syncOfflineTodoItems() {
-        console.log("sync kjører"); 
         /*
             
             get all elements from repo
@@ -16,20 +15,18 @@ export default class Sync {
         */
         //loop through repo and delete
         getApiCall(repoUrl,(items) => {
-            for( let item of items){
+            for (let item of items.TodoItems){
                 deleteApiCall(repoUrl, item);//deleting (hopefully)
             }
-            //items.foreach( item =>{
-            //    deleteApiCall(repoUrl, item);//deleting (hopefully)
-            //})
         })
-
+        
         backgroundSync.getItemsFromOfflineDB((items) => {
             for(let item of items) {
                 //adding items
-                postApiCall(repoUrl,item) // adding to repo
+                postApiCall(repoUrl,item.value) // adding to repo
             }
         })
+        
 
 
         // ------------------------------
@@ -48,7 +45,7 @@ export default class Sync {
         // delete item on repo
         function deleteApiCall(url, data) {
             $.ajax({
-                url: url + "?" + $.param({ id: data.id }),
+                url: url + "?" + $.param({ id: data._id }),
                 type: "delete"
             })
         }
