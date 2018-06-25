@@ -4,7 +4,6 @@ require("../css/background-sync.less");
 require('./background-sync'); 
 
 var ToasterInstance = require("./libs/Toaster").default;
-var Sync = require('./sync/Sync').default;
 
 //var TekstController = require('./controller/TekstController').default;
 
@@ -27,11 +26,7 @@ module.exports = {
         }
 
         const toggleOnlineStatus = function () {
-            if (navigator.onLine) {
-                if ('serviceWorker' in navigator) {
-                    //Sync.syncOfflineTodoItems();
-                }
-            } else {
+            if (!navigator.onLine) {
                 ToasterInstance().then(toaster => {
                     toaster.toast('Connection is off.');
             })};

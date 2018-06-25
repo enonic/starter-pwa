@@ -51,11 +51,19 @@ class TodoItem {
 if ('serviceWorker' in navigator) {
     // Service Worker and Push is supported
     navigator.serviceWorker.ready.then(function (registration) {
-        registration.sync.register('testSync')
-    });
+        registration.sync.register('Background-sync')
+    }); 
+    navigator.serviceWorker.addEventListener("message", (event)=>{
+        let data = JSON.parse(event.data)
+        console.log(packet.data.message)
+        if(data.message === "synced"){
+            console.log("syncing was done!!") // Oppdater all gui slik at items blir vist som synced
+        }
+    })
 } else {
     displayErrorStatus('Something else wrong with sw in background-sync.js', true);
 }
+
 
 
 /**

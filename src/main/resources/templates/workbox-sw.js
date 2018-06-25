@@ -79,8 +79,13 @@ self.addEventListener('notificationclick', function(event) {
  */
 
 self.addEventListener('sync', (event) => {
-    if (event.tag == 'testSync') {
+    if (event.tag == 'Background-sync') {
         event.waitUntil(syncOfflineWithRepo())
+        self.clients.matchAll().then(function(clients) {
+            clients[0].postMessage(JSON.stringify({message:"synced"}));
+        })
+        //const client = clients.get(event)
+        //client.postMessage({msg: "sync", url: event.request.url})
     } else {
         console.error("Problem with sync listener"); 
     }
@@ -108,7 +113,11 @@ let syncOfflineWithRepo = function (callback) {
         }).then(()=>{
             getAll(indexDbName.todoMemo,storeName.todo).then(items => {
                 for( let item of items){
-                    postApiCall(repoUrl, item.value).then() 
+                    postApiCall(repoUrl, item.value).then(()=>{
+                        //poste tilbake til indexDB med synced = true
+                        item.value.synced = true
+                        indexDBPut(indexDbName.todoMemo,storeName.todo, item.value)
+                    })
                 }
             })
         });
@@ -119,6 +128,26 @@ let syncOfflineWithRepo = function (callback) {
     deleteApiCall(repoUrl, )
     */ 
     
+}
+
+let indexDBPut = function(indexDbName,storeName, value) {
+    return open(indexDbName).then((db)=>{
+        return new Promise((resolve,reject)=>{
+            
+            var dbTransaction = db.transaction(storeName, 'readwrite');
+            var dbStore = dbTransaction.objectStore(storeName);
+            var dbRequest = dbStore.put(value);
+
+            dbTransaction.oncomplete = (e) => {
+                resolve(dbRequest.result);
+            }
+
+            dbTransaction.onabort =
+                dbTransaction.onerror = (e) => {
+                    reject(e);
+                }
+        })
+    })
 }
 
 
@@ -184,6 +213,7 @@ let open = function (indexDbName) {
 
 
 
+
 let getApiCall = (url) => {
     return fetch(url,{ 
         method: 'GET',
@@ -197,8 +227,12 @@ let deleteApiCall = (url, data) => {
 }
 
 let postApiCall = (url, data) => {
-    fetch(url, {
-        body: JSON.stringify(data), 
-        method: 'POST',
+    return new Promise((resolve,reject)=>{
+        fetch(url, {
+            body: JSON.stringify(data), 
+            method: 'POST',
+        }).then(resolve())
+        .catch(reject())
     })
+    
 }
