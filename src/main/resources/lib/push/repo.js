@@ -229,8 +229,8 @@ exports.deleteTodo = function (item) {
     //TODO:!!! Add error handling!!
 
     var repoConn = getRepoConnection();
-    
-    var result = repoConn.delete(item.data.id);
+    log.info(item.data)
+    repoConn.delete(item.data);
     repoConn.refresh();
     return "SUCCESS";
     
@@ -305,10 +305,10 @@ exports.storeKeyPair = function (keyPair) {
 exports.getAllTodos = function() {
     var repoConn = getRepoConnection();
     var hits = repoConn.query({
-        query: "item.data.type = 'TodoItem'"
+        query: "item.type = 'TodoItem'"
     }).hits;
 
-
+    log.info(JSON.stringify(hits, null, 4));
     if (!hits || hits.length < 1) {
         return "NOT_FOUND";
     }
@@ -317,7 +317,7 @@ exports.getAllTodos = function() {
     var todoItems = hits.map(function(hit) {
         return repoConn.get(hit.id);
     });
-    //log.info(JSON.stringify(todoItems, null, 4));
+    log.info(JSON.stringify(todoItems, null, 4));
     if (todoItems) {
         return todoItems;
     } else {

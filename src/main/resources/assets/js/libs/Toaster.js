@@ -29,7 +29,6 @@ class Toaster {
     constructor() {
         //this.view = document.getElementsByClassName("toast-view");
         this.view = document.querySelector(".toast-view"); 
-        console.log(this.view); 
         this.hideTimeout = 0;
         this.hideBound = this.hide.bind(this);
     }

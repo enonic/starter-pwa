@@ -24,7 +24,10 @@ var pushRepo = require('/lib/push/repo');
  * @returns {{body: Object, [status]: number, headers: Object}} HTTP Response object
  */
 exports.post = function (req) {
-    var todoItem = getItemObj(req.params);
+    var todoItem = JSON.parse(req.body); 
+    //log.info(JSON.stringify(todo, null, 4)); //erstatt todoItem emd meg om ok
+    //var todoItem = getItemObj(req.params);
+    
     if (!todoItem) {
         var message = 'Missing/invalid todoItem data in request';
         log.warning(message);
@@ -49,7 +52,8 @@ exports.post = function (req) {
 };
 
 exports.delete = function (req){
-    var todoItem = getItemObj(req.params);
+    
+    var todoItem = getItemObj(req.params.data);
     if (!todoItem) {
         var message = "Missing/invalid item data in request";
         log.warning(message);
@@ -118,7 +122,7 @@ var sortItems = function (items){
     
     items.sort(function (a, b) {
         //log.info(JSON.stringify(a.item.data.id, null, 4));
-        return a.item.data.id - b.item.data.id;
+        return a.item.id - b.item.id;
     });
     
     return items

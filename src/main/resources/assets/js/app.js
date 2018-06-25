@@ -29,7 +29,7 @@ module.exports = {
         const toggleOnlineStatus = function () {
             if (navigator.onLine) {
                 if ('serviceWorker' in navigator) {
-                    Sync.syncOfflineTodoItems();
+                    //Sync.syncOfflineTodoItems();
                 }
             } else {
                 ToasterInstance().then(toaster => {

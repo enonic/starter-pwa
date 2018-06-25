@@ -44,6 +44,21 @@ class TodoItem {
 }
 
 /**
+ * Setup the service worker and trigger initialization
+ */
+
+
+if ('serviceWorker' in navigator) {
+    // Service Worker and Push is supported
+    navigator.serviceWorker.ready.then(function (registration) {
+        registration.sync.register('testSync')
+    });
+} else {
+    displayErrorStatus('Something else wrong with sw in background-sync.js', true);
+}
+
+
+/**
  * Search for TodoItem based on ID and use callback 
  * @param {string} id item identifier 
  */
@@ -127,6 +142,8 @@ let updateTodoView = () => {
     let outputArea = document.getElementById("todo-app__item-area");
     outputArea.innerHTML = "";
     for (let todo of registeredTodos) {
+        console.log(todo.synced); 
+
         outputArea.innerHTML += `
             <div style="background-color:${todo.synced ? "green" : "red"}" class="todo-app__item">
                 <label class="todo-app__checkbox" style=" background-image: ${todo.isChecked ? "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-checked.gif)" : "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-unchecked.gif)"}
