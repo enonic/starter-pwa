@@ -6,6 +6,9 @@ const workboxSW = new self.WorkboxSW({
     clientsClaim: true
 });
 
+const repoUrl = "/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/background-sync";
+
+
 const indexDbName = {todoMemo: "TodoMemo"}
 const storeName = {todo: "TodoModel"}
 
@@ -78,21 +81,30 @@ self.addEventListener('notificationclick', function(event) {
  * Handling background-syncing
  */
 
+
+self.addEventListener('message', (event)=>{
+    event.waitUntil(syncOfflineWithRepo())
+
+    self.clients.matchAll().then(function(clients) {
+        clients[0].postMessage(JSON.stringify({message:"synced"}));
+    })
+    
+    
+})
+
 self.addEventListener('sync', (event) => {
+    console.log("sync kjører")
     if (event.tag == 'Background-sync') {
         event.waitUntil(syncOfflineWithRepo())
         self.clients.matchAll().then(function(clients) {
             clients[0].postMessage(JSON.stringify({message:"synced"}));
         })
-        //const client = clients.get(event)
-        //client.postMessage({msg: "sync", url: event.request.url})
+        
     } else {
         console.error("Problem with sync listener"); 
     }
 });
 
-const repoUrl =
-    "/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/background-sync";
 
 let syncOfflineWithRepo = function (callback) {
     /*

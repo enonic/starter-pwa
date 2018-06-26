@@ -9,7 +9,6 @@
 
 
 import IndexedDBInstance from "./libs/db/IndexedDB";
-import Sync from "./sync/Sync"
 
 let registeredTodos = [];
 /**
@@ -55,9 +54,11 @@ if ('serviceWorker' in navigator) {
     }); 
     navigator.serviceWorker.addEventListener("message", (event)=>{
         let data = JSON.parse(event.data)
-        console.log(packet.data.message)
         if(data.message === "synced"){
-            console.log("syncing was done!!") // Oppdater all gui slik at items blir vist som synced
+            for(let todo of registeredTodos){
+                todo.synced = true
+            }
+            updateTodoView();
         }
     })
 } else {
@@ -91,20 +92,10 @@ let addTodo = () => {
         registeredTodos.push(item);
         addToOfflineStorage(item)
         inputfield.value = "";
-        
-        /*  Implement in sync function when online
-            // adding data to online repo
-            postApiCall(
-                repoUrl,
-                {
-                    text: inputfield.value,
-                    date: item.date,
-                    isChecked: item.isChecked,
-                    id: item.id,
-                    type: "TodoItem"
-                }
-            );
-            */
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.controller.postMessage("message");
+        }
         updateTodoView();
         updateAllListeners();   
     } else {
