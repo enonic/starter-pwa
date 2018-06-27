@@ -10,7 +10,11 @@ const repoUrl = "/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/ba
 
 
 const indexDbName = {todoMemo: "TodoMemo"}
-const storeName = {todo: "TodoModel"}
+//const storeName = {todo: "TodoModel"}
+const storeName = { 
+    todo: "OfflineStorage", 
+    removed: "DeletedWhileOffline"
+}
 
 
 let indexDB;
@@ -69,6 +73,25 @@ self.addEventListener('push', function(event) {
 
 
 /**
+ * STILL TESTING 
+ * Runs when browser is back online. 
+ * Updates online repo to reflect changes made in offline indexdb
+ */
+let syncTodoItemsBetweenStorages = () => {
+    getAllFromIndexDb(indexDbName.todoMemo, storeName.todo).then(offlineItems => {
+        let fromOffline = offlineItems;
+        getAllFromIndexDb(indexDbName.todoMemo, storageName.removed).then(removedItems => {
+            let removedWhileOffline = removedItems;
+
+            // Compare with data from repo 
+            console.log(fromOffline);
+            console.log(removedWhileOffline);
+
+        })
+    })
+}
+
+/**
  * Handles the event of the push notification being clicked on
  */
 self.addEventListener('notificationclick', function(event) {
@@ -76,12 +99,10 @@ self.addEventListener('notificationclick', function(event) {
 });
 
 
-/**
- * TEST
- * Handling background-syncing
- */
+self.addEventListener("sync", syncTodoItemsBetweenStorages);
 
 
+/*
 self.addEventListener('message', (event)=>{
     event.waitUntil(syncOfflineWithRepo())
 
@@ -93,25 +114,32 @@ self.addEventListener('message', (event)=>{
 })
 
 self.addEventListener('sync', (event) => {
-    console.log("sync kjører")
     if (event.tag == 'Background-sync') {
         event.waitUntil(syncOfflineWithRepo())
         self.clients.matchAll().then(function(clients) {
-            clients[0].postMessage(JSON.stringify({message:"synced"}));
+            clients[0].postMessage(JSON.stringify({message:"todoSync"}));
         })
         
     } else {
         console.error("Problem with sync listener"); 
     }
 });
-
-
+*/
+/*
 let syncOfflineWithRepo = function (callback) {
-    /*
+    
         get all elements from repo
         delete all elements in repo
         add all elements to repo from db
-    */
+
+        get all elements from repo. X
+        Add them to indexDB.        X 
+        Remove all elements from repo. 
+        Add indexDB to repo. 
+    
+
+
+    
     getApiCall(repoUrl).then(response => {
         //for (let item of response.json().TodoItems){
         response.json().then(data => {
@@ -123,7 +151,7 @@ let syncOfflineWithRepo = function (callback) {
                 }
             }
         }).then(()=>{
-            getAll(indexDbName.todoMemo,storeName.todo).then(items => {
+            getAllFromIndexDb(indexDbName.todoMemo,storeName.todo).then(items => {
                 for( let item of items){
                     postApiCall(repoUrl, item.value).then(()=>{
                         //poste tilbake til indexDB med synced = true
@@ -134,14 +162,8 @@ let syncOfflineWithRepo = function (callback) {
             })
         });
     })
-        //} 
-    /* 
-    postApiCall(repoUrl);
-    deleteApiCall(repoUrl, )
-    */ 
-    
 }
-
+*/
 let indexDBPut = function(indexDbName,storeName, value) {
     return open(indexDbName).then((db)=>{
         return new Promise((resolve,reject)=>{
@@ -163,7 +185,7 @@ let indexDBPut = function(indexDbName,storeName, value) {
 }
 
 
-let getAll = function(indexDbName,storeName, index, order) {
+let getAllFromIndexDb = function(indexDbName,storeName, index, order) {
     return open(indexDbName).then((db) => {
 
         return new Promise((resolve, reject) => {

@@ -7,10 +7,46 @@
 
 // BUG: remove only runs once. Figure out. 
 
+/*
+Service worker må fungere slik:
+    - Ha sin egen online event listener
+        - trigger synkfunksjonen som er beskrevet nedenfor
+    Skal bare gjøre noe når en går online, ikke når appen gjøre noe. Alt appen gjør lagres enten i db eller i repo.
+    
+    App skal hente fra repo, db-storage og db-deleted. 
+    
+    Det som er i db-deleted skal fjernest fra både repo og db-deleted (seg selv)
+    Det som kun er i repo db-storage, skal legges til repo. 
+
+Funksjon for å lagre data
+    - storage = online ? db : repo;
+
+
+Kjøres bare når man går online
+Funksjon for å synkronisere mellom db og repo
+    - henter alle elementer fra repoet inn i en liste
+    - Henter alle fra db inn i en liste
+    - slett i repo alle de som ligger i slett-db
+    - endre i repo alle som er markert endret, slett i db alle duplikater, legge til resten fra db inn i repo
+
+    lagre repoliste som rigsteredtodos
+    update
+
+
+
+
+*/
+
+
+
 
 import IndexedDBInstance from "./libs/db/IndexedDB";
 
 let registeredTodos = [];
+const repoUrl = "/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/background-sync";
+
+
+
 /**
  * Model of a TodoItem 
  */
@@ -87,13 +123,14 @@ let addTodo = () => {
         // Only add if user actually entered something 
     if (inputfield.value !== ""){
 
-        
+        // online = to repo : to indexDB 
         const item = new TodoItem(inputfield.value, new Date(), false);
         registeredTodos.push(item);
         addToOfflineStorage(item)
         inputfield.value = "";
 
         if ('serviceWorker' in navigator) {
+            console.log(navigator.serviceWorker.controller); 
             navigator.serviceWorker.controller.postMessage("message");
         }
         updateTodoView();
@@ -122,7 +159,7 @@ let removeTodo = (event) => {
 
     for(let todoItem of registeredTodos){ 
         if (todoItem.id === id) {
-            
+            // Online ? repo : indexDB 
             removeFromOfflineStorage(todoItem)
             //deleteApiCall(repoUrl, todoItem)
             registeredTodos.splice(registeredTodos.indexOf(todoItem), 1);
@@ -141,8 +178,6 @@ let updateTodoView = () => {
     let outputArea = document.getElementById("todo-app__item-area");
     outputArea.innerHTML = "";
     for (let todo of registeredTodos) {
-        console.log(todo.synced); 
-
         outputArea.innerHTML += `
             <div style="background-color:${todo.synced ? "green" : "red"}" class="todo-app__item">
                 <label class="todo-app__checkbox" style=" background-image: ${todo.isChecked ? "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-checked.gif)" : "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-unchecked.gif)"}
@@ -268,11 +303,13 @@ document.getElementById("todo-app__startButton").onclick = () => {
     document.getElementById("todo-app__startButton").style.display = "none"; 
     document.getElementById("todo-app__container").style.display = "block"; 
                         // callback adding items to reisteredTodos when they are fetche
-    getItemsFromOfflineDB(updateFromOfflineDB);
+    //getItemsFromOfflineDB(updateFromOfflineDB);
+    getItemsFromStorage(r => r) // skriv funksjon som oppdaterer view gjennom offline/online avhengig av hva som er status 
 }
 
+
+
 let updateFromOfflineDB = (todoItems) => {
-    console.log("update")
     for (let item of todoItems) {
         var data = item.value   
         registeredTodos.push(new TodoItem(data.text, data.date, data.isChecked, data.id, data.synced));
@@ -280,6 +317,7 @@ let updateFromOfflineDB = (todoItems) => {
     updateTodoView();
     updateAllListeners();
 }
+
 
 /**
  * Post data to an API endpoint. If successful (as in, HTTP call was successful, but the response may contain warnings, error messages etc),
@@ -297,31 +335,61 @@ let addToOfflineStorage = (todoItem) => {
     //dbInstance.add("TodoMemo", {id : "testid"}, "testid");
     todoItem.synced = false; 
     IndexedDBInstance().then(instance => {
-        instance.add("TodoModel", todoItem) 
+        instance.add("OfflineStorage", todoItem) 
     })
 
 }
 
 
-let getItemsFromOfflineDB = function (callback) {
-    IndexedDBInstance().then(instance => {
-        instance.getAll("TodoModel").then(callback); 
-    }); 
-}
+
 
 let removeFromOfflineStorage = function (todoItem, callback){
     IndexedDBInstance().then(instance => {
-        instance.delete("TodoModel", todoItem.id)
+        instance.delete("OfflineStorage", todoItem.id)
+        instance.add("DeletedWhileOffline", todoItem); 
+        console.log("hei");  
     }); 
 }
 
 let editItemToOfflineStorage = function (todoItem){
     IndexedDBInstance().then(instance => {
-        instance.put("TodoModel",todoItem)
+        instance.put("OfflineStorage",todoItem)
     }); 
 }
 
+
+
+/**
+ * 
+ * @param {function} callback takes results as arguments
+ */
+
+let getItemsFromStorage = (callback) => {
+    if(navigator.onLine) {
+        getApiCall(repoUrl).then((response) => {
+            response.json().then(result => callback(result.TodoItems)); 
+        })
+    } else {
+        getItemsFromOfflineDB(callback)
+    }
+}
+
+let getItemsFromOfflineDB = function (callback) {
+    IndexedDBInstance().then(instance => {
+        instance.getAll("OfflineStorage").then(callback);
+    });
+}
+
+
+let getApiCall = (url) => {
+    return fetch(url, {
+        method: 'GET',
+    });
+}
+
+
+
 export default {
-    getItemsFromOfflineDB: getItemsFromOfflineDB,
-    editItemToOfflineStorage: editItemToOfflineStorage
+  getItemsFromOfflineDB: getItemsFromOfflineDB,
+  editItemToOfflineStorage: editItemToOfflineStorage
 };

@@ -49,12 +49,20 @@ const Config = {
     name: 'TodoMemo',
     version: 1,
     stores: {
-        'TodoModel': {
+        'OfflineStorage': {
             properties: {
                 keyPath: 'id'
             },
             indexes: {
                 todoItem: { unique : false }
+            }
+        }, 
+        'DeletedWhileOffline': {
+            properties: {
+                keyPath: 'id'
+            },
+            indexes: {
+                todoItem: { unique: false }
             }
         }
     }
