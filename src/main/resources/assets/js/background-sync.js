@@ -40,6 +40,7 @@ Funksjon for å synkronisere mellom db og repo
 
 
 
+
 import IndexedDBInstance from "./libs/db/IndexedDB";
 
 let registeredTodos = [];
@@ -126,13 +127,15 @@ let addTodo = () => {
         // online = to repo : to indexDB 
         const item = new TodoItem(inputfield.value, new Date(), false);
         registeredTodos.push(item);
-        addToOfflineStorage(item)
+        //addToOfflineStorage(item)
+        addToStorage(item); 
         inputfield.value = "";
-
+        /* MANUELL TRIGGING AV SW 
         if ('serviceWorker' in navigator) {
             console.log(navigator.serviceWorker.controller); 
             navigator.serviceWorker.controller.postMessage("message");
         }
+        */
         updateTodoView();
         updateAllListeners();   
     } else {
@@ -160,7 +163,8 @@ let removeTodo = (event) => {
     for(let todoItem of registeredTodos){ 
         if (todoItem.id === id) {
             // Online ? repo : indexDB 
-            removeFromOfflineStorage(todoItem)
+            //removeFromOfflineStorage(todoItem)
+            removeFromStorage(todoItem); 
             //deleteApiCall(repoUrl, todoItem)
             registeredTodos.splice(registeredTodos.indexOf(todoItem), 1);
             updateTodoView();
@@ -201,7 +205,7 @@ let itemEdited = (event) => {
     var todoItem = searchAndApply(id, (item) => {
         item.text = event.target.value; 
         //putApiCall(repoUrl, item);
-        editItemToOfflineStorage(item);
+        editInOfflineStorage(item);
     }); 
     changeInputToLabel(); 
 }
@@ -215,7 +219,7 @@ let checkTodo = (checkboxElement) => {
     searchAndApply(id, item => {
         
         item.isChecked = !item.isChecked;
-        editItemToOfflineStorage(item);    
+        editInOfflineStorage(item);    
         //putApiCall(repoUrl, item);
     }); 
     
@@ -260,8 +264,8 @@ let updateInputFieldListeners = () => {
 let changeLabelToInput = (textfield) => {
     let label = textfield.innerHTML;
     let parent = textfield.parentNode; 
-    console.log("parent", parent)
     let input = document.createElement("input"); 
+
     input.className = "todo-app__inputfield"; 
     input.value = label; 
     parent.replaceChild(input, parent.childNodes[1]);
@@ -319,44 +323,34 @@ let updateFromOfflineDB = (todoItems) => {
 }
 
 
-/**
- * Post data to an API endpoint. If successful (as in, HTTP call was successful, but the response may contain warnings, error messages etc),
- * trigger callbackSuccess with the response object. If not, trigger callbackFailure with the error.
- */
 
-// ------------------------------
-// Offline storage in IndexDB 
-// ------------------------------
-
-let addToOfflineStorage = (todoItem) => {
-    //const dbInstance = IndexedDBInstance().then(instance => instance)
-    //NOTE:  try adding something and run
-    //console.log(dbInstance); 
-    //dbInstance.add("TodoMemo", {id : "testid"}, "testid");
-    todoItem.synced = false; 
-    IndexedDBInstance().then(instance => {
-        instance.add("OfflineStorage", todoItem) 
-    })
-
+let addToStorage = (todoItem) => {
+    if(navigator.onLine) {
+        postApiCall(repoUrl, todoItem)
+    } else {
+        addToOfflineStorage(todoItem); 
+    }
 }
 
-
-
-
-let removeFromOfflineStorage = function (todoItem, callback){
-    IndexedDBInstance().then(instance => {
-        instance.delete("OfflineStorage", todoItem.id)
-        instance.add("DeletedWhileOffline", todoItem); 
-        console.log("hei");  
-    }); 
+// ONLINE DOES NOT WORK 
+let removeFromStorage = (todoItem) => {
+    if(navigator.onLine) {
+        deleteApiCall(repoUrl, todoItem); 
+    } else {
+        removeFromOfflineStorage(todoItem); 
+    }
 }
 
-let editItemToOfflineStorage = function (todoItem){
-    IndexedDBInstance().then(instance => {
-        instance.put("OfflineStorage",todoItem)
-    }); 
+// NOT IN USE YET
+let editInStorage = (newItem) => {
+    if(navigator.onLine) {
+        // put api 
+        
+    } else {
+        // db 
+        editInOfflineStorage(newItem); 
+    }
 }
-
 
 
 /**
@@ -374,12 +368,11 @@ let getItemsFromStorage = (callback) => {
     }
 }
 
-let getItemsFromOfflineDB = function (callback) {
-    IndexedDBInstance().then(instance => {
-        instance.getAll("OfflineStorage").then(callback);
-    });
-}
 
+
+// ----------------------------
+// Online communcation with repo 
+// ----------------------------
 
 let getApiCall = (url) => {
     return fetch(url, {
@@ -387,9 +380,59 @@ let getApiCall = (url) => {
     });
 }
 
+let deleteApiCall = (url, data) => {
+    fetch(url + "?data=" + data._id, {
+        method: 'DELETE',
+    }); 
+}
+
+let postApiCall = (url, data) => {
+    return new Promise((resolve, reject) => {
+        fetch(url, {
+            body: JSON.stringify(data),
+            method: 'POST',
+        }).then(resolve())
+            .catch(reject())
+    })
+}
+// ----------------------------
+// Offline communcation with db 
+// ----------------------------
+
+let getItemsFromOfflineDB = function (callback) {
+    IndexedDBInstance().then(instance => {
+        instance.getAll("OfflineStorage").then(callback);
+    });
+}
+
+let addToOfflineStorage = (todoItem) => {
+    //const dbInstance = IndexedDBInstance().then(instance => instance)
+    //NOTE:  try adding something and run
+    //console.log(dbInstance); 
+    //dbInstance.add("TodoMemo", {id : "testid"}, "testid");
+    todoItem.synced = false;
+    IndexedDBInstance().then(instance => {
+        instance.add("OfflineStorage", todoItem)
+    }).catch(err => console.error(err)); 
+
+}
+
+let removeFromOfflineStorage = function (todoItem) {
+    IndexedDBInstance().then(instance => {
+        instance.delete("OfflineStorage", todoItem.id)
+        instance.add("DeletedWhileOffline", todoItem);
+    });
+}
+
+let editInOfflineStorage = function (todoItem) {
+    IndexedDBInstance().then(instance => {
+        instance.put("OfflineStorage", todoItem)
+    });
+} 
+
 
 
 export default {
-  getItemsFromOfflineDB: getItemsFromOfflineDB,
-  editItemToOfflineStorage: editItemToOfflineStorage
+    getItemsFromOfflineDB: getItemsFromOfflineDB,
+    editItemToOfflineStorage: editInOfflineStorage
 };

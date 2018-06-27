@@ -80,7 +80,7 @@ self.addEventListener('push', function(event) {
 let syncTodoItemsBetweenStorages = () => {
     getAllFromIndexDb(indexDbName.todoMemo, storeName.todo).then(offlineItems => {
         let fromOffline = offlineItems;
-        getAllFromIndexDb(indexDbName.todoMemo, storageName.removed).then(removedItems => {
+        getAllFromIndexDb(indexDbName.todoMemo, storeName.removed).then(removedItems => {
             let removedWhileOffline = removedItems;
 
             // Compare with data from repo 
