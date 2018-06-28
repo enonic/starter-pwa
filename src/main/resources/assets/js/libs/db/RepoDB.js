@@ -27,7 +27,6 @@ export default function RepoDBInstance() {
     return Promise.resolve(window.RepoDBInstance_);
 }
 
-
 class OnlineDatabase {
 
     constructor() {
