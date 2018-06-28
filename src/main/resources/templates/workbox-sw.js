@@ -33,7 +33,6 @@ workboxSW.router.registerRoute("{{appUrl}}audio", workboxSW.strategies.networkFi
 workboxSW.router.registerRoute("{{appUrl}}video", workboxSW.strategies.networkFirst());
 workboxSW.router.registerRoute("{{appUrl}}webrtc", workboxSW.strategies.networkFirst());
 
-
 /**
  * Handles the event of receiving of a subscribed push notification
 */
