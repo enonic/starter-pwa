@@ -7,17 +7,13 @@ const workboxSW = new self.WorkboxSW({
 });
 
 const repoUrl = "/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/background-sync";
-
-
 const indexDbName = {todoMemo: "TodoMemo"}
-//const storeName = {todo: "TodoModel"}
 const storeName = { 
     todo: "OfflineStorage", 
     removed: "DeletedWhileOffline"
 }
 
-
-let indexDB;
+let indexDB; // indeDB instance
 
 // This is a placeholder for manifest dynamically injected from webpack.config.js
 workboxSW.precache([]);
@@ -71,119 +67,116 @@ self.addEventListener('push', function(event) {
     }
 });
 
+self.addEventListener('notificationclick', function(event) {event.notification.close()});
+
 
 /**
- * STILL TESTING 
- * Runs when browser is back online. 
- * Updates online repo to reflect changes made in offline indexdb
+ * Background sync
  */
-let syncTodoItemsBetweenStorages = () => {
-    getAllFromIndexDb(indexDbName.todoMemo, storeName.todo).then(offlineItems => {
-        let fromOffline = offlineItems;
-        getAllFromIndexDb(indexDbName.todoMemo, storageName.removed).then(removedItems => {
-            let removedWhileOffline = removedItems;
 
-            // Compare with data from repo 
-            console.log(fromOffline);
-            console.log(removedWhileOffline);
-
-        })
-    })
-}
-
-/**
- * Handles the event of the push notification being clicked on
- */
-self.addEventListener('notificationclick', function(event) {
-    event.notification.close();
-});
-
-
-self.addEventListener("sync", syncTodoItemsBetweenStorages);
-
-
-/*
-self.addEventListener('message', (event)=>{
-    event.waitUntil(syncOfflineWithRepo())
-
-    self.clients.matchAll().then(function(clients) {
-        clients[0].postMessage(JSON.stringify({message:"synced"}));
-    })
-    
-    
-})
 
 self.addEventListener('sync', (event) => {
     if (event.tag == 'Background-sync') {
-        event.waitUntil(syncOfflineWithRepo())
-        self.clients.matchAll().then(function(clients) {
-            clients[0].postMessage(JSON.stringify({message:"todoSync"}));
-        })
-        
+        event.waitUntil(syncronize(event))
     } else {
-        console.error("Problem with sync listener"); 
+        console.error("Problem with sync listener, sync-tag not supported") 
     }
-});
-*/
-/*
-let syncOfflineWithRepo = function (callback) {
-    
-        get all elements from repo
-        delete all elements in repo
-        add all elements to repo from db
+})
 
-        get all elements from repo. X
-        Add them to indexDB.        X 
-        Remove all elements from repo. 
-        Add indexDB to repo. 
-    
-
-
-    
-    getApiCall(repoUrl).then(response => {
-        //for (let item of response.json().TodoItems){
-        response.json().then(data => {
-            if (data.TodoItems){
-                for (let item of data.TodoItems) {
-                    //item.item.synced = true; 
-                    //console.log("sw: ", item)
-                    deleteApiCall(repoUrl, item);//deleting (hopefully)
-                }
-            }
-        }).then(()=>{
-            getAllFromIndexDb(indexDbName.todoMemo,storeName.todo).then(items => {
-                for( let item of items){
-                    postApiCall(repoUrl, item.value).then(()=>{
-                        //poste tilbake til indexDB med synced = true
-                        item.value.synced = true
-                        indexDBPut(indexDbName.todoMemo,storeName.todo, item.value)
-                    })
-                }
-            })
-        });
-    })
-}
-*/
-let indexDBPut = function(indexDbName,storeName, value) {
-    return open(indexDbName).then((db)=>{
-        return new Promise((resolve,reject)=>{
-            
-            var dbTransaction = db.transaction(storeName, 'readwrite');
-            var dbStore = dbTransaction.objectStore(storeName);
-            var dbRequest = dbStore.put(value);
-
-            dbTransaction.oncomplete = (e) => {
-                resolve(dbRequest.result);
-            }
-
-            dbTransaction.onabort =
-                dbTransaction.onerror = (e) => {
-                    reject(e);
-                }
-        })
-    })
+function getItemsFromRepo(){
+    // fetching items from repo
+    getApiCall(repoUrl).then((response) => response.json().then(itemList => {
+        // item fetched from repo is an object called TodoItems, we are interested in it's values 
+        return itemList.TodoItems
+    }))
 }
 
+function getItemsFromDB() {
+    return Promise.all([
+        //fetching items from indexDB
+        getAllFromIndexDb(indexDbName.todoMemo, storeName.removed),
+        getAllFromIndexDb(indexDbName.todoMemo, storeName.todo)
+    ])
+}
+
+function compareDelete(db){
+    return Promise.all(db.map(item => 
+        deleteApiCall(repoUrl,item)
+            .catch(err => 
+                reject(err)
+            )
+        )
+    )
+}
+
+function resolveChanges(db){
+    return Promise.all(db.map(item => 
+        item.changed ? putApiCall(repoUrl, item) :
+         item.synced ? null : postApiCall(repoUrl, item)
+        )
+    )
+}
+
+
+
+let syncronize = function(event){
+    //read db, dbRemove and repo
+    getItems().then(values => {
+
+        //delete in repo all from db-delete 
+        compareDelete(values[0]).then(
+
+            // change in repo all marked with change 
+            resolveChanges(values[1]).then(
+
+                //get new items from repo (synced values are changed if synced)
+                getItemsFromRepo().then(repo => {
+                    
+                    //flush db & dbRemove
+                    Promise.all([
+                        flushDB(values[0]),
+                        flushDB(values[1])
+                    ]).then(
+
+                        //add all items from repo into db.
+                        Promise.all(repo.map(item => DBPost(storeName.todo, item))).then(() => {
+
+                            //Send message to app for update of UI
+                            const client = await clients.get(event.clientId);
+                            if (client) {
+                                clients.postMessage({
+                                    message: "update",
+                                    url: event.request.url
+                                })
+                            }
+                        })
+                    )
+                })
+            )   
+        )
+    })    
+}
+
+/**
+ * Offline DB storage
+ */
+
+function flushDB(db){
+    return new Promise((resolve,reject) => {
+        var dbTransaction = db.transaction(db, "readwrite");
+        var flushReq = dbTransaction.objectStore(db).clear();
+        flushReq.onsuccess(response => resolve(response))
+        flushDB.onerror(response => reject(response))
+    })
+    
+
+}
+
+let DBPost = function (indexDbName,item){
+    return open(indexDbName).then(db => {
+        db.add(indexDbName, item) 
+    })
+}
 
 let getAllFromIndexDb = function(indexDbName,storeName, index, order) {
     return open(indexDbName).then((db) => {
@@ -248,6 +241,12 @@ let open = function (indexDbName) {
 
 
 
+
+/**
+ * Online repo storage http requests
+ */
+
+
 let getApiCall = (url) => {
     return fetch(url,{ 
         method: 'GET',
@@ -255,18 +254,26 @@ let getApiCall = (url) => {
 }
 
 let deleteApiCall = (url, data) => {
-    fetch(url + "?data=" + data._id, {
+    return fetch(url + "?data=" + data._id, {
         method: 'DELETE',
     })
 }
 
 let postApiCall = (url, data) => {
-    return new Promise((resolve,reject)=>{
-        fetch(url, {
-            body: JSON.stringify(data), 
-            method: 'POST',
-        }).then(resolve())
-        .catch(reject())
-    })
-    
+    return fetch(url, {
+        body: JSON.stringify(data), 
+        method: 'POST',
+    }) 
 }
+
+let putApiCall = (url, data) => {
+    return fetch(url, {
+        body: JSON.stringify(data), 
+        method: 'PUT',
+    }) 
+}
+
+
+
+
+

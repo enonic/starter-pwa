@@ -9,31 +9,32 @@
 
 /*
 Service worker må fungere slik:
-    - Ha sin egen online event listener
-        - trigger synkfunksjonen som er beskrevet nedenfor
-    Skal bare gjøre noe når en går online, ikke når appen gjøre noe. Alt appen gjør lagres enten i db eller i repo.
     
-    App skal hente fra repo, db-storage og db-deleted. 
     
-    Det som er i db-deleted skal fjernest fra både repo og db-deleted (seg selv)
-    Det som kun er i repo db-storage, skal legges til repo. 
 
-Funksjon for å lagre data
-    - storage = online ? db : repo;
+    sw.js:
+        - reg sync, queue sync func
+        - if online, run sync else wait (done automatic)
+        - return message when done 
+
+        
+        sync-func:
+            - read db, db-delete and repo
+            - delete in repo all from db-delete 
+            - change in repo all marked with change
+            - add all items from db into repo marked with !synced
+            - delete db
+            - get all from repo and add all into db.
+    
+    bs.js:
+        - if serviceWorker => use sw, else use normal http req (sync.js) // can wait until all else is done
+        - store all changes in db
+        - update func => get all items from db, update UI
 
 
-Kjøres bare når man går online
-Funksjon for å synkronisere mellom db og repo
-    - henter alle elementer fra repoet inn i en liste
-    - Henter alle fra db inn i en liste
-    - slett i repo alle de som ligger i slett-db
-    - endre i repo alle som er markert endret, slett i db alle duplikater, legge til resten fra db inn i repo
-
-    lagre repoliste som rigsteredtodos
-    update
-
-
-
+    Later on tasks:
+        sw.js:
+            - notice changes in repo and fetch changes into indexdb.
 
 */
 
@@ -85,6 +86,7 @@ class TodoItem {
 
 if ('serviceWorker' in navigator) {
     // Service Worker and Push is supported
+    /*
     navigator.serviceWorker.ready.then(function (registration) {
         registration.sync.register('Background-sync')
     }); 
@@ -97,6 +99,7 @@ if ('serviceWorker' in navigator) {
             updateTodoView();
         }
     })
+    */
 } else {
     displayErrorStatus('Something else wrong with sw in background-sync.js', true);
 }
@@ -129,12 +132,11 @@ let addTodo = () => {
         addToOfflineStorage(item)
         inputfield.value = "";
 
-        if ('serviceWorker' in navigator) {
-            console.log(navigator.serviceWorker.controller); 
-            navigator.serviceWorker.controller.postMessage("message");
-        }
+        navigator.serviceWorker.ready.then(function (registration) {
+            registration.sync.register('Background-sync')
+        }); 
         updateTodoView();
-        updateAllListeners();   
+        updateAllListeners(); 
     } else {
         // let user know something was wrong 
         inputfield.style.border = "solid red";
@@ -260,7 +262,6 @@ let updateInputFieldListeners = () => {
 let changeLabelToInput = (textfield) => {
     let label = textfield.innerHTML;
     let parent = textfield.parentNode; 
-    console.log("parent", parent)
     let input = document.createElement("input"); 
     input.className = "todo-app__inputfield"; 
     input.value = label; 
@@ -271,7 +272,6 @@ let changeLabelToInput = (textfield) => {
 }
 
 let changeInputToLabel = () => {
-    console.log("change input triggered")
     let input = document.getElementsByClassName("todo-app__inputfield")[0]; 
     let parent = input.parentNode;
 
@@ -347,7 +347,6 @@ let removeFromOfflineStorage = function (todoItem, callback){
     IndexedDBInstance().then(instance => {
         instance.delete("OfflineStorage", todoItem.id)
         instance.add("DeletedWhileOffline", todoItem); 
-        console.log("hei");  
     }); 
 }
 
