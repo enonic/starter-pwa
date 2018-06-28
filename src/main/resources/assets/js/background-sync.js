@@ -1,20 +1,3 @@
-/**
- * 1. global variables 
- * 2. Todo class // NOTE: move this out to another file  
- * 2. functions 
- * 3. listeners
- */
-
-// BUG: remove only runs once. Figure out. 
-
-/*
-    Alltid kommuniser med IndexDB
-    dersom nett 
-        push til repo 
-*/
-
-
-
 
 const storage = require('./libs/Storage'); 
 const storeNames = {
@@ -46,13 +29,9 @@ class TodoItem {
         this.id = (!id ? new Date().valueOf() : id); // unique id}
         this.synced = (!synced ? false : synced); 
         this.type = "TodoItem"; 
+        this.changed = false; 
     }
-
     getFormattedDate() {
-        //pulled as string from repo as string 
-        //if (typeof this.date === "string") {
-        //    this.date = Date.parse(this.date); 
-        //}
         return  ""
         + this.date.getHours() + ":" + this.date.getMinutes() + " " 
         + this.date.getDate() + "/" + (this.date.getMonth() + 1) + "/" + this.date.getFullYear();
@@ -62,8 +41,6 @@ class TodoItem {
 /**
  * Setup the service worker and trigger initialization
  */
-
-
 if ('serviceWorker' in navigator) {
     // Service Worker and Push is supported
     navigator.serviceWorker.ready.then(function (registration) {
@@ -107,17 +84,15 @@ let addTodo = () => {
         registeredTodos.push(item);
 
         storage.add.offline(storeNames.main, item); 
-        updateAllListeners(); 
 
         inputfield.value = "";
         /* MANUELL TRIGGING AV SW 
         if ('serviceWorker' in navigator) {
             console.log(navigator.serviceWorker.controller); 
             navigator.serviceWorker.controller.postMessage("message");
-        }
-        */
+        }*/
         updateTodoView();
-        updateAllListeners();   
+        updateListenersFor.everything();  
     } else {
         // let user know something was wrong 
         inputfield.style.border = "solid red";
@@ -132,21 +107,19 @@ let addTodo = () => {
  * @param event may be event or TodoItem
  */
 let removeTodo = (event) => {   
-    /**
-     * Find the element data with DOM api 
-     * 
-     * Loop through register and remove from local 
-     * Update view 
-     */
+    /*Find the element data with DOM api 
+    Loop through register and remove from local 
+    Update view */
     const id = parseInt(event.target.parentNode.children[1].id); 
 
     for(let todoItem of registeredTodos){ 
         if (todoItem.id === id) {
             // Online ? repo : indexDB 
-            storage.delete.offline(storeNames.main, todoItem.id);             
+            storage.delete.offline(storeNames.main, todoItem.id);  
+            if(!navigator.onLine) storage.add.offline(storeNames.deletedWhileOffline, todoItem);            
             registeredTodos.splice(registeredTodos.indexOf(todoItem), 1);
             updateTodoView();
-            updateAllListeners();
+            updateListenersFor.everything(); 
             return; //do not check more items than neccecary
         }
     }
@@ -176,15 +149,17 @@ let updateTodoView = () => {
 }
 
 /**
- * Runs when an item is changed 
+ * edits an item based on onclick
+ * updates storage
  */
-let itemEdited = (event) => {
+let editItemText = (event) => {
     const id = event.target.parentNode.children[1].id;
     var todoItem = searchAndApply(id, (item) => {
         item.text = event.target.value; 
-        storage.edit.offline(storeNames.main, item); 
+        item.changed = true; 
+        storage.replace.offline(storeNames.main, item); 
     }); 
-    updateAllListeners(); 
+    updateListenersFor.everything(); 
     changeInputToLabel(); 
 }
 
@@ -197,43 +172,53 @@ let checkTodo = (checkboxElement) => {
     searchAndApply(id, item => {
         
         item.isChecked = !item.isChecked;
-        storage.edit.offline(storeNames.main, item);     
-        //putApiCall(repoUrl, item);
+        storage.replace.offline(storeNames.main, item);     
     }); 
     
+    updateListenersFor.everything(); 
+    //updateAllListeners(); 
     updateTodoView(); 
-    updateAllListeners(); 
 }
 
-
-let updateRemoveListeners = () => {
-    for (let button of document.getElementsByClassName("remove-todo-button")) {
-        button.onclick = removeTodo;
-    }
-}
-
-let updateCheckListeners = () => {    
-    const checkboxes = document.getElementsByClassName("todo-app__checkbox"); 
-    if(checkboxes) {
-        for (let checkbox of checkboxes) {
-            checkbox.onclick = () => { 
-                checkTodo(checkbox);
+/**
+ * Methods for updating listeners 
+ * By wrapping in objects, a call to one of 
+ * the methods will feel like reading a sentence. 
+ * Hopefully, this makes the code more readable. 
+ * i.e. updateListenersfor.checkboxes => "update listeners for checkboxes"
+ */
+const updateListenersFor = {
+    everything : () => {        
+        // TODO: do this with loop to dynamically add if more functions added 
+        updateListenersFor.removeButtons(); 
+        updateListenersFor.checkboxes(); 
+        updateListenersFor.textfields(); 
+        updateListenersFor.inputfields(); 
+    },
+    removeButtons : () => {
+        for (let button of document.getElementsByClassName("remove-todo-button")) {
+            button.onclick = removeTodo;
+        }
+    }, 
+    checkboxes : () => {
+        const checkboxes = document.getElementsByClassName("todo-app__checkbox");
+        if (checkboxes) {
+            for (let checkbox of checkboxes) {
+                checkbox.onclick = () => {
+                    checkTodo(checkbox);
+                }
             }
         }
-    }
-}
-
-let updateTextfieldListeners = () => {
-    for(let textfield of document.getElementsByClassName("todo-app__textfield")){
-        textfield.onclick = () => changeLabelToInput(textfield); 
-        //textfield.onchange = itemEdited; 
-    }
-}
-
-let updateInputFieldListeners = () => {
-    for (let inputfield of document.getElementsByClassName("todo-app__inputfield")) {
-        //inputfield.onchange = itemEdited;
-        inputfield.onblur = itemEdited; 
+    }, 
+    textfields : () => {
+        for (let textfield of document.getElementsByClassName("todo-app__textfield")) {
+            textfield.onclick = () => changeLabelToInput(textfield);
+        }
+    }, 
+    inputfields : () => {
+        for (let inputfield of document.getElementsByClassName("todo-app__inputfield")) {
+            inputfield.onblur = editItemText;
+        }
     }
 }
 
@@ -248,11 +233,10 @@ let changeLabelToInput = (textfield) => {
     parent.replaceChild(input, parent.childNodes[1]);
     input.focus();
     
-    updateInputFieldListeners(); 
+    updateListenersFor.inputfields(); 
 }
 
 let changeInputToLabel = () => {
-    console.log("change input triggered")
     let input = document.getElementsByClassName("todo-app__inputfield")[0]; 
     let parent = input.parentNode;
 
@@ -261,14 +245,7 @@ let changeInputToLabel = () => {
     label.innerHTML = input.value;
     parent.replaceChild(label, parent.childNodes[1]);
 
-    updateTextfieldListeners(); 
-}
-
-let updateAllListeners = () => {
-    // refarctor all the ones using classes -> repeating a lot right now 
-    updateRemoveListeners(); 
-    updateCheckListeners(); 
-    updateTextfieldListeners(); 
+    updateListenersFor.textfields(); 
 }
 
 // Listeners
@@ -285,8 +262,8 @@ document.getElementById("todo-app__startButton").onclick = () => {
     document.getElementById("todo-app__container").style.display = "block"; 
     storage.get.offline(storeNames.main, items => {
         // transform from indexDB-item to TodoItem
-        registeredTodos = items.map(item => new TodoItem(item.value.text, item.value.date, item.value.isChecked)); 
+        registeredTodos = items.map(item => new TodoItem(item.value.text, item.value.date, item.value.isChecked, item.value.id)); 
         updateTodoView(); 
-        updateAllListeners(); 
+        updateListenersFor.everything(); 
     }); 
 }
