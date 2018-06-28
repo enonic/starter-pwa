@@ -40,7 +40,7 @@ module.exports = {
             IndexedDBInstance().then(instance => {
                 instance.add(storeName, item);
             }); 
-            dbChanged("add"); 
+            dbChanged("dd"); 
         }, 
         /**
          * Adds item to online storage 
@@ -65,9 +65,10 @@ module.exports = {
          */
         offline : (storeName, identifier) => {
             IndexedDBInstance().then(instance => {
-                instance.delete(storeName, identifier)
+                let req = instance.delete(storeName, identifier)
+                req.onsuccess = () => dbChanged("delete");  
             });
-            dbChanged("delete");  
+            
         },
         /**
          * Removes item from online storage

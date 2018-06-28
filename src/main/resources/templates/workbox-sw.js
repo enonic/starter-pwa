@@ -74,8 +74,8 @@ self.addEventListener('notificationclick', function(event) {event.notification.c
  */
 
 self.addEventListener('sync', (event) => {
+    console.log("synq requested")
     if (event.tag == 'Background-sync') {
-        console.log("sync request registered")
         event.waitUntil(syncronize(event))
     } else {
         console.error("Problem with sync listener, sync-tag not supported") 
@@ -86,7 +86,6 @@ function getItemsFromRepo(){
     // fetching items from repo
     return getApiCall(repoUrl).then((response) => response.json().then(itemList => {
         // item fetched from repo is an object called TodoItems, we are interested in it's values 
-        console.log("itemList:", itemList)
         return itemList.TodoItems
     }))
 }
@@ -121,48 +120,41 @@ function resolveChanges(db){
 
 let syncronize = function(event){
     //read db, dbRemove and repo
-    console.log("syncronizing...")
-    console.log("1 - getting items")
     getItemsFromDB().then(values => {
         
-        console.log("2 - deleting in repo")
+   
         //delete in repo all from db-delete 
         compareDelete(values[0]).then(() => {
 
-            console.log("3 - changing items in repo ")
+
             // change in repo all marked with change and sync not synced items
             resolveChanges(values[1]).then(() => {
                 
-                console.log("4 - get new items from repo") 
+         
                 //get new items from repo (synced values are changed if synced)
                 getItemsFromRepo().then(repo => {
                     
-                    console.log("5 - flush db")
+                  
                     //flush db & dbRemove
                     Promise.all([
                         flushDB(indexDbName.todoMemo, storeName.todo),
                         flushDB(indexDbName.todoMemo, storeName.removed)
                     ]).then(() => {
 
-                        console.log("6 - add items to db")
                         //add all items from repo into db.
-                        console.log("repo:", repo)
                         repo ? Promise.all(repo.map(element => DBPost(indexDbName.todoMemo, storeName.todo, element.item))).then(() => {
                             
-                            console.log("7 - send message to app")
                             //Send message to app for update of UI
-                            console.log(event) 
                             let data = {message: "synced"}
                             self.clients.matchAll().then(function(clients) {
                                 if (clients && clients.length > 0) {
                                     clients[0].postMessage(data);
-                    
                                 } else {
                                     console.error("Can't update the DOM: serviceworker can't find a client (page)");
                                 }   
 
                             }); 
-                        }) : console.log("something went wrong when syncronizing with repo....404?", repo)
+                        }) : console.log(repo)
                     })
 
                 })
@@ -187,7 +179,6 @@ function flushDB(indexDbName, storeName){
 }
 
 let DBPost = function (indexDbName,storeName,item){
-    console.log("item from repo to be posted on db", item)
     return open(indexDbName).then(db => {
         var dbTransaction = db.transaction(storeName, 'readwrite');
         var dbStore = dbTransaction.objectStore(storeName);
@@ -274,7 +265,6 @@ let deleteApiCall = (url, data) => {
 }
 
 let postApiCall = (url, data) => {
-    console.log("postAPI item:", data)
     return fetch(url, {
         body: JSON.stringify(data), 
         method: 'POST',

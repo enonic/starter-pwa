@@ -50,7 +50,8 @@ const repoUrl =
     "/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/background-sync";
 
 
-let registeredTodos = [];
+
+export let registeredTodos = []
 
 
 
@@ -66,7 +67,7 @@ class TodoItem {
      */               
     constructor(text, date, isChecked, id, synced) {
         this.text = text; 
-        this.date = date; 
+        this.date = (typeof date === "string" ? new Date(date) : date); 
         this.isChecked = isChecked;
         // only give new ID of old one is not supplied 
         this.id = (!id ? new Date().valueOf() : id); // unique id}
@@ -107,10 +108,8 @@ let addTodo = () => {
         registeredTodos.push(item);
 
         storage.add.offline(storeNames.main, item); 
-
         inputfield.value = "";
-        updateTodoView();
-        updateListenersFor.everything();  
+        updateUI()
     } else {
         // let user know something was wrong 
         inputfield.style.border = "solid red";
@@ -134,11 +133,9 @@ let removeTodo = (event) => {
         if (!navigator.onLine) storage.add.offline(storeNames.deletedWhileOffline, todoItem);
         //remove from the array used for rendering 
         registeredTodos.splice(registeredTodos.indexOf(todoItem), 1);
-
-        updateTodoView();
-        updateListenersFor.everything();
         return; //do not check more items than neccecary
     }); 
+    updateUI()
 }    
 
 /**
@@ -149,6 +146,7 @@ let updateTodoView = () => {
     let outputArea = document.getElementById("todo-app__item-area");
     outputArea.innerHTML = "";
     for (let todo of registeredTodos) {
+        console.log("synced: ", todo.synced); 
         outputArea.innerHTML += `
             <div style="background-color:${todo.synced ? "green" : "red"}" class="todo-app__item">
                 <label class="todo-app__checkbox" style=" background-image: ${todo.isChecked ? "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-checked.gif)" : "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-unchecked.gif)"}
@@ -174,7 +172,6 @@ let editItemText = (event) => {
         item.text = event.target.value; 
         registerChange(item, storeNames.main);    
     }); 
-    updateListenersFor.everything(); 
     changeInputToLabel(); 
 }
 
@@ -203,6 +200,7 @@ let registerChange = (item, storeName) => {
     item.changed = true;
     item.synced = false; // set to true in backend when eventually synced. 
     storage.replace.offline(storeName, item);
+    updateUI()
 }
 
 let changeLabelToInput = (textfield) => {
@@ -245,8 +243,7 @@ document.getElementById("todo-app__startButton").onclick = () => {
     storage.get.offline(storeNames.main, items => {
         // transform from indexDB-item to TodoItem
         registeredTodos = items.map(item => new TodoItem(item.value.text, item.value.date, item.value.isChecked, item.value.id)); 
-        updateTodoView(); 
-        updateListenersFor.everything(); 
+        updateUI()
     }); 
 }
 
@@ -292,3 +289,29 @@ const updateListenersFor = {
         }
     }
 }
+
+
+let updateUI = () => {
+    console.log("update")
+    storage.get.offline(storeNames.main, (items) => {
+        registeredTodos = items.map(item => new TodoItem(item.value.text, item.value.date, item.value.isChecked, item.value.id, item.value.synced))
+        updateTodoView();
+        updateListenersFor.everything(); 
+    })
+    
+}
+
+
+
+
+/**
+ * Listen to serviceworker
+ */
+
+navigator.serviceWorker.addEventListener("message", (event)=>{
+    if(event.data.message === "synced"){
+        updateUI()
+    }
+
+})
+    
