@@ -85,6 +85,26 @@ class TodoItem {
  * Setup the service worker and trigger initialization
  */
 
+if ('serviceWorker' in navigator) {
+    // Service Worker and Push is supported
+    /*
+    navigator.serviceWorker.ready.then(function (registration) {
+        registration.sync.register('Background-sync')
+    }); 
+    navigator.serviceWorker.addEventListener("message", (event)=>{
+        let data = JSON.parse(event.data)
+        if(data.message === "synced"){
+            for(let todo of registeredTodos){
+                todo.synced = true
+            }
+            updateTodoView();
+        }
+    })
+    */
+} else {
+    console.log("SW not supported"); 
+}
+
 
 
 
@@ -110,7 +130,6 @@ let addTodo = () => {
         const item = new TodoItem(inputfield.value, new Date(), false);
         registeredTodos.push(item);
 
-
         storage.add.offline(storeNames.main, item); 
 
         inputfield.value = "";
@@ -134,18 +153,16 @@ let removeTodo = (event) => {
     Loop through register and remove from local 
     Update view */
     const id = parseInt(event.target.parentNode.children[1].id); 
+    searchAndApply(id, (todoItem) => {
+        storage.delete.offline(storeNames.main, todoItem.id);
+        if (!navigator.onLine) storage.add.offline(storeNames.deletedWhileOffline, todoItem);
+        //remove from the array used for rendering 
+        registeredTodos.splice(registeredTodos.indexOf(todoItem), 1);
 
-    for(let todoItem of registeredTodos){ 
-        if (todoItem.id === id) {
-            // Online ? repo : indexDB 
-            storage.delete.offline(storeNames.main, todoItem.id);  
-            if(!navigator.onLine) storage.add.offline(storeNames.deletedWhileOffline, todoItem);            
-            registeredTodos.splice(registeredTodos.indexOf(todoItem), 1);
-            updateTodoView();
-            updateListenersFor.everything(); 
-            return; //do not check more items than neccecary
-        }
-    }
+        updateTodoView();
+        updateListenersFor.everything();
+        return; //do not check more items than neccecary
+    }); 
 }    
 
 /**
@@ -179,8 +196,7 @@ let editItemText = (event) => {
     const id = event.target.parentNode.children[1].id;
     var todoItem = searchAndApply(id, (item) => {
         item.text = event.target.value; 
-        item.changed = true; 
-        storage.replace.offline(storeNames.main, item); 
+        registerChange(item, storeNames.main);    
     }); 
     updateListenersFor.everything(); 
     changeInputToLabel(); 
@@ -193,59 +209,26 @@ let editItemText = (event) => {
 let checkTodo = (checkboxElement) => {
     const id = checkboxElement.parentNode.children[1].children[1].id;
     searchAndApply(id, item => {
-        
         item.isChecked = !item.isChecked;
-        storage.replace.offline(storeNames.main, item);     
+        registerChange(item, storeNames.main);    
     }); 
-    
-    updateListenersFor.everything(); 
-    //updateAllListeners(); 
+
     updateTodoView(); 
+    updateListenersFor.everything(); 
 }
 
 /**
- * Methods for updating listeners 
- * By wrapping in objects, a call to one of 
- * the methods will feel like reading a sentence. 
- * Hopefully, this makes the code more readable. 
- * i.e. updateListenersfor.checkboxes => "update listeners for checkboxes"
+ * Should be run when an item is edited 
+ * updated changed, sets to not synced and replaces in storage
+ * @param item the edited item
+ * @param storeName storeName to replaced in (probably storeNames.main)
  */
-const updateListenersFor = {
-    everything : () => {        
-        // TODO: do this with loop to dynamically add if more functions added 
-        updateListenersFor.removeButtons(); 
-        updateListenersFor.checkboxes(); 
-        updateListenersFor.textfields(); 
-        updateListenersFor.inputfields(); 
-    },
-    removeButtons : () => {
-        for (let button of document.getElementsByClassName("remove-todo-button")) {
-            button.onclick = removeTodo;
-        }
-    }, 
-    checkboxes : () => {
-        const checkboxes = document.getElementsByClassName("todo-app__checkbox");
-        if (checkboxes) {
-            for (let checkbox of checkboxes) {
-                checkbox.onclick = () => {
-                    checkTodo(checkbox);
-                }
-            }
-        }
-    }, 
-    textfields : () => {
-        for (let textfield of document.getElementsByClassName("todo-app__textfield")) {
-            textfield.onclick = () => changeLabelToInput(textfield);
-        }
-    }, 
-    inputfields : () => {
-        for (let inputfield of document.getElementsByClassName("todo-app__inputfield")) {
-            inputfield.onblur = editItemText;
-        }
-    }
+let registerChange = (item, storeName) => {
+    item.changed = true;
+    item.synced = false; // set to true in backend when eventually synced. 
+    storage.replace.offline(storeName, item);
 }
 
-// refactor -> similar to changeInputToLabel
 let changeLabelToInput = (textfield) => {
     let label = textfield.innerHTML;
     let parent = textfield.parentNode; 
@@ -293,4 +276,47 @@ document.getElementById("todo-app__startButton").onclick = () => {
         updateTodoView(); 
         updateListenersFor.everything(); 
     }); 
+}
+
+/**
+ * Methods for updating listeners 
+ * By wrapping in objects, a call to one of 
+ * the methods will feel like reading a sentence. 
+ * Hopefully, this makes the code more readable. 
+ * i.e. updateListenersfor.checkboxes => "update listeners for checkboxes"
+ */
+const updateListenersFor = {
+    /**
+     * Runs every update method except for itself 
+     */
+    everything: () => {
+        for(let key of Object.keys(updateListenersFor)) {
+            (key !== "everything" ? updateListenersFor[key]() : null); 
+        }
+    },
+    removeButtons: () => {
+        for (let button of document.getElementsByClassName("remove-todo-button")) {
+            button.onclick = removeTodo;
+        }
+    },
+    checkboxes: () => {
+        const checkboxes = document.getElementsByClassName("todo-app__checkbox");
+        if (checkboxes) {
+            for (let checkbox of checkboxes) {
+                checkbox.onclick = () => {
+                    checkTodo(checkbox);
+                }
+            }
+        }
+    },
+    textfields: () => {
+        for (let textfield of document.getElementsByClassName("todo-app__textfield")) {
+            textfield.onclick = () => changeLabelToInput(textfield);
+        }
+    },
+    inputfields: () => {
+        for (let inputfield of document.getElementsByClassName("todo-app__inputfield")) {
+            inputfield.onblur = editItemText;
+        }
+    }
 }

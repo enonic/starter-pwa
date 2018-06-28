@@ -114,6 +114,7 @@ function resolveChanges(db){
         item.changed ? putApiCall(repoUrl, item) :
          (item.synced ? null : postApiCall(repoUrl, item))
         )
+
     )
 }
 
@@ -160,10 +161,10 @@ let syncronize = function(event){
                                     console.error("Can't update the DOM: serviceworker can't find a client (page)");
                                 }   
 
-
                             }); 
                         }) : console.log("something went wrong when syncronizing with repo....404?", repo)
                     })
+
                 })
             })   
         })

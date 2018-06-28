@@ -1,5 +1,5 @@
-//import IndexedDBInstance from "./db/IndexedDB";
 const IndexedDBInstance = require('./db/IndexedDB').default; 
+const dbChanged = require("../dbChanged"); 
 
 module.exports = {
     /**
@@ -40,6 +40,7 @@ module.exports = {
             IndexedDBInstance().then(instance => {
                 instance.add(storeName, item);
             }); 
+            dbChanged("add"); 
         }, 
         /**
          * Adds item to online storage 
@@ -65,7 +66,8 @@ module.exports = {
         offline : (storeName, identifier) => {
             IndexedDBInstance().then(instance => {
                 instance.delete(storeName, identifier)
-            }); 
+            });
+            dbChanged("delete");  
         },
         /**
          * Removes item from online storage
@@ -92,6 +94,7 @@ module.exports = {
             IndexedDBInstance().then(instance => {
                 instance.put(storeName, item);
             });
+            dbChanged("replace"); 
         }, 
         online : () => {
             throw "online replace not yet implementted (Storage.js)"
