@@ -110,8 +110,7 @@ function compareDelete(db){
 function resolveChanges(db){
     return Promise.all(db.map(item => 
         item.changed ? putApiCall(repoUrl, item) :
-         item.synced ? null : postApiCall(repoUrl, item)
-        )
+        item.synced ? null : postApiCall(repoUrl, item))
     )
 }
 
@@ -140,7 +139,7 @@ let syncronize = function(event){
                         Promise.all(repo.map(item => DBPost(storeName.todo, item))).then(() => {
 
                             //Send message to app for update of UI
-                            const client = await clients.get(event.clientId);
+                            const client = clients.get(event.clientId);
                             if (client) {
                                 clients.postMessage({
                                     message: "update",

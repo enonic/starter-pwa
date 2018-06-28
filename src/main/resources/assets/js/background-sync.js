@@ -128,7 +128,6 @@ let addTodo = () => {
         const item = new TodoItem(inputfield.value, new Date(), false);
         registeredTodos.push(item);
 
-
         storage.add.offline(storeNames.main, item); 
 
         inputfield.value = "";
@@ -209,59 +208,14 @@ let editItemText = (event) => {
 let checkTodo = (checkboxElement) => {
     const id = checkboxElement.parentNode.children[1].children[1].id;
     searchAndApply(id, item => {
-        
         item.isChecked = !item.isChecked;
         storage.replace.offline(storeNames.main, item);     
     }); 
-    
-    updateListenersFor.everything(); 
-    //updateAllListeners(); 
+
     updateTodoView(); 
+    updateListenersFor.everything(); 
 }
 
-/**
- * Methods for updating listeners 
- * By wrapping in objects, a call to one of 
- * the methods will feel like reading a sentence. 
- * Hopefully, this makes the code more readable. 
- * i.e. updateListenersfor.checkboxes => "update listeners for checkboxes"
- */
-const updateListenersFor = {
-    everything : () => {        
-        // TODO: do this with loop to dynamically add if more functions added 
-        updateListenersFor.removeButtons(); 
-        updateListenersFor.checkboxes(); 
-        updateListenersFor.textfields(); 
-        updateListenersFor.inputfields(); 
-    },
-    removeButtons : () => {
-        for (let button of document.getElementsByClassName("remove-todo-button")) {
-            button.onclick = removeTodo;
-        }
-    }, 
-    checkboxes : () => {
-        const checkboxes = document.getElementsByClassName("todo-app__checkbox");
-        if (checkboxes) {
-            for (let checkbox of checkboxes) {
-                checkbox.onclick = () => {
-                    checkTodo(checkbox);
-                }
-            }
-        }
-    }, 
-    textfields : () => {
-        for (let textfield of document.getElementsByClassName("todo-app__textfield")) {
-            textfield.onclick = () => changeLabelToInput(textfield);
-        }
-    }, 
-    inputfields : () => {
-        for (let inputfield of document.getElementsByClassName("todo-app__inputfield")) {
-            inputfield.onblur = editItemText;
-        }
-    }
-}
-
-// refactor -> similar to changeInputToLabel
 let changeLabelToInput = (textfield) => {
     let label = textfield.innerHTML;
     let parent = textfield.parentNode; 
@@ -305,4 +259,48 @@ document.getElementById("todo-app__startButton").onclick = () => {
         updateTodoView(); 
         updateListenersFor.everything(); 
     }); 
+}
+
+/**
+ * Methods for updating listeners 
+ * By wrapping in objects, a call to one of 
+ * the methods will feel like reading a sentence. 
+ * Hopefully, this makes the code more readable. 
+ * i.e. updateListenersfor.checkboxes => "update listeners for checkboxes"
+ */
+const updateListenersFor = {
+    /**
+     * Runs every update method except for itself 
+     */
+    everything: () => {
+        for(let key of Object.keys(updateListenersFor)) {
+            console.log(key); 
+            (key !== "everything" ? updateListenersFor[key]() : null); 
+        }
+    },
+    removeButtons: () => {
+        for (let button of document.getElementsByClassName("remove-todo-button")) {
+            button.onclick = removeTodo;
+        }
+    },
+    checkboxes: () => {
+        const checkboxes = document.getElementsByClassName("todo-app__checkbox");
+        if (checkboxes) {
+            for (let checkbox of checkboxes) {
+                checkbox.onclick = () => {
+                    checkTodo(checkbox);
+                }
+            }
+        }
+    },
+    textfields: () => {
+        for (let textfield of document.getElementsByClassName("todo-app__textfield")) {
+            textfield.onclick = () => changeLabelToInput(textfield);
+        }
+    },
+    inputfields: () => {
+        for (let inputfield of document.getElementsByClassName("todo-app__inputfield")) {
+            inputfield.onblur = editItemText;
+        }
+    }
 }
