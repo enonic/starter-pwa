@@ -25,6 +25,23 @@ module.exports = {
             return;
         }
 
+        if ('serviceWorker' in navigator) {            
+            
+            /*
+            navigator.serviceWorker.addEventListener("message", (event)=>{
+                let data = JSON.parse(event.data)
+                if(data.message === "synced"){
+                    for(let todo of registeredTodos){
+                        todo.synced = true
+                    }
+                    updateTodoView();
+                }
+            })
+            */
+        } else {
+            displayErrorStatus('Something else wrong with sw in background-sync.js', true);
+        }
+
         const toggleOnlineStatus = function () {
             if (!navigator.onLine) {
                 ToasterInstance().then(toaster => {

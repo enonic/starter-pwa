@@ -75,6 +75,7 @@ self.addEventListener('notificationclick', function(event) {event.notification.c
 
 self.addEventListener('sync', (event) => {
     if (event.tag == 'Background-sync') {
+        console.log("sync request registered")
         event.waitUntil(syncronize(event))
     } else {
         console.error("Problem with sync listener, sync-tag not supported") 
@@ -83,8 +84,9 @@ self.addEventListener('sync', (event) => {
 
 function getItemsFromRepo(){
     // fetching items from repo
-    getApiCall(repoUrl).then((response) => response.json().then(itemList => {
+    return getApiCall(repoUrl).then((response) => response.json().then(itemList => {
         // item fetched from repo is an object called TodoItems, we are interested in it's values 
+        console.log("itemList:", itemList)
         return itemList.TodoItems
     }))
 }
@@ -110,48 +112,61 @@ function compareDelete(db){
 function resolveChanges(db){
     return Promise.all(db.map(item => 
         item.changed ? putApiCall(repoUrl, item) :
-         item.synced ? null : postApiCall(repoUrl, item)
+         (item.synced ? null : postApiCall(repoUrl, item))
         )
     )
 }
 
 
-
 let syncronize = function(event){
     //read db, dbRemove and repo
-    getItems().then(values => {
-
+    console.log("syncronizing...")
+    console.log("1 - getting items")
+    getItemsFromDB().then(values => {
+        
+        console.log("2 - deleting in repo")
         //delete in repo all from db-delete 
-        compareDelete(values[0]).then(
+        compareDelete(values[0]).then(() => {
 
-            // change in repo all marked with change 
-            resolveChanges(values[1]).then(
-
+            console.log("3 - changing items in repo ")
+            // change in repo all marked with change and sync not synced items
+            resolveChanges(values[1]).then(() => {
+                
+                console.log("4 - get new items from repo") 
                 //get new items from repo (synced values are changed if synced)
                 getItemsFromRepo().then(repo => {
                     
+                    console.log("5 - flush db")
                     //flush db & dbRemove
                     Promise.all([
-                        flushDB(values[0]),
-                        flushDB(values[1])
-                    ]).then(
+                        flushDB(indexDbName.todoMemo, storeName.todo),
+                        flushDB(indexDbName.todoMemo, storeName.removed)
+                    ]).then(() => {
 
+                        console.log("6 - add items to db")
                         //add all items from repo into db.
-                        Promise.all(repo.map(item => DBPost(storeName.todo, item))).then(() => {
-
+                        console.log("repo:", repo)
+                        repo ? Promise.all(repo.map(element => DBPost(indexDbName.todoMemo, storeName.todo, element.item))).then(() => {
+                            
+                            console.log("7 - send message to app")
                             //Send message to app for update of UI
-                            const client = await clients.get(event.clientId);
-                            if (client) {
-                                clients.postMessage({
-                                    message: "update",
-                                    url: event.request.url
-                                })
-                            }
-                        })
-                    )
+                            console.log(event) 
+                            let data = {message: "synced"}
+                            self.clients.matchAll().then(function(clients) {
+                                if (clients && clients.length > 0) {
+                                    clients[0].postMessage(data);
+                    
+                                } else {
+                                    console.error("Can't update the DOM: serviceworker can't find a client (page)");
+                                }   
+
+
+                            }); 
+                        }) : console.log("something went wrong when syncronizing with repo....404?", repo)
+                    })
                 })
-            )   
-        )
+            })   
+        })
     })    
 }
 
@@ -159,20 +174,23 @@ let syncronize = function(event){
  * Offline DB storage
  */
 
-function flushDB(db){
+function flushDB(indexDbName, storeName){
     return new Promise((resolve,reject) => {
-        var dbTransaction = db.transaction(db, "readwrite");
-        var flushReq = dbTransaction.objectStore(db).clear();
-        flushReq.onsuccess(response => resolve(response))
-        flushDB.onerror(response => reject(response))
+        return open(indexDbName).then(db => {
+            var dbTransaction = db.transaction(storeName, "readwrite");
+            var flushReq = dbTransaction.objectStore(storeName).clear();
+            flushReq.onsuccess = event => resolve(event)
+            flushDB.onerror = event => reject(event)
+        })
     })
-    
-
 }
 
-let DBPost = function (indexDbName,item){
+let DBPost = function (indexDbName,storeName,item){
+    console.log("item from repo to be posted on db", item)
     return open(indexDbName).then(db => {
-        db.add(indexDbName, item) 
+        var dbTransaction = db.transaction(storeName, 'readwrite');
+        var dbStore = dbTransaction.objectStore(storeName);
+        dbStore.add(item);
     })
 }
 
@@ -198,10 +216,7 @@ let getAllFromIndexDb = function(indexDbName,storeName, index, order) {
                 var cursor = e.target.result;
 
                 if (cursor) {
-                    dbResults.push({
-                        key: cursor.key,
-                        value: cursor.value
-                    });
+                    dbResults.push(cursor.value)
                     cursor.continue();
                 } else {
                     resolve(dbResults);
@@ -258,6 +273,7 @@ let deleteApiCall = (url, data) => {
 }
 
 let postApiCall = (url, data) => {
+    console.log("postAPI item:", data)
     return fetch(url, {
         body: JSON.stringify(data), 
         method: 'POST',
