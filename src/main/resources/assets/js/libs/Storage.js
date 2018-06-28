@@ -2,6 +2,9 @@
 const IndexedDBInstance = require('./db/IndexedDB').default; 
 
 module.exports = {
+    /**
+     * Methods for retrieving from storage
+     */
     get : {
         /**
          * Gets items from indexDB
@@ -24,6 +27,9 @@ module.exports = {
             });
         }
     }, 
+    /**
+     * Methods for adding to storage
+     */
     add : {
         /**
          * Adds item to indexDB
@@ -47,6 +53,9 @@ module.exports = {
             })
         }
     }, 
+    /**
+     * Methods for deleting from storage
+     */
     delete : {
         /**
          * Removes item from indexDB
@@ -70,7 +79,10 @@ module.exports = {
             });
         }
     }, 
-    edit : {
+    /**
+     * Methods for replacing things in storage
+     */
+    replace : {
         /**
          * Edits item in indexDB store
          * @param storeName name of the indexDB store 
@@ -82,7 +94,7 @@ module.exports = {
             });
         }, 
         online : () => {
-            throw "offline edit not implemeted yet (Storage.js)";
+            throw "online replace not yet implementted (Storage.js)"
         }
     }
 }

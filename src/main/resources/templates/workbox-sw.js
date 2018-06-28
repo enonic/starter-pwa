@@ -84,8 +84,8 @@ let syncTodoItemsBetweenStorages = () => {
             let removedWhileOffline = removedItems;
 
             // Compare with data from repo 
-            console.log(fromOffline);
-            console.log(removedWhileOffline);
+            //console.log(fromOffline);
+            //console.log(removedWhileOffline);
 
         })
     })
