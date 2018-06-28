@@ -101,7 +101,7 @@ if ('serviceWorker' in navigator) {
     })
     */
 } else {
-    displayErrorStatus('Something else wrong with sw in background-sync.js', true);
+    console.log("SW not supported"); 
 }
 
 
@@ -194,8 +194,7 @@ let editItemText = (event) => {
     const id = event.target.parentNode.children[1].id;
     var todoItem = searchAndApply(id, (item) => {
         item.text = event.target.value; 
-        item.changed = true; 
-        storage.replace.offline(storeNames.main, item); 
+        registerChange(item, storeNames.main);    
     }); 
     updateListenersFor.everything(); 
     changeInputToLabel(); 
@@ -209,11 +208,23 @@ let checkTodo = (checkboxElement) => {
     const id = checkboxElement.parentNode.children[1].children[1].id;
     searchAndApply(id, item => {
         item.isChecked = !item.isChecked;
-        storage.replace.offline(storeNames.main, item);     
+        registerChange(item, storeNames.main);    
     }); 
 
     updateTodoView(); 
     updateListenersFor.everything(); 
+}
+
+/**
+ * Should be run when an item is edited 
+ * updated changed, sets to not synced and replaces in storage
+ * @param item the edited item
+ * @param storeName storeName to replaced in (probably storeNames.main)
+ */
+let registerChange = (item, storeName) => {
+    item.changed = true;
+    item.synced = false; // set to true in backend when eventually synced. 
+    storage.replace.offline(storeName, item);
 }
 
 let changeLabelToInput = (textfield) => {
@@ -274,7 +285,6 @@ const updateListenersFor = {
      */
     everything: () => {
         for(let key of Object.keys(updateListenersFor)) {
-            console.log(key); 
             (key !== "everything" ? updateListenersFor[key]() : null); 
         }
     },
