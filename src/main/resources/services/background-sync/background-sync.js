@@ -52,7 +52,7 @@ exports.post = function (req) {
 };
 
 exports.delete = function (req){
-    
+
     var todoItem = getItemObj(req.params.data);
     if (!todoItem) {
         var message = "Missing/invalid item data in request";
@@ -79,6 +79,7 @@ exports.delete = function (req){
 exports.put = function (req) {
 
     var todoItem = getItemObj(req.params);
+    log.info(JSON.stringify(todoItem, null, 4)); 
     if (!todoItem) {
         var message = "Missing/invalid item data in request";
         log.warning(message);
@@ -205,7 +206,7 @@ var deleteTodoNode = function (todoItem) {
                 message: "todoItem not found",
             }
 
-        } else if (result === "SUCCESS") {
+        } else if (result === "SUCCESS") { 
             return { success: true };
 
         } else if (typeof result === 'string') {

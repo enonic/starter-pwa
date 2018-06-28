@@ -74,7 +74,6 @@ self.addEventListener('notificationclick', function(event) {event.notification.c
  * Background sync
  */
 
-
 self.addEventListener('sync', (event) => {
     if (event.tag == 'Background-sync') {
         event.waitUntil(syncronize(event))

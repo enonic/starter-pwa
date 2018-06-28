@@ -1,3 +1,4 @@
+
 /**
  * 1. global variables 
  * 2. Todo class // NOTE: move this out to another file  
@@ -40,11 +41,16 @@ Service worker må fungere slik:
 
 
 
+const storage = require('./libs/Storage'); 
+const storeNames = {
+    main : "OfflineStorage", 
+    deletedWhileOffline : "DeletedWhileOffline"
+}
+const repoUrl =
+    "/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/background-sync";
 
-import IndexedDBInstance from "./libs/db/IndexedDB";
 
 let registeredTodos = [];
-const repoUrl = "/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/background-sync";
 
 
 
@@ -66,13 +72,9 @@ class TodoItem {
         this.id = (!id ? new Date().valueOf() : id); // unique id}
         this.synced = (!synced ? false : synced); 
         this.type = "TodoItem"; 
+        this.changed = false; 
     }
-
     getFormattedDate() {
-        //pulled as string from repo as string 
-        //if (typeof this.date === "string") {
-        //    this.date = Date.parse(this.date); 
-        //}
         return  ""
         + this.date.getHours() + ":" + this.date.getMinutes() + " " 
         + this.date.getDate() + "/" + (this.date.getMonth() + 1) + "/" + this.date.getFullYear();
@@ -82,8 +84,6 @@ class TodoItem {
 /**
  * Setup the service worker and trigger initialization
  */
-
-
 if ('serviceWorker' in navigator) {
     // Service Worker and Push is supported
     /*
@@ -125,18 +125,15 @@ let addTodo = () => {
     const inputfield = document.getElementById("add-todo-text");
         // Only add if user actually entered something 
     if (inputfield.value !== ""){
-
-        // online = to repo : to indexDB 
         const item = new TodoItem(inputfield.value, new Date(), false);
         registeredTodos.push(item);
-        addToOfflineStorage(item)
-        inputfield.value = "";
 
-        navigator.serviceWorker.ready.then(function (registration) {
-            registration.sync.register('Background-sync')
-        }); 
+
+        storage.add.offline(storeNames.main, item); 
+
+        inputfield.value = "";
         updateTodoView();
-        updateAllListeners(); 
+        updateListenersFor.everything();  
     } else {
         // let user know something was wrong 
         inputfield.style.border = "solid red";
@@ -151,22 +148,19 @@ let addTodo = () => {
  * @param event may be event or TodoItem
  */
 let removeTodo = (event) => {   
-    /**
-     * Find the element data with DOM api 
-     * 
-     * Loop through register and remove from local 
-     * Update view 
-     */
+    /*Find the element data with DOM api 
+    Loop through register and remove from local 
+    Update view */
     const id = parseInt(event.target.parentNode.children[1].id); 
 
     for(let todoItem of registeredTodos){ 
         if (todoItem.id === id) {
             // Online ? repo : indexDB 
-            removeFromOfflineStorage(todoItem)
-            //deleteApiCall(repoUrl, todoItem)
+            storage.delete.offline(storeNames.main, todoItem.id);  
+            if(!navigator.onLine) storage.add.offline(storeNames.deletedWhileOffline, todoItem);            
             registeredTodos.splice(registeredTodos.indexOf(todoItem), 1);
             updateTodoView();
-            updateAllListeners();
+            updateListenersFor.everything(); 
             return; //do not check more items than neccecary
         }
     }
@@ -196,15 +190,17 @@ let updateTodoView = () => {
 }
 
 /**
- * Runs when an item is changed 
+ * edits an item based on onclick
+ * updates storage
  */
-let itemEdited = (event) => {
+let editItemText = (event) => {
     const id = event.target.parentNode.children[1].id;
     var todoItem = searchAndApply(id, (item) => {
         item.text = event.target.value; 
-        //putApiCall(repoUrl, item);
-        editItemToOfflineStorage(item);
+        item.changed = true; 
+        storage.replace.offline(storeNames.main, item); 
     }); 
+    updateListenersFor.everything(); 
     changeInputToLabel(); 
 }
 
@@ -217,44 +213,53 @@ let checkTodo = (checkboxElement) => {
     searchAndApply(id, item => {
         
         item.isChecked = !item.isChecked;
-        editItemToOfflineStorage(item);    
-        //putApiCall(repoUrl, item);
+        storage.replace.offline(storeNames.main, item);     
     }); 
     
+    updateListenersFor.everything(); 
+    //updateAllListeners(); 
     updateTodoView(); 
-    updateAllListeners(); 
-    //throw "is not updated in database. Use putApiCall, once that is working."; 
 }
 
-
-let updateRemoveListeners = () => {
-    for (let button of document.getElementsByClassName("remove-todo-button")) {
-        button.onclick = removeTodo;
-    }
-}
-
-let updateCheckListeners = () => {    
-    const checkboxes = document.getElementsByClassName("todo-app__checkbox"); 
-    if(checkboxes) {
-        for (let checkbox of checkboxes) {
-            checkbox.onclick = () => { 
-                checkTodo(checkbox);
+/**
+ * Methods for updating listeners 
+ * By wrapping in objects, a call to one of 
+ * the methods will feel like reading a sentence. 
+ * Hopefully, this makes the code more readable. 
+ * i.e. updateListenersfor.checkboxes => "update listeners for checkboxes"
+ */
+const updateListenersFor = {
+    everything : () => {        
+        // TODO: do this with loop to dynamically add if more functions added 
+        updateListenersFor.removeButtons(); 
+        updateListenersFor.checkboxes(); 
+        updateListenersFor.textfields(); 
+        updateListenersFor.inputfields(); 
+    },
+    removeButtons : () => {
+        for (let button of document.getElementsByClassName("remove-todo-button")) {
+            button.onclick = removeTodo;
+        }
+    }, 
+    checkboxes : () => {
+        const checkboxes = document.getElementsByClassName("todo-app__checkbox");
+        if (checkboxes) {
+            for (let checkbox of checkboxes) {
+                checkbox.onclick = () => {
+                    checkTodo(checkbox);
+                }
             }
         }
-    }
-}
-
-let updateTextfieldListeners = () => {
-    for(let textfield of document.getElementsByClassName("todo-app__textfield")){
-        textfield.onclick = () => changeLabelToInput(textfield); 
-        //textfield.onchange = itemEdited; 
-    }
-}
-
-let updateInputFieldListeners = () => {
-    for (let inputfield of document.getElementsByClassName("todo-app__inputfield")) {
-        //inputfield.onchange = itemEdited;
-        inputfield.onblur = itemEdited; 
+    }, 
+    textfields : () => {
+        for (let textfield of document.getElementsByClassName("todo-app__textfield")) {
+            textfield.onclick = () => changeLabelToInput(textfield);
+        }
+    }, 
+    inputfields : () => {
+        for (let inputfield of document.getElementsByClassName("todo-app__inputfield")) {
+            inputfield.onblur = editItemText;
+        }
     }
 }
 
@@ -263,12 +268,13 @@ let changeLabelToInput = (textfield) => {
     let label = textfield.innerHTML;
     let parent = textfield.parentNode; 
     let input = document.createElement("input"); 
+
     input.className = "todo-app__inputfield"; 
     input.value = label; 
     parent.replaceChild(input, parent.childNodes[1]);
     input.focus();
     
-    updateInputFieldListeners(); 
+    updateListenersFor.inputfields(); 
 }
 
 let changeInputToLabel = () => {
@@ -280,14 +286,7 @@ let changeInputToLabel = () => {
     label.innerHTML = input.value;
     parent.replaceChild(label, parent.childNodes[1]);
 
-    updateTextfieldListeners(); 
-}
-
-let updateAllListeners = () => {
-    // refarctor all the ones using classes -> repeating a lot right now 
-    updateRemoveListeners(); 
-    updateCheckListeners(); 
-    updateTextfieldListeners(); 
+    updateListenersFor.textfields(); 
 }
 
 // Listeners
@@ -302,93 +301,10 @@ document.onkeydown = (event) => {
 document.getElementById("todo-app__startButton").onclick = () => {
     document.getElementById("todo-app__startButton").style.display = "none"; 
     document.getElementById("todo-app__container").style.display = "block"; 
-                        // callback adding items to reisteredTodos when they are fetche
-    //getItemsFromOfflineDB(updateFromOfflineDB);
-    getItemsFromStorage(r => r) // skriv funksjon som oppdaterer view gjennom offline/online avhengig av hva som er status 
-}
-
-
-
-let updateFromOfflineDB = (todoItems) => {
-    for (let item of todoItems) {
-        var data = item.value   
-        registeredTodos.push(new TodoItem(data.text, data.date, data.isChecked, data.id, data.synced));
-    }
-    updateTodoView();
-    updateAllListeners();
-}
-
-
-/**
- * Post data to an API endpoint. If successful (as in, HTTP call was successful, but the response may contain warnings, error messages etc),
- * trigger callbackSuccess with the response object. If not, trigger callbackFailure with the error.
- */
-
-// ------------------------------
-// Offline storage in IndexDB 
-// ------------------------------
-
-let addToOfflineStorage = (todoItem) => {
-    //const dbInstance = IndexedDBInstance().then(instance => instance)
-    //NOTE:  try adding something and run
-    //console.log(dbInstance); 
-    //dbInstance.add("TodoMemo", {id : "testid"}, "testid");
-    todoItem.synced = false; 
-    IndexedDBInstance().then(instance => {
-        instance.add("OfflineStorage", todoItem) 
-    })
-
-}
-
-
-
-
-let removeFromOfflineStorage = function (todoItem, callback){
-    IndexedDBInstance().then(instance => {
-        instance.delete("OfflineStorage", todoItem.id)
-        instance.add("DeletedWhileOffline", todoItem); 
+    storage.get.offline(storeNames.main, items => {
+        // transform from indexDB-item to TodoItem
+        registeredTodos = items.map(item => new TodoItem(item.value.text, item.value.date, item.value.isChecked, item.value.id)); 
+        updateTodoView(); 
+        updateListenersFor.everything(); 
     }); 
 }
-
-let editItemToOfflineStorage = function (todoItem){
-    IndexedDBInstance().then(instance => {
-        instance.put("OfflineStorage",todoItem)
-    }); 
-}
-
-
-
-/**
- * 
- * @param {function} callback takes results as arguments
- */
-
-let getItemsFromStorage = (callback) => {
-    if(navigator.onLine) {
-        getApiCall(repoUrl).then((response) => {
-            response.json().then(result => callback(result.TodoItems)); 
-        })
-    } else {
-        getItemsFromOfflineDB(callback)
-    }
-}
-
-let getItemsFromOfflineDB = function (callback) {
-    IndexedDBInstance().then(instance => {
-        instance.getAll("OfflineStorage").then(callback);
-    });
-}
-
-
-let getApiCall = (url) => {
-    return fetch(url, {
-        method: 'GET',
-    });
-}
-
-
-
-export default {
-  getItemsFromOfflineDB: getItemsFromOfflineDB,
-  editItemToOfflineStorage: editItemToOfflineStorage
-};
