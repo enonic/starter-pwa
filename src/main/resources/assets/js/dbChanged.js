@@ -7,16 +7,21 @@
  * workbox-sw.js  
  */
 
+const storage = require("./libs/Storage"); 
 /**
- * Notify about indexDB changes to update with repo, if client has internet 
+ * Notify about indexDB changes to update with repo, if client has internet
  * @param type optional type to specify what kind of operation was done 
  */
 module.exports = (type) => {
-    if(!type) {
-        // check for all changes 
-        
-    } else {
-        // TODO: try to do some specified things based on the update type 
+    if(navigator.serviceWorker) {
+        console.log("Service Worker with background sync has handled this already, and I am not needed. :("); 
+    } else if(navigator.onLine) {
+        console.log("I have been notified about database change and will proceed to sync. :D", type);
+        sync(); 
     }
-    console.log("I have been notified about database change and will proceed to sync: ", type);
+}
+
+let sync = () => {
+    console.error("online, non-serviceworker sync not implemented"); 
+    //use imported storage 
 }

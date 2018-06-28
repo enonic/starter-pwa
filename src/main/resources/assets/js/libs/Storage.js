@@ -15,7 +15,6 @@ module.exports = {
             IndexedDBInstance().then(instance => {
                 instance.getAll("OfflineStorage").then(callback);
             });
-            dbChanged("get"); 
         }, 
         /**
          * Get request from URL 
