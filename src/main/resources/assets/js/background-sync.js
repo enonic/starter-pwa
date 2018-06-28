@@ -152,18 +152,16 @@ let removeTodo = (event) => {
     Loop through register and remove from local 
     Update view */
     const id = parseInt(event.target.parentNode.children[1].id); 
+    searchAndApply(id, (todoItem) => {
+        storage.delete.offline(storeNames.main, todoItem.id);
+        if (!navigator.onLine) storage.add.offline(storeNames.deletedWhileOffline, todoItem);
+        //remove from the array used for rendering 
+        registeredTodos.splice(registeredTodos.indexOf(todoItem), 1);
 
-    for(let todoItem of registeredTodos){ 
-        if (todoItem.id === id) {
-            // Online ? repo : indexDB 
-            storage.delete.offline(storeNames.main, todoItem.id);  
-            if(!navigator.onLine) storage.add.offline(storeNames.deletedWhileOffline, todoItem);            
-            registeredTodos.splice(registeredTodos.indexOf(todoItem), 1);
-            updateTodoView();
-            updateListenersFor.everything(); 
-            return; //do not check more items than neccecary
-        }
-    }
+        updateTodoView();
+        updateListenersFor.everything();
+        return; //do not check more items than neccecary
+    }); 
 }    
 
 /**
