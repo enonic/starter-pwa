@@ -14,7 +14,10 @@ const storage = require("./libs/Storage");
  */
 module.exports = (type) => {
     if(navigator.serviceWorker) {
-        console.log("Service Worker with background sync has handled this already, and I am not needed. :("); 
+        navigator.serviceWorker.ready.then(function (registration) {
+            registration.sync.register('Background-sync')
+        });
+        
     } else if(navigator.onLine) {
         console.log("I have been notified about database change and will proceed to sync. :D", type);
         sync(); 

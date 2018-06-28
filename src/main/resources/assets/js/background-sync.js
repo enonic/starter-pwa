@@ -81,30 +81,6 @@ class TodoItem {
     }
 }
 
-/**
- * Setup the service worker and trigger initialization
- */
-
-if ('serviceWorker' in navigator) {
-    // Service Worker and Push is supported
-    /*
-    navigator.serviceWorker.ready.then(function (registration) {
-        registration.sync.register('Background-sync')
-    }); 
-    navigator.serviceWorker.addEventListener("message", (event)=>{
-        let data = JSON.parse(event.data)
-        if(data.message === "synced"){
-            for(let todo of registeredTodos){
-                todo.synced = true
-            }
-            updateTodoView();
-        }
-    })
-    */
-} else {
-    console.log("SW not supported"); 
-}
-
 
 
 
@@ -264,10 +240,6 @@ document.onkeydown = (event) => {
     }
 }
 document.getElementById("todo-app__startButton").onclick = () => {
-    navigator.serviceWorker.ready.then(function (registration) {
-        console.log("request sync")
-        registration.sync.register('Background-sync')
-    }) 
     document.getElementById("todo-app__startButton").style.display = "none"; 
     document.getElementById("todo-app__container").style.display = "block"; 
     storage.get.offline(storeNames.main, items => {
