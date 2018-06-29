@@ -2,6 +2,7 @@
 require('../css/styles.less');
 require("../css/background-sync.less");
 require('./background-sync'); 
+const update = require('../js/dbChanged')
 
 var ToasterInstance = require("./libs/Toaster").default;
 
@@ -43,7 +44,9 @@ module.exports = {
         }
 
         const toggleOnlineStatus = function () {
-            if (!navigator.onLine) {
+            if (navigator.onLine) {
+                update("online")
+            }else{
                 ToasterInstance().then(toaster => {
                     toaster.toast('Connection is off.');
             })};

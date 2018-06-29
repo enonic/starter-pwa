@@ -1,4 +1,9 @@
-importScripts('{{appUrl}}js/workbox-sw.prod.v2.0.1.js'); 
+try {
+    importScripts('{{appUrl}}js/workbox-sw.prod.v2.0.1.js'); 
+} catch(err) {
+    console.error(err); 
+}
+
 
 const swVersion = '{{appVersion}}';
 const workboxSW = new self.WorkboxSW({
@@ -99,19 +104,12 @@ function getItemsFromDB() {
 }
 
 function compareDelete(db){
-    return Promise.all(db.map(item => 
-        deleteApiCall(repoUrl,item)
-        .then(console.log("item was deleted"))
-        .then(console.log("items from repo:", getItemsFromRepo()))
-        .catch(err => {
-            console.error(err)
-            reject(err)
-        })
-    ))
+    return Promise.all(db.map(item => deleteApiCall(repoUrl,item)))
 }
 
 function resolveChanges(db){
     return Promise.all(db.map(item => {
+        console.log(item.changed)
         return item.synced ? (
             item.changed ? 
                 putApiCall(repoUrl, item) : null) 
@@ -122,56 +120,57 @@ function resolveChanges(db){
 
 
 let syncronize = function(event){
-    //read db, dbRemove and repo
-    console.log("6 - SW: fetch db");
-    getItemsFromDB().then(values => {
-        console.log("7 - SW: got db");
+    console.log()
+    return new Promise((resolve, reject) => 
+    {
+        console.log("syncronize - 1")
+        //read db, dbRemove and repo
+        getItemsFromDB().then(values => {
 
-        //delete in repo all from db-delete 
-        console.log("8 - SW: repo delete");
-        compareDelete(values[0]).then(() => {
-            
-            
-            // change in repo all marked with change and sync not synced items
-            console.log("9 - SW: repo change and add");
-            resolveChanges(values[1]).then(() => {
+            console.log("syncronize - 2");
+            //delete in repo all from db-delete 
+            compareDelete(values[0]).then(() => {
                 
-                
-                //get new items from repo (synced values are changed if synced)
-                console.log("10 - SW: get items from repo");
-                getItemsFromRepo().then(repo => {
+                console.log("syncronize - 3");
+                // change in repo all marked with change and sync not synced items
+                resolveChanges(values[1]).then(() => {
                     
-                    
-                    //flush db & dbRemove
-                    console.log("11 - SW: flush db");
-                    Promise.all([
-                        flushDB(indexDbName.todoMemo, storeName.todo),
-                        flushDB(indexDbName.todoMemo, storeName.removed)
-                    ]).then(() => {
-                    
-
-                        //add all items from repo into db.
-                        repo ? Promise.all(repo.map(element => DBPost(indexDbName.todoMemo, storeName.todo, element.item))).then(() => {
-                            console.log("12 - SW: add to db");
-                            //Send message to app for update of UI
-                            let data = {message: "synced"}
-                            console.log("13 - SW: post msg");
-                            self.clients.matchAll().then(function(clients) {
-                                if (clients && clients.length > 0) {
-                                    clients[0].postMessage(data);
-                                } else {
-                                    console.error("Can't update the DOM: serviceworker can't find a client (page)");
-                                }   
-
-                            }); 
-                        }) : console.log(repo)
+                    console.log("syncronize - 4");
+                    //get new items from repo (synced values are changed if synced)
+                    getItemsFromRepo().then(repo => {
+                        
+                        console.log("syncronize - 5");
+                        //flush db & dbRemove
+                        Promise.all([
+                            flushDB(indexDbName.todoMemo, storeName.todo),
+                            flushDB(indexDbName.todoMemo, storeName.removed)
+                        ]).then(() => {
+                        
+                            console.log("syncronize - 6");
+                            //add all items from repo into db.
+                            Promise.resolve(repo ? Promise.all(repo.map(element => DBPost(indexDbName.todoMemo, storeName.todo, element.item))): null)
+                            .then(()=>{
+                                console.log("syncronize - 7");
+                                let data = { message: "synced" }
+                                self.clients.matchAll().then(function (clients) {
+                                    if (clients && clients.length > 0) {
+                                        console.log("syncronize - 8");
+                                        clients[0].postMessage(data);
+                                        resolve()
+                                    } else {
+                                        console.error("Can't update the DOM: serviceworker can't find a client (page)");
+                                    }
+                                }) 
+                            })
+                        }) 
                     })
 
-                })
+                }).catch(reject())
             })   
         })
-    })    
-}
+    })
+}    
+
 
 /**
  * Offline DB storage
@@ -283,6 +282,7 @@ let postApiCall = (url, data) => {
 }
 
 let putApiCall = (url, data) => {
+    console.log("item to be changed:", data)
     return fetch(url, {
         body: JSON.stringify(data), 
         method: 'PUT',

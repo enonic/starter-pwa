@@ -19,7 +19,8 @@ module.exports = (type) => {
     console.log("4 - dbChanged");
     if(navigator.serviceWorker) {
         navigator.serviceWorker.ready.then(function (registration) {
-            registration.sync.register('Background-sync')
+            console.log("registrating sync")
+            registration.sync.register("Background-sync");
         });
         
     } else if(navigator.onLine) {

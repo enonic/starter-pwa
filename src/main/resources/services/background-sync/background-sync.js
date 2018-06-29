@@ -78,8 +78,8 @@ exports.delete = function (req){
 
 exports.put = function (req) {
 
-    var todoItem = getItemObj(req.params);
-    //log.info(JSON.stringify(todoItem, null, 4)); 
+    var todoItem = JSON.parse(req.body);
+    log.info(JSON.stringify(todoItem, null, 4)); 
     if (!todoItem) {
         var message = "Missing/invalid item data in request";
         log.warning(message);
@@ -161,13 +161,6 @@ var getAllTodoItems = function() {
     }
 
 }
-
-var getItemObj = function (params) {
-
-    return {
-        data: params
-    };
-};
 
 
 

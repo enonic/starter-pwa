@@ -109,6 +109,7 @@ let addTodo = () => {
 
         storage.add.offline(storeNames.main, item); 
         inputfield.value = "";
+        updateUI()
     } else {
         // let user know something was wrong 
         inputfield.style.border = "solid red";
@@ -127,7 +128,6 @@ let removeTodo = (event) => {
     Loop through register and remove from local 
     Update view */
     const id = parseInt(event.target.parentNode.children[1].id); 
-    console.log("1 - Click")
     searchAndApply(id, (todoItem) => {
         storage.add.offline(storeNames.deletedWhileOffline, todoItem, true).then(
         storage.delete.offline(storeNames.main, todoItem.id))

@@ -228,7 +228,6 @@ exports.deleteSubscription = function(subscription) {
 };
 
 exports.deleteTodo = function (item) {
-    log.info("deleting item: " + JSON.stringify(item, null, 4));
     var repoConn = getRepoConnection();
     //log.info(JSON.stringify(item.data, null, 4)); 
     
@@ -251,12 +250,11 @@ exports.deleteTodo = function (item) {
 
 
 exports.replaceTodo = function (item) {
+    //log.info("deleting item: " + JSON.stringify(item, null, 4));
     var repoConn = getRepoConnection();
     var hits = repoConn.query({
         query:
-            "item.data.id = '" +
-            item.data.id +
-            "'"
+            "item.id =" + item.id
     }).hits;
     
     if (!hits || hits.length < 1) {
@@ -273,8 +271,9 @@ exports.replaceTodo = function (item) {
     var editor = function(node) {
         //log.info(JSON.stringify(node,null,4)); 
         //node.data.text = "EDITED"; 
-        node.item.data.text = item.data.text;
-        node.item.data.isChecked = item.data.isChecked; 
+        node.item.text = item.text;
+        node.item.isChecked = item.isChecked;
+        node.item.changed = false 
         return node; 
     }
     
