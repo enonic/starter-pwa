@@ -189,8 +189,6 @@ exports.storeSubscriptionAndGetNode = function(subscription) {
 };
 
 exports.storeBackgroundSyncItemAndGetNode = function (item) {
-    log.info("dreating item"); 
-    log.info(new Date().valueOf()); 
     item.synced = true; 
     var repoConn = getRepoConnection();
 
@@ -201,8 +199,6 @@ exports.storeBackgroundSyncItemAndGetNode = function (item) {
     })
 
     repoConn.refresh();
-    log.info("item created"); 
-    log.info(new Date().valueOf()); 
     return node;
 };
 
@@ -232,11 +228,21 @@ exports.deleteSubscription = function(subscription) {
 };
 
 exports.deleteTodo = function (item) {
-
-    //TODO:!!! Add error handling!!
-    
+    log.info("deleting item: " + JSON.stringify(item, null, 4));
     var repoConn = getRepoConnection();
-    repoConn.delete(item.data);
+    //log.info(JSON.stringify(item.data, null, 4)); 
+    
+    var hits = repoConn.query({
+        query: "item.id = " + item.id 
+    }).hits;
+    if (!hits || hits.length < 1) {
+        return "NOT_FOUND";
+    }
+    var repoConn = getRepoConnection();
+    var deleteRepsonse = hits.map(function(hit) {
+        return repoConn.delete(hit.id)
+    });
+    
     repoConn.refresh();
     return "SUCCESS";
     
@@ -246,7 +252,6 @@ exports.deleteTodo = function (item) {
 
 exports.replaceTodo = function (item) {
     var repoConn = getRepoConnection();
-
     var hits = repoConn.query({
         query:
             "item.data.id = '" +
@@ -311,10 +316,9 @@ exports.storeKeyPair = function (keyPair) {
 exports.getAllTodos = function() {
     var repoConn = getRepoConnection();
     var hits = repoConn.query({
+        count: 1000,
         query: "item.type = 'TodoItem'"
     }).hits;
-    log.info(hits.length)
-    log.info(new Date().valueOf()); 
     if (!hits || hits.length < 1) {
         return "NOT_FOUND";
     }

@@ -52,8 +52,8 @@ exports.post = function (req) {
 };
 
 exports.delete = function (req){
-
-    var todoItem = getItemObj(req.params.data);
+    
+    var todoItem = JSON.parse(req.params.data);
     if (!todoItem) {
         var message = "Missing/invalid item data in request";
         log.warning(message);
@@ -104,6 +104,8 @@ exports.put = function (req) {
 }
 
 exports.get = function(req) {
+    // req
+
     // Get all from repo 
     var result = getAllTodoItems();
     //log.info(JSON.stringify(result, null, 4));
@@ -185,8 +187,6 @@ var createTodoNode = function (todoItem) {
             }
 
         } else {
-            log.info(JSON.stringify(todoItem))
-            log.info(new Date().valueOf())
             return { success: true };
         }
 
@@ -201,7 +201,9 @@ var createTodoNode = function (todoItem) {
 
 var deleteTodoNode = function (todoItem) {
     try {
+        
         var result = pushRepo.deleteTodo(todoItem);
+        
         if (result === "NOT_FOUND") {
             return {
                 status: 404,

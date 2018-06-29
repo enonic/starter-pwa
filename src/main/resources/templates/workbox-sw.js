@@ -86,7 +86,6 @@ function getItemsFromRepo(){
     // fetching items from repo
     return getApiCall(repoUrl).then((response) => response.json().then(itemList => {
         // item fetched from repo is an object called TodoItems, we are interested in it's values 
-        console.log("todoitems", itemList.TodoItems)
         return itemList.TodoItems
     }))
 }
@@ -102,11 +101,13 @@ function getItemsFromDB() {
 function compareDelete(db){
     return Promise.all(db.map(item => 
         deleteApiCall(repoUrl,item)
-            .catch(err => 
-                reject(err)
-            )
-        )
-    )
+        .then(console.log("item was deleted"))
+        .then(console.log("items from repo:", getItemsFromRepo()))
+        .catch(err => {
+            console.error(err)
+            reject(err)
+        })
+    ))
 }
 
 function resolveChanges(db){
@@ -127,26 +128,27 @@ let syncronize = function(event){
         console.log("7 - SW: got db");
 
         //delete in repo all from db-delete 
+        console.log("8 - SW: repo delete");
         compareDelete(values[0]).then(() => {
             
-            console.log("8 - SW: repo delete");
-            // change in repo all marked with change and sync not synced items
             
+            // change in repo all marked with change and sync not synced items
+            console.log("9 - SW: repo change and add");
             resolveChanges(values[1]).then(() => {
                 
-                console.log("9 - SW: repo change and add");
+                
                 //get new items from repo (synced values are changed if synced)
-                console.log("get", new Date().valueOf());
+                console.log("10 - SW: get items from repo");
                 getItemsFromRepo().then(repo => {
                     
-                    console.log("10 - SW: got items from repo");
-                    console.log("repo: ", repo);
+                    
                     //flush db & dbRemove
+                    console.log("11 - SW: flush db");
                     Promise.all([
                         flushDB(indexDbName.todoMemo, storeName.todo),
                         flushDB(indexDbName.todoMemo, storeName.removed)
                     ]).then(() => {
-                        console.log("11 - SW: flushed db");
+                    
 
                         //add all items from repo into db.
                         repo ? Promise.all(repo.map(element => DBPost(indexDbName.todoMemo, storeName.todo, element.item))).then(() => {
@@ -261,28 +263,26 @@ let open = function (indexDbName) {
 
 
 let getApiCall = (url) => {
-    console.log("getapi", new Date().valueOf()); 
-    return fetch(url,{ 
-        method: 'GET',
-    }).then(console.log("response get", new Date().valueOf()))
+    return fetch(url,{
+        
+        method: 'GET'
+    })
 }
 
 let deleteApiCall = (url, data) => {
-    return fetch(url + "?data=" + data._id, {
+    return fetch(url + "?data=" + JSON.stringify(data), {
         method: 'DELETE',
     })
 }
 
 let postApiCall = (url, data) => {
-    console.log("post", new Date().valueOf())
     return fetch(url, {
         body: JSON.stringify(data), 
         method: 'POST',
-    }).then(r => console.log("post response",r ))
+    })
 }
 
 let putApiCall = (url, data) => {
-    console.log("change: ", data);
     return fetch(url, {
         body: JSON.stringify(data), 
         method: 'PUT',
