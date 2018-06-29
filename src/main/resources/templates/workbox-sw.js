@@ -104,7 +104,8 @@ function getItemsFromDB() {
 }
 
 function compareDelete(db){
-    return Promise.all(db.map(item => deleteApiCall(repoUrl,item)))
+    console.log("deleting......")
+    return Promise.all(db.map(item => deleteApiCall(repoUrl,item).then(r=>console.log(r))))
 }
 
 function resolveChanges(db){
@@ -120,9 +121,7 @@ function resolveChanges(db){
 
 
 let syncronize = function(event){
-    console.log()
-    return new Promise((resolve, reject) => 
-    {
+
         console.log("syncronize - 1")
         //read db, dbRemove and repo
         getItemsFromDB().then(values => {
@@ -156,7 +155,7 @@ let syncronize = function(event){
                                     if (clients && clients.length > 0) {
                                         console.log("syncronize - 8");
                                         clients[0].postMessage(data);
-                                        resolve()
+                                        
                                     } else {
                                         console.error("Can't update the DOM: serviceworker can't find a client (page)");
                                     }
@@ -165,9 +164,9 @@ let syncronize = function(event){
                         }) 
                     })
 
-                }).catch(reject())
-            })   
-        })
+                })
+            }).catch(err => console.error(err))   
+        
     })
 }    
 

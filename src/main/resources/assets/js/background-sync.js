@@ -130,7 +130,10 @@ let removeTodo = (event) => {
     const id = parseInt(event.target.parentNode.children[1].id); 
     searchAndApply(id, (todoItem) => {
         storage.add.offline(storeNames.deletedWhileOffline, todoItem, true).then(
-        storage.delete.offline(storeNames.main, todoItem.id))
+        storage.delete.offline(storeNames.main, todoItem.id)).then(
+            updateUI()
+        )
+        
         return; //do not check more items than neccecary
     }); 
 }    

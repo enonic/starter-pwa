@@ -191,7 +191,7 @@ exports.storeSubscriptionAndGetNode = function(subscription) {
 exports.storeBackgroundSyncItemAndGetNode = function (item) {
     item.synced = true; 
     var repoConn = getRepoConnection();
-
+    log.info("Add:" + new Date() + log.info(JSON.stringify(item, null, 4)))
     var node = repoConn.create({
         _parentPath: BACKGROUND_SYNC_PATH,
         _permissions: ROOT_PERMISSIONS,
@@ -228,6 +228,7 @@ exports.deleteSubscription = function(subscription) {
 };
 
 exports.deleteTodo = function (item) {
+    log.info("DELETE:" + new Date() + log.info(JSON.stringify(item, null, 4)))
     var repoConn = getRepoConnection();
     //log.info(JSON.stringify(item.data, null, 4)); 
     
@@ -251,6 +252,7 @@ exports.deleteTodo = function (item) {
 
 exports.replaceTodo = function (item) {
     //log.info("deleting item: " + JSON.stringify(item, null, 4));
+    log.info("EDIT:" + new Date() + log.info(JSON.stringify(item, null, 4)))
     var repoConn = getRepoConnection();
     var hits = repoConn.query({
         query:
@@ -313,6 +315,7 @@ exports.storeKeyPair = function (keyPair) {
 };
 
 exports.getAllTodos = function() {
+    log.info("GET REQUEST" + new Date())
     var repoConn = getRepoConnection();
     var hits = repoConn.query({
         count: 1000,
