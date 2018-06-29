@@ -50,7 +50,8 @@ const repoUrl =
     "/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/background-sync";
 
 
-let registeredTodos = [];
+
+export let registeredTodos = []
 
 
 
@@ -66,7 +67,7 @@ class TodoItem {
      */               
     constructor(text, date, isChecked, id, synced) {
         this.text = text; 
-        this.date = date; 
+        this.date = (typeof date === "string" ? new Date(date) : date); 
         this.isChecked = isChecked;
         // only give new ID of old one is not supplied 
         this.id = (!id ? new Date().valueOf() : id); // unique id}
@@ -79,30 +80,6 @@ class TodoItem {
         + this.date.getHours() + ":" + this.date.getMinutes() + " " 
         + this.date.getDate() + "/" + (this.date.getMonth() + 1) + "/" + this.date.getFullYear();
     }
-}
-
-/**
- * Setup the service worker and trigger initialization
- */
-
-if ('serviceWorker' in navigator) {
-    // Service Worker and Push is supported
-    /*
-    navigator.serviceWorker.ready.then(function (registration) {
-        registration.sync.register('Background-sync')
-    }); 
-    navigator.serviceWorker.addEventListener("message", (event)=>{
-        let data = JSON.parse(event.data)
-        if(data.message === "synced"){
-            for(let todo of registeredTodos){
-                todo.synced = true
-            }
-            updateTodoView();
-        }
-    })
-    */
-} else {
-    console.log("SW not supported"); 
 }
 
 
@@ -131,10 +108,7 @@ let addTodo = () => {
         registeredTodos.push(item);
 
         storage.add.offline(storeNames.main, item); 
-
         inputfield.value = "";
-        updateTodoView();
-        updateListenersFor.everything();  
     } else {
         // let user know something was wrong 
         inputfield.style.border = "solid red";
@@ -153,14 +127,10 @@ let removeTodo = (event) => {
     Loop through register and remove from local 
     Update view */
     const id = parseInt(event.target.parentNode.children[1].id); 
+    console.log("1 - Click")
     searchAndApply(id, (todoItem) => {
-        storage.delete.offline(storeNames.main, todoItem.id);
-        if (!navigator.onLine) storage.add.offline(storeNames.deletedWhileOffline, todoItem);
-        //remove from the array used for rendering 
-        registeredTodos.splice(registeredTodos.indexOf(todoItem), 1);
-
-        updateTodoView();
-        updateListenersFor.everything();
+        storage.add.offline(storeNames.deletedWhileOffline, todoItem, true).then(
+        storage.delete.offline(storeNames.main, todoItem.id))
         return; //do not check more items than neccecary
     }); 
 }    
@@ -174,7 +144,7 @@ let updateTodoView = () => {
     outputArea.innerHTML = "";
     for (let todo of registeredTodos) {
         outputArea.innerHTML += `
-            <div style="background-color:${todo.synced ? "green" : "red"}" class="todo-app__item">
+            <div style="background-color:${todo.synced ? (todo.changed ? "yellow" : "green") : "red"}" class="todo-app__item">
                 <label class="todo-app__checkbox" style=" background-image: ${todo.isChecked ? "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-checked.gif)" : "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-unchecked.gif)"}
                 
                 "></label>
@@ -198,7 +168,6 @@ let editItemText = (event) => {
         item.text = event.target.value; 
         registerChange(item, storeNames.main);    
     }); 
-    updateListenersFor.everything(); 
     changeInputToLabel(); 
 }
 
@@ -212,9 +181,6 @@ let checkTodo = (checkboxElement) => {
         item.isChecked = !item.isChecked;
         registerChange(item, storeNames.main);    
     }); 
-
-    updateTodoView(); 
-    updateListenersFor.everything(); 
 }
 
 /**
@@ -224,9 +190,9 @@ let checkTodo = (checkboxElement) => {
  * @param storeName storeName to replaced in (probably storeNames.main)
  */
 let registerChange = (item, storeName) => {
-    item.changed = true;
-    item.synced = false; // set to true in backend when eventually synced. 
+    item.changed = true;// set to true in backend when eventually synced. 
     storage.replace.offline(storeName, item);
+    updateUI("registerchange")
 }
 
 let changeLabelToInput = (textfield) => {
@@ -264,19 +230,12 @@ document.onkeydown = (event) => {
     }
 }
 document.getElementById("todo-app__startButton").onclick = () => {
-    if(navigator.serviceWorker) {
-        navigator.serviceWorker.ready.then(function (registration) {
-            console.log("request sync")
-            registration.sync.register('Background-sync')
-        }) 
-    }
     document.getElementById("todo-app__startButton").style.display = "none"; 
     document.getElementById("todo-app__container").style.display = "block"; 
     storage.get.offline(storeNames.main, items => {
         // transform from indexDB-item to TodoItem
-        console.log(items); 
         registeredTodos = items.map(item => new TodoItem(item.value.text, item.value.date, item.value.isChecked, item.value.id)); 
-        updateListenersFor.everything(); 
+        updateUI("startbutton")
     }); 
 }
 
@@ -322,3 +281,30 @@ const updateListenersFor = {
         }
     }
 }
+
+
+let updateUI = (arg) => {
+    console.log(" updateui call from ", arg)
+    console.log("14 - Update UI");
+    storage.get.offline(storeNames.main, (items) => {
+        console.log("15 - Got items from db");
+        registeredTodos = items.map(item => new TodoItem(item.value.text, item.value.date, item.value.isChecked, item.value.id, item.value.synced))
+        updateTodoView();
+        updateListenersFor.everything(); 
+    })
+}
+
+
+
+
+/**
+ * Listen to serviceworker
+ */
+
+navigator.serviceWorker.addEventListener("message", (event)=>{
+    if(event.data.message === "synced"){
+        updateUI("serviceworker")
+    }
+
+})
+    

@@ -35,12 +35,18 @@ module.exports = {
          * Adds item to indexDB
          * @param storeName name of the indexDB store
          * @param item the item to add 
+         * @param noSync set to true if no sync with repo is wanted 
          */
-        offline : (storeName, item) => {
-            IndexedDBInstance().then(instance => {
+        offline : (storeName, item, noSync) => {
+            console.log("2 - adding item to removeStore");
+            return IndexedDBInstance().then(instance => {
+                console.log("2.5 - got db instances");
                 instance.add(storeName, item);
+                if(!noSync) {
+                    console.log("nosync er false eller undefined"); 
+                    dbChanged("add"); 
+                }
             }); 
-            dbChanged("add"); 
         }, 
         /**
          * Adds item to online storage 
@@ -65,9 +71,12 @@ module.exports = {
          */
         offline : (storeName, identifier) => {
             IndexedDBInstance().then(instance => {
-                instance.delete(storeName, identifier)
+                console.log("3 - delete offline");
+                let req = instance.delete(storeName, identifier)
+                //req.onsuccess = () => dbChanged("delete");  
+                dbChanged("delete"); 
             });
-            dbChanged("delete");  
+            
         },
         /**
          * Removes item from online storage

@@ -146,7 +146,6 @@ class OfflineDatabase {
     put(storeName, value) {
 
         return this.open().then((db) => {
-
             return new Promise((resolve, reject) => {
 
                 var dbTransaction = db.transaction(storeName, 'readwrite');

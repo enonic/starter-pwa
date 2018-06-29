@@ -133,7 +133,6 @@ var sortItems = function (items){
 var getAllTodoItems = function() {
     try {
         var result = pushRepo.getAllTodos();
-        log.info(JSON.stringify(result,null,4)); 
         if (result === "NOT_FOUND") {
             return {
                 status: 404,
@@ -186,6 +185,8 @@ var createTodoNode = function (todoItem) {
             }
 
         } else {
+            log.info(JSON.stringify(todoItem))
+            log.info(new Date().valueOf())
             return { success: true };
         }
 

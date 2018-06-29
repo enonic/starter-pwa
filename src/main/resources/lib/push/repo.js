@@ -189,17 +189,20 @@ exports.storeSubscriptionAndGetNode = function(subscription) {
 };
 
 exports.storeBackgroundSyncItemAndGetNode = function (item) {
-    log.info(JSON.stringify(item, null, 4)); 
+    log.info("dreating item"); 
+    log.info(new Date().valueOf()); 
     item.synced = true; 
-    log.info(JSON.stringify(item, null, 4)); 
-
     var repoConn = getRepoConnection();
+
     var node = repoConn.create({
         _parentPath: BACKGROUND_SYNC_PATH,
         _permissions: ROOT_PERMISSIONS,
         item: item
-    });
+    })
+
     repoConn.refresh();
+    log.info("item created"); 
+    log.info(new Date().valueOf()); 
     return node;
 };
 
@@ -310,7 +313,8 @@ exports.getAllTodos = function() {
     var hits = repoConn.query({
         query: "item.type = 'TodoItem'"
     }).hits;
-
+    log.info(hits.length)
+    log.info(new Date().valueOf()); 
     if (!hits || hits.length < 1) {
         return "NOT_FOUND";
     }
