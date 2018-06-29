@@ -264,16 +264,18 @@ document.onkeydown = (event) => {
     }
 }
 document.getElementById("todo-app__startButton").onclick = () => {
-    navigator.serviceWorker.ready.then(function (registration) {
-        console.log("request sync")
-        registration.sync.register('Background-sync')
-    }) 
+    if(navigator.serviceWorker) {
+        navigator.serviceWorker.ready.then(function (registration) {
+            console.log("request sync")
+            registration.sync.register('Background-sync')
+        }) 
+    }
     document.getElementById("todo-app__startButton").style.display = "none"; 
     document.getElementById("todo-app__container").style.display = "block"; 
     storage.get.offline(storeNames.main, items => {
         // transform from indexDB-item to TodoItem
+        console.log(items); 
         registeredTodos = items.map(item => new TodoItem(item.value.text, item.value.date, item.value.isChecked, item.value.id)); 
-        updateTodoView(); 
         updateListenersFor.everything(); 
     }); 
 }
