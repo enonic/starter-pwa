@@ -250,8 +250,8 @@ let open = function (indexDbName) {
  */
 
 
-let getApiCall = (url) => {
-    return fetch(url,{
+let getApiCall = (url, data) => {
+    return fetch(url + "?data=" + String(data),{
         method: 'GET'
     })
 }

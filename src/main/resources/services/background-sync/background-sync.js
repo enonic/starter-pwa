@@ -101,7 +101,7 @@ exports.put = function (req) {
 }
 
 exports.get = function(req) {
-
+    
     var result = getAllTodoItems();
     if (result.status && Number(result.status) >= 400) {
         return result;
