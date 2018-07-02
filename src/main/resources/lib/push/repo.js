@@ -325,7 +325,7 @@ exports.getAllTodos = function() {
         return repoConn.get(hit.id);
     });
     if (todoItems) {
-        return todoItems;
+        return todoItems ;
     } else {
         return "NOT_FOUND";
     }
