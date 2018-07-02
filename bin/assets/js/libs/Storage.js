@@ -101,8 +101,9 @@ export default {
         offline : (storeName, item) => {
             return IndexedDBInstance().then(instance => {
                 instance.put(storeName, item);
+                dbChanged("replace"); 
             });
-            dbChanged("replace"); 
+            
         }, 
         online : (url, data) => {
             return fetch(url, {

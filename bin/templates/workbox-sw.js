@@ -98,28 +98,17 @@ function getItemsFromDB() {
     ])
 }
 
-<<<<<<< HEAD
-function compareDelete(db){
-    return Promise.all(db.map(item => deleteApiCall(repoUrl,item).then(r=>console.log(r))))
-=======
 // deleting all items in repo contained in a database
 function removeItemsFromRepo(db){
     return Promise.all(db.map(item => 
         deleteApiCall(repoUrl,item)
     ))
->>>>>>> 4b5abd8b1c65694cd3e627d74f27e6a30283e5c8
 }
 
 //resolving offline changes on online repository
 function resolveChanges(db){
     return Promise.all(db.map(item => {
-<<<<<<< HEAD
-        return item.synced ? (
-            item.changed ? 
-                putApiCall(repoUrl, item) : null) 
-=======
         return item.synced ? ( item.changed ? putApiCall(repoUrl, item) : null) 
->>>>>>> 4b5abd8b1c65694cd3e627d74f27e6a30283e5c8
             : postApiCall(repoUrl, item)
     }))
 
@@ -128,42 +117,6 @@ function resolveChanges(db){
 
 let syncronize = function(event){
 
-<<<<<<< HEAD
-        //read db, dbRemove and repo
-        getItemsFromDB().then(values => {
-
-            //delete in repo all from db-delete 
-            compareDelete(values[0]).then(() => {
-                
-                // change in repo all marked with change and sync not synced items
-                resolveChanges(values[1]).then(() => {
-                    
-                    //get new items from repo (synced values are changed if synced)
-                    getItemsFromRepo().then(repo => {
-                        
-                        //flush db & dbRemove
-                        Promise.all([
-                            flushDB(indexDbName.todoMemo, storeName.todo),
-                            flushDB(indexDbName.todoMemo, storeName.removed)
-                        ]).then(() => {
-                        
-                            //add all items from repo into db.
-                            Promise.resolve(repo ? Promise.all(repo.map(element => DBPost(indexDbName.todoMemo, storeName.todo, element.item))): null)
-                            .then(()=>{
-                                let data = { message: "synced" }
-                                self.clients.matchAll().then(function (clients) {
-                                    if (clients && clients.length > 0) {
-                                        clients[0].postMessage(data);
-                                        
-                                    } else {
-                                        console.error("Can't update the DOM: serviceworker can't find a client (page)");
-                                    }
-                                }) 
-                            })
-                        }) 
-                    })
-
-=======
     //read db, dbRemove and repo
     getItemsFromDB().then(values => {
 
@@ -197,7 +150,6 @@ let syncronize = function(event){
                             }) 
                         })
                     }) 
->>>>>>> 4b5abd8b1c65694cd3e627d74f27e6a30283e5c8
                 })
 
             })
@@ -298,8 +250,8 @@ let open = function (indexDbName) {
  */
 
 
-let getApiCall = (url) => {
-    return fetch(url,{
+let getApiCall = (url, data) => {
+    return fetch(url + "?data=" + String(data),{
         method: 'GET'
     })
 }

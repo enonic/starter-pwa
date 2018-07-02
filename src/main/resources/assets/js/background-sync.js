@@ -42,6 +42,7 @@ Service worker må fungere slik:
 
 
 const storage = require('./libs/Storage').default; 
+const dbChange = require('./dbChanged')
 const storeNames = {
     offline : "OfflineStorage", 
     deletedWhileOffline : "DeletedWhileOffline"
@@ -148,13 +149,14 @@ let updateTodoView = () => {
     outputArea.innerHTML = "";
     for (let todo of registeredTodos) {
         outputArea.innerHTML += `
-            <li class="todo-app__item mdl-list__item" style="background-color:${todo.synced ? (todo.changed ? "yellow" : "#388E3C") : "#FF6E40"}; padding: 15px">
-                <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect mdl-list__item-primary-action" for="${todo.id}">
+            <li class="todo-app__item mdl-list__item">
+                <label class="mdl-cell mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="${todo.id}">
 					<input type="checkbox" id="${todo.id}" class="mdl-checkbox__input todo-app__checkbox" ${todo.isChecked ? "checked" : ""}/>
-				</label>
-                <label id="${todo.id}" value="${todo.text}" class="todo-app__textfield mdl-list__item-primary-content">${todo.text}</label>
-                <div class="mdl-list__item-secondary-content">${todo.getFormattedDate()}</div>
-                <button class="remove-todo-button mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-list__item-secondary-action">
+                </label>
+                <label id="${todo.id}" value="${todo.text}" class="todo-app__textfield">${todo.text}</label>
+                <div>${todo.getFormattedDate()}</div>
+                <i class="material-icons">${todo.synced ? "network_wifi" : "signal_wifi_off"}</i>
+                <button class="remove-todo-button mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab">
 					<i class="material-icons" id=${todo.id}>delete_forever</i>
 				</button>
             </li>
@@ -206,10 +208,13 @@ let changeLabelToInput = (textfield) => {
     let id = parent.children[1].id; 
     let input = document.createElement("input"); 
 
-    input.className = "todo-app__inputfield"; 
+    dbChange("edit"); 
+
+    input.className = "todo-app__inputfield mdl-textfield__input"; 
     input.id = id; 
     input.value = label; 
     parent.replaceChild(input, parent.children[1]);
+
     input.focus();
     
     updateListenersFor.inputfields(); 
@@ -217,6 +222,7 @@ let changeLabelToInput = (textfield) => {
 
 let changeInputToLabel = () => {
     let input = document.getElementsByClassName("todo-app__inputfield")[0]; 
+
     let parent = input.parentNode;
 
     let label = document.createElement("label");

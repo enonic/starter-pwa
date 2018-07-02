@@ -12,16 +12,23 @@
     width: 100vw;
 }
 
-#todo-app__input {
-    background-color: turquoise;
-}
-
 #todo-app__item-area {
     overflow-y: scroll;
 }
 
+.todo-app__item {
+    padding: 15px; 
+    border-bottom-style: solid; 
+    border-bottom-width: 1px; 
+}
+
+.todo-app__textfield {
+    margin-left: 5%; 
+}
+
+
 @media (min-width: @breakpoint_desktop) {
     #todo-app__container {
-        width: 30vw;
+        width: 20vw;
     }
 }

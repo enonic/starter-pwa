@@ -29,20 +29,23 @@ let updateInterval = () => {
 
 
 let syncronize = () => {
-    /*if(navigator.serviceWorker) {
+    if(navigator.serviceWorker.sync) {
         navigator.serviceWorker.ready.then(function (registration) {
             registration.sync.register("Background-sync");
         });
         
-    } else */
-    if(navigator.onLine) {
+    } else if(navigator.onLine) {
         localSync(); 
     }
 }
     
 module.exports = (type) => {
-    //updateInterval()
-    syncronize()
+    if(type == 'edit'){
+        clearInterval(interval)
+    } else {
+        updateInterval()
+        syncronize()
+    }
 }
 
 
