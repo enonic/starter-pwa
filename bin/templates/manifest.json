@@ -1,0 +1,15 @@
+{
+  "name": "PWA Starter for Enonic XP",
+  "short_name": "PWA Starter",
+  "theme_color": "#FFF",
+  "background_color": "#FFF",
+  "display": "standalone",
+  "start_url": "{{startUrl}}",
+  "icons": [
+    {
+      "src": "precache/icons/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

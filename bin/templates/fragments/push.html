@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<div data-th-fragment="fragment-push" data-th-remove="tag">
+    <div id="page-content">
+
+        <form data-th-class="'push-forms push ' + (${startDisabled} ? 'disabled' : '')" id="push-form" data-th-action="${pushUrl}" onSubmit="return false;">
+            <label>
+                <span class="subscriber-notify">Notify </span>
+                <span id="subscriber-count" data-th-text="${subscriberCount}">subscribers</span>
+            </label>
+            <input type="text" id="push-field" name="message" autocomplete="off" placeholder="Say something..." data-th-disabled="${startDisabled}"/>
+            <div class="button-holder"><button id="push-button" data-th-disabled="${startDisabled}">Push</button></div>
+            <p>For demonstration purposes.<br />Allowing the client to send push notifications to all subscribers like this is usually not recommended.</p>
+        </form>
+    </div>
+
+    <div data-th-replace="/templates/fragments/common::fragment-no-javascript"></div>
+
+    <div id="permission-footer">
+        <form class="push-forms subscribe center"
+              id="subscribe-form"
+              data-th-action="${subscribeUrl}"
+              th:attr="data-public-key=${publicKey},data-subscribercount-url=${subscriberCountUrl}"
+              onSubmit="return false;">
+            <label id="subscribe-status">Checking subscription and permissions...</label>
+            <div class="button-holder"><button id="subscribe-button" class="hidden">Subscribe</button></div>
+        </form>
+
+        <div class="offline-message center"><p>Offline: push notifications are disabled.</p></div>
+    </div>
+</div>
+
+</body>
+
+</html>

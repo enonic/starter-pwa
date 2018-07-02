@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<div data-th-fragment="fragment-site-menu" data-th-remove="tag">
+    <div class="mdl-layout__drawer">
+        <span class="mdl-layout-title" data-th-utext="${title}"></span>
+        <nav class="mdl-navigation">
+            <a class="mdl-navigation__link" data-th-href="${appUrl}" data-th-classappend="${pageId == 'main' ? 'mdl-typography--font-black' : ''}">Home</a>
+            <a class="mdl-navigation__link" data-th-href="${appUrl + 'offline'}" data-th-classappend="${pageId == 'offline' ? 'mdl-typography--font-black' : ''}">Offline</a>
+            <a class="mdl-navigation__link" data-th-href="${appUrl + 'push'}" data-th-classappend="${pageId == 'push' ? 'mdl-typography--font-black' : ''}">Push</a>
+            <a class="mdl-navigation__link" data-th-href="${appUrl + 'cache-first'}" data-th-classappend="${pageId == 'cache-first' ? 'mdl-typography--font-black' : ''}">Cache First</a>
+            <a class="mdl-navigation__link" data-th-href="${appUrl + 'background-sync'}" data-th-classappend="${pageId == 'background-sync' ? 'mdl-typography--font-black' : ''}">Background Sync</a>
+            <a class="mdl-navigation__link" data-th-href="${appUrl + 'bluetooth'}" data-th-classappend="${pageId == 'bluetooth' ? 'mdl-typography--font-black' : ''}">Bluetooth</a>
+            <a class="mdl-navigation__link" data-th-href="${appUrl + 'audio'}" data-th-classappend="${pageId == 'audio' ? 'mdl-typography--font-black' : ''}">Audio</a>
+            <a class="mdl-navigation__link" data-th-href="${appUrl + 'video'}" data-th-classappend="${pageId == 'video' ? 'mdl-typography--font-black' : ''}">Video</a>
+            <a class="mdl-navigation__link" data-th-href="${appUrl + 'webrtc'}" data-th-classappend="${pageId == 'webrtc' ? 'mdl-typography--font-black' : ''}">WebRTC</a>
+        </nav>
+        <p class="app-version" data-th-utext="${'v.' + version}"></p>
+        
+    </div>
+</div>
+
+<div data-th-fragment="fragment-page-main" data-th-remove="tag">
+    <img id="pwa-logo" data-th-src="${portal.assetUrl({'_path=precache/icons/pwa-logo.png'})}" alt="PWA Logo">
+    <div id="page-content">Welcome to the PWA Starter!</div>
+    <div id="content-offline">
+        You are now offline but this page is still available
+    </div>
+    <div data-th-replace="common::fragment-no-javascript"></div>
+</div>
+<div data-th-fragment="fragment-no-javascript" data-th-remove="tag">
+    <noscript>
+        <p id="js-disabled">Javascript is disabled.<br> PWA features of this application are not available.</p>
+    </noscript>
+</div>
+
+
+</body>
+</html>
