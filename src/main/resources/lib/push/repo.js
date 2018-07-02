@@ -127,7 +127,6 @@ var createBackgroundSyncNode = function() {
     var backgroundSyncExist = nodeWithPathExists(repoConn, BACKGROUND_SYNC_PATH);
 
     if (backgroundSyncExist) {
-        // Node exists
         return;
     }
 

@@ -101,7 +101,6 @@ exports.put = function (req) {
 }
 
 exports.get = function(req) {
-    
     var result = getAllTodoItems();
     if (result.status && Number(result.status) >= 400) {
         return result;
@@ -112,16 +111,6 @@ exports.get = function(req) {
             "Content-Type": "application/json"
         }
     };
-}
-
-// The user should get items in the same order as received 
-var sortItems = function (items){
-    
-    items.sort(function (a, b) {
-        return a.item.id - b.item.id;
-    });
-    
-    return items;//items.reverse;   
 }
 
 
@@ -142,7 +131,7 @@ var getAllTodoItems = function() {
             }
         } 
         else {
-            return sortItems(result)
+            return result.reverse()
         }
 
     } catch (e) {
