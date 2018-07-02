@@ -1,7 +1,7 @@
 const IndexedDBInstance = require('./db/IndexedDB').default; 
 const dbChanged = require("../dbChanged"); 
 
-module.exports = {
+export default {
     /**
      * Methods for retrieving from storage
      */
@@ -12,9 +12,9 @@ module.exports = {
          * @param callback callback when fetched 
          */
         offline: (storeName, callback) => {
-            IndexedDBInstance().then(instance => {
-                instance.getAll("OfflineStorage").then(callback);
-            });
+            return IndexedDBInstance().then(instance => 
+                instance.getAll(storeName).then(callback)
+            );
         }, 
         /**
          * Get request from URL 
@@ -22,9 +22,9 @@ module.exports = {
          * @returns Promise from fetch 
          */
         online: (url) => {
-            return fetch(url, {
-                method: 'GET',
-            });
+            return fetch(url,{
+                method: 'GET'
+            })
         }
     }, 
     /**
@@ -37,15 +37,12 @@ module.exports = {
          * @param item the item to add 
          * @param noSync set to true if no sync with repo is wanted 
          */
-        offline : (storeName, item, noSync) => {
-            console.log("2 - adding item to removeStore");
+        offline : (storeName, item, sync) => {
             return IndexedDBInstance().then(instance => {
-                console.log("2.5 - got db instances");
-                instance.add(storeName, item);
-                if(!noSync) {
-                    console.log("nosync er false eller undefined"); 
-                    dbChanged("add"); 
-                }
+                instance.add(storeName, item);   
+                if(!sync){
+                    dbChanged("delete"); 
+                } 
             }); 
         }, 
         /**
@@ -68,13 +65,15 @@ module.exports = {
          * Removes item from indexDB
          * @param storeName name of the indexDB store
          * @param identifier the identifier of item to delete 
+         * @param sync If function called by online sync function
          */
-        offline : (storeName, identifier) => {
-            IndexedDBInstance().then(instance => {
-                console.log("3 - delete offline");
+        offline : (storeName, identifier, sync) => {
+            return IndexedDBInstance().then(instance => {
                 let req = instance.delete(storeName, identifier)
                 //req.onsuccess = () => dbChanged("delete");  
-                dbChanged("delete"); 
+                if(!sync){
+                    dbChanged("delete"); 
+                }
             });
             
         },
@@ -84,10 +83,10 @@ module.exports = {
          * @param parameter passed as ?data to specify what to delete
          * @returns Promise from fetch 
          */
-        online : (url, parameter) => { // parameters er data._id for oss!
-            return fetch(url + "?data=" + parameter, {
+        online : (url, data) => {
+            return fetch(url + "?data=" + JSON.stringify(data), {
                 method: 'DELETE',
-            });
+            })
         }
     }, 
     /**
@@ -100,13 +99,25 @@ module.exports = {
          * @param item item to replace the old one 
          */
         offline : (storeName, item) => {
-            IndexedDBInstance().then(instance => {
+            return IndexedDBInstance().then(instance => {
                 instance.put(storeName, item);
             });
             dbChanged("replace"); 
         }, 
-        online : () => {
-            throw "online replace not yet implementted (Storage.js)"
+        online : (url, data) => {
+            return fetch(url, {
+                body: JSON.stringify(data), 
+                method: 'PUT',
+            }) 
+        }
+    },
+
+    flush : {
+        offline : (storeName) => {
+            return IndexedDBInstance().then(instance => {
+                instance.deleteAll(storeName)
+    
+            })
         }
     }
 }

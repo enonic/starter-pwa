@@ -4,6 +4,7 @@ require("../css/background-sync.less");
 require('./background-sync'); 
 const update = require('../js/dbChanged')
 
+
 var ToasterInstance = require("./libs/Toaster").default;
 
 //var TekstController = require('./controller/TekstController').default;
@@ -28,7 +29,6 @@ module.exports = {
 
         const toggleOnlineStatus = function () {
             if (navigator.onLine) {
-                console.log("online")
                 update("online")
             }else{
                 ToasterInstance().then(toaster => {

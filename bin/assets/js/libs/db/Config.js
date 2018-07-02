@@ -46,7 +46,7 @@ class ConfigManager {
 }
 
 const Config = {
-    name: 'TodoMemo',
+    name: 'Todolist',
     version: 1,
     stores: {
         'OfflineStorage': {

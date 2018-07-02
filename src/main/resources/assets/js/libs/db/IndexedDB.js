@@ -220,7 +220,6 @@ class OfflineDatabase {
     }
 
     getAll(storeName, index, order) {
-
         return this.open().then((db) => {
 
             return new Promise((resolve, reject) => {

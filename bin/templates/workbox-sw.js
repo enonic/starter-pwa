@@ -1,8 +1,4 @@
-try {
-    importScripts('{{appUrl}}js/workbox-sw.prod.v2.0.1.js'); 
-} catch(err) {
-    console.error(err); 
-}
+importScripts('{{appUrl}}js/workbox-sw.prod.v2.0.1.js'); 
 
 
 const swVersion = '{{appVersion}}';
@@ -12,13 +8,13 @@ const workboxSW = new self.WorkboxSW({
 });
 
 const repoUrl = "/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/background-sync";
-const indexDbName = {todoMemo: "TodoMemo"}
+const indexDbName = {Todolist: "Todolist"}
 const storeName = { 
-    todo: "OfflineStorage", 
-    removed: "DeletedWhileOffline"
+    offline: "OfflineStorage", 
+    deletedWhileOffline: "DeletedWhileOffline"
 }
 
-let indexDB; // indeDB instance
+let indexDB; // indexDB instance
 
 // This is a placeholder for manifest dynamically injected from webpack.config.js
 workboxSW.precache([]);
@@ -97,20 +93,33 @@ function getItemsFromRepo(){
 function getItemsFromDB() {
     return Promise.all([
         //fetching items from indexDB
-        getAllFromIndexDb(indexDbName.todoMemo, storeName.removed),
-        getAllFromIndexDb(indexDbName.todoMemo, storeName.todo)
+        getAllFromIndexDb(indexDbName.Todolist, storeName.deletedWhileOffline),
+        getAllFromIndexDb(indexDbName.Todolist, storeName.offline)
     ])
 }
 
+<<<<<<< HEAD
 function compareDelete(db){
     return Promise.all(db.map(item => deleteApiCall(repoUrl,item).then(r=>console.log(r))))
+=======
+// deleting all items in repo contained in a database
+function removeItemsFromRepo(db){
+    return Promise.all(db.map(item => 
+        deleteApiCall(repoUrl,item)
+    ))
+>>>>>>> 4b5abd8b1c65694cd3e627d74f27e6a30283e5c8
 }
 
+//resolving offline changes on online repository
 function resolveChanges(db){
     return Promise.all(db.map(item => {
+<<<<<<< HEAD
         return item.synced ? (
             item.changed ? 
                 putApiCall(repoUrl, item) : null) 
+=======
+        return item.synced ? ( item.changed ? putApiCall(repoUrl, item) : null) 
+>>>>>>> 4b5abd8b1c65694cd3e627d74f27e6a30283e5c8
             : postApiCall(repoUrl, item)
     }))
 
@@ -119,6 +128,7 @@ function resolveChanges(db){
 
 let syncronize = function(event){
 
+<<<<<<< HEAD
         //read db, dbRemove and repo
         getItemsFromDB().then(values => {
 
@@ -153,9 +163,45 @@ let syncronize = function(event){
                         }) 
                     })
 
+=======
+    //read db, dbRemove and repo
+    getItemsFromDB().then(values => {
+
+        //delete in repo all from db-delete 
+        removeItemsFromRepo(values[0]).then(() => {
+            
+            // change in repo all marked with change and sync not synced items
+            resolveChanges(values[1]).then(() => {
+                
+                //get new items from repo (synced values are changed if synced)
+                getItemsFromRepo().then(repo => {
+                    
+                    //flush db & dbRemove
+                    Promise.all([
+                        flushDB(indexDbName.Todolist, storeName.offline),
+                        flushDB(indexDbName.Todolist, storeName.deletedWhileOffline)
+                    ]).then(() => {
+                    
+                        //add all items from repo into db.
+                        Promise.resolve(repo ? Promise.all(repo.map(element => DBPost(indexDbName.Todolist, storeName.offline, element.item))): null)
+                        .then(()=>{
+
+                            let data = { message: "synced" }
+                            self.clients.matchAll().then(function (clients) {
+                                if (clients && clients.length > 0) {
+                                    clients[0].postMessage(data);
+                                    
+                                } else {
+                                    console.error("Can't update the DOM: serviceworker can't find a client (page)");
+                                }
+                            }) 
+                        })
+                    }) 
+>>>>>>> 4b5abd8b1c65694cd3e627d74f27e6a30283e5c8
                 })
-            }).catch(err => console.error(err))   
-        
+
+            })
+        })  
     })
 }    
 
@@ -179,11 +225,14 @@ let DBPost = function (indexDbName,storeName,item){
     return open(indexDbName).then(db => {
         var dbTransaction = db.transaction(storeName, 'readwrite');
         var dbStore = dbTransaction.objectStore(storeName);
-        dbStore.add(item);
+        dbStore.add(item)
+        dbStore.onerror = (event) => 
+            console.error("Something wentr wrong with your local databse. Make sure your browser supports indexDB")
+        
     })
 }
 
-let getAllFromIndexDb = function(indexDbName,storeName, index, order) {
+let getAllFromIndexDb = function(indexDbName, storeName, index, order) {
     return open(indexDbName).then((db) => {
 
         return new Promise((resolve, reject) => {
@@ -251,7 +300,6 @@ let open = function (indexDbName) {
 
 let getApiCall = (url) => {
     return fetch(url,{
-        
         method: 'GET'
     })
 }
