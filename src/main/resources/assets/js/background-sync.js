@@ -148,12 +148,17 @@ let updateTodoView = () => {
     let outputArea = document.getElementById("todo-app__item-area");
     outputArea.innerHTML = "";
     for (let todo of registeredTodos) {
+        /**
+         * Legg på grid 
+         * mdl-grid
+         * mdl-cell mdl-cell--4-col
+         */
         outputArea.innerHTML += `
-            <li class="todo-app__item mdl-list__item">
-                <label class="mdl-cell mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="${todo.id}">
+            <li class="todo-app__item mdl-list__item>
+                <label class=" mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="${todo.id}">
 					<input type="checkbox" id="${todo.id}" class="mdl-checkbox__input todo-app__checkbox" ${todo.isChecked ? "checked" : ""}/>
                 </label>
-                <label id="${todo.id}" value="${todo.text}" class="todo-app__textfield">${todo.text}</label>
+                <label id="${todo.id}" value="${todo.text}" class="todo-app__textfield ">${todo.text}</label>
                 <div>${todo.getFormattedDate()}</div>
                 <i class="material-icons">${todo.synced ? "network_wifi" : "signal_wifi_off"}</i>
                 <button class="remove-todo-button mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab">
