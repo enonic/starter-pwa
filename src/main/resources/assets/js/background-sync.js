@@ -126,8 +126,9 @@ let addTodo = () => {
 let removeTodo = (event) => {   
     /*Find the element data with DOM api 
     Loop through register and remove from local 
-    Update view */
-    const id = parseInt(event.target.parentNode.children[1].id); 
+    Update view */ 
+    //const id = parseInt(event.target.parentNode.children[1].id); 
+    const id = event.target.id; 
     searchAndApply(id, (todoItem) => {
         storage.add.offline(storeNames.deletedWhileOffline, todoItem, true).then(
         storage.delete.offline(storeNames.main, todoItem.id)).then(
@@ -146,33 +147,16 @@ let updateTodoView = () => {
     let outputArea = document.getElementById("todo-app__item-area");
     outputArea.innerHTML = "";
     for (let todo of registeredTodos) {
-        /*
-        outputArea.innerHTML += `
-            <li style="background-color:${todo.synced ? (todo.changed ? "yellow" : "green") : "red"}" class="todo-app__item">
-                <label class="todo-app__checkbox" style=" background-image: ${todo.isChecked ? "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-checked.gif)" : "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-unchecked.gif)"}
-                
-                "></label>
-                <div style="text-decoration:${todo.isChecked ? "line-through" : "none"}">
-                    <label class="todo-app__textfield" value="${todo.text}">${todo.text}</label>
-                    <div id="${todo.id}">${todo.getFormattedDate()}</div>
-                    <button class="remove-todo-button">X</button>
-                </div>
-            </li>
-        `;
-        */
-        //MATERAL, TODO: replace with DOM-API
         outputArea.innerHTML += `
             <li class="mdl-list__item todo-app__item" style="background-color:${todo.synced ? (todo.changed ? "yellow" : "green") : "red"}; padding: 15px">
-                <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="${todo.id}">
-					<input type="checkbox" id="${todo.id}" class="mdl-checkbox__input"/>
+                <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect mdl-list__item-primary-action" for="${todo.id}">
+					<input type="checkbox" id="${todo.id}" class="mdl-checkbox__input todo-app__checkbox" ${todo.isChecked ? "checked" : ""}/>
 				</label>
-                <div class="mdl-list__item-primary-content">
-                    <label value="${todo.text}">${todo.text}</label>
-                    <div id="${todo.id}">${todo.getFormattedDate()}</div>
-                    <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab">
-						<i class="material-icons">delete_forever</i>
-					</button>
-                </div>
+                <label id="${todo.id}" value="${todo.text}" class="todo-app__textfield mdl-list__item-primary-content">${todo.text}</label>
+                <div class="mdl-list__item-secondary-content">${todo.getFormattedDate()}</div>
+                <button class="remove-todo-button mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-list__item-secondary-action">
+					<i class="material-icons" id=${todo.id}>delete_forever</i>
+				</button>
             </li>
         `;
     }
@@ -184,7 +168,7 @@ let updateTodoView = () => {
  * updates storage
  */
 let editItemText = (event) => {
-    const id = event.target.parentNode.children[1].id;
+    const id = event.target.id; 
     var todoItem = searchAndApply(id, (item) => {
         item.text = event.target.value; 
         registerChange(item, storeNames.main);    
@@ -197,7 +181,7 @@ let editItemText = (event) => {
  * Takes the DOM element and makes it TodoItem counterpart checked/unchecked
  */
 let checkTodo = (checkboxElement) => {
-    const id = checkboxElement.parentNode.children[1].children[1].id;
+    const id = checkboxElement.id; 
     searchAndApply(id, item => {
         item.isChecked = !item.isChecked;
         registerChange(item, storeNames.main);    
@@ -219,11 +203,13 @@ let registerChange = (item, storeName) => {
 let changeLabelToInput = (textfield) => {
     let label = textfield.innerHTML;
     let parent = textfield.parentNode; 
+    let id = parent.children[1].id; 
     let input = document.createElement("input"); 
 
     input.className = "todo-app__inputfield"; 
+    input.id = id; 
     input.value = label; 
-    parent.replaceChild(input, parent.childNodes[1]);
+    parent.replaceChild(input, parent.children[1]);
     input.focus();
     
     updateListenersFor.inputfields(); 
@@ -236,7 +222,7 @@ let changeInputToLabel = () => {
     let label = document.createElement("label");
     label.className = "todo-app__textfield";
     label.innerHTML = input.value;
-    parent.replaceChild(label, parent.childNodes[1]);
+    parent.replaceChild(label, parent.children[1]);
 
     updateListenersFor.textfields(); 
 }
