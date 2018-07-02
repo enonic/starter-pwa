@@ -146,8 +146,6 @@ let updateTodoView = () => {
     let outputArea = document.getElementById("todo-app__item-area");
     outputArea.innerHTML = "";
     for (let todo of registeredTodos) {
-        //let todoHTML = generateTodoHTML(todo); 
-        //outputArea.appendChild(todoHTML); 
         /*
         outputArea.innerHTML += `
             <li style="background-color:${todo.synced ? (todo.changed ? "yellow" : "green") : "red"}" class="todo-app__item">
@@ -177,68 +175,9 @@ let updateTodoView = () => {
                 </div>
             </li>
         `;
-        
-
-        // container
-        
     }
 }
 
-let generateTodoHTML = (todo) => {
-    let container = document.createElement("li");
-    container.className = "mdl-list__item";
-    container.style.backgroundColor = (todo.synced ? "green" : "red");
-
-    // checkbox 
-    let checkboxContainer = document.createElement("label");
-    checkboxContainer.className = "mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect";
-    checkboxContainer.setAttribute("for", todo.id);
-
-    let checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.id = todo.id;
-    checkbox.classname = "mdl-checkbox__input";
-    componentHandler.upgradeElement(checkbox);
-
-    checkboxContainer.appendChild(checkbox);
-    console.log(checkboxContainer);
-    componentHandler.upgradeElement(checkboxContainer);
-
-    // other content
-    let contentContainer = document.createElement("div");
-    contentContainer.className = "mdl-list__item-primary-content";
-
-    let text = document.createElement("label");
-    text.value = todo.text;
-    text.innerHTML = todo.text;
-
-    let date = document.createElement("div");
-    date.id = todo.id;
-    date.innerHTML = todo.getFormattedDate();
-
-    let removeButton = document.createElement("button");
-    removeButton.className = "mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab";
-
-    let removeButtonIcon = document.createElement("i");
-    removeButtonIcon.className = "material-icons";
-    removeButtonIcon.innerHTML = "delete_forever";
-    componentHandler.upgradeElement(removeButtonIcon);
-
-    removeButton.appendChild(removeButtonIcon);
-    componentHandler.upgradeElement(removeButton);
-
-    contentContainer.appendChild(text);
-    contentContainer.appendChild(date);
-    contentContainer.appendChild(removeButton);
-    componentHandler.upgradeElement(contentContainer);
-
-
-    container.appendChild(checkboxContainer);
-    container.appendChild(contentContainer);
-    componentHandler.upgradeElement(container);
-
-    return container; 
-}
 
 /**
  * edits an item based on onclick
