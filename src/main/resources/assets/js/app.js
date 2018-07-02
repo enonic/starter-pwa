@@ -7,8 +7,6 @@ const update = require('../js/dbChanged')
 
 var ToasterInstance = require("./libs/Toaster").default;
 
-//var TekstController = require('./controller/TekstController').default;
-
 module.exports = {
     notifyAboutNewVersion: function() {
         var snackbarContainer = document.querySelector('#notification-bar');

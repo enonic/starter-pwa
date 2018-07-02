@@ -44,10 +44,6 @@ function resolveChanges(db){
             : storage.add.online(repoUrl, item)
     }))
 
-    /**
-     * if synced & !inRepo = remove from db
-     */
-
 }
 
 

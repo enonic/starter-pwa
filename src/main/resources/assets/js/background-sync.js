@@ -1,46 +1,3 @@
-
-/**
- * 1. global variables 
- * 2. Todo class // NOTE: move this out to another file  
- * 2. functions 
- * 3. listeners
- */
-
-// BUG: remove only runs once. Figure out. 
-
-/*
-Service worker må fungere slik:
-    
-    
-
-    sw.js:
-        - reg sync, queue sync func
-        - if online, run sync else wait (done automatic)
-        - return message when done 
-
-        
-        sync-func:
-            - read db, db-delete and repo
-            - delete in repo all from db-delete 
-            - change in repo all marked with change
-            - add all items from db into repo marked with !synced
-            - delete db
-            - get all from repo and add all into db.
-    
-    bs.js:
-        - if serviceWorker => use sw, else use normal http req (sync.js) // can wait until all else is done
-        - store all changes in db
-        - update func => get all items from db, update UI
-
-
-    Later on tasks:
-        sw.js:
-            - notice changes in repo and fetch changes into indexdb.
-
-*/
-
-
-
 const storage = require('./libs/Storage').default; 
 const storeNames = {
     offline : "OfflineStorage", 
@@ -169,7 +126,7 @@ let updateTodoView = () => {
  */
 let editItemText = (event) => {
     const id = event.target.id; 
-    var todoItem = searchAndApply(id, (item) => {
+    searchAndApply(id, (item) => {
         item.text = event.target.value; 
         registerChange(item, storeNames.offline);    
     }); 

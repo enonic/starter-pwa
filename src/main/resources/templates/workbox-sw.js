@@ -186,7 +186,6 @@ let DBPost = function (indexDbName,storeName,item){
 
 let getAllFromIndexDb = function(indexDbName, storeName, index, order) {
     return open(indexDbName).then((db) => {
-
         return new Promise((resolve, reject) => {
             var dbTransaction = db.transaction(storeName, 'readonly');
             var dbStore = dbTransaction.objectStore(storeName);

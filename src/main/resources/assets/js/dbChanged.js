@@ -40,8 +40,9 @@ let syncronize = () => {
 }
     
 module.exports = (type) => {
-    //updateInterval()
+    updateInterval()
     syncronize()
 }
+
 
 
