@@ -25,8 +25,6 @@ var pushRepo = require('/lib/push/repo');
  */
 exports.post = function (req) {
     var todoItem = JSON.parse(req.body); 
-    //log.info(JSON.stringify(todo, null, 4)); //erstatt todoItem emd meg om ok
-    //var todoItem = getItemObj(req.params);
     
     if (!todoItem) {
         var message = 'Missing/invalid todoItem data in request';
@@ -79,7 +77,6 @@ exports.delete = function (req){
 exports.put = function (req) {
 
     var todoItem = JSON.parse(req.body);
-    log.info(JSON.stringify(todoItem, null, 4)); 
     if (!todoItem) {
         var message = "Missing/invalid item data in request";
         log.warning(message);
@@ -104,11 +101,8 @@ exports.put = function (req) {
 }
 
 exports.get = function(req) {
-    // req
 
-    // Get all from repo 
     var result = getAllTodoItems();
-    //log.info(JSON.stringify(result, null, 4));
     if (result.status && Number(result.status) >= 400) {
         return result;
     }
@@ -124,7 +118,6 @@ exports.get = function(req) {
 var sortItems = function (items){
     
     items.sort(function (a, b) {
-        //log.info(JSON.stringify(a.item.data.id, null, 4));
         return a.item.id - b.item.id;
     });
     
@@ -156,7 +149,7 @@ var getAllTodoItems = function() {
         log.error(e);
         return {
             status: 500,
-            message: "Couldn't delete node",
+            message: "Could not delete node",
         };
     }
 
@@ -176,7 +169,7 @@ var createTodoNode = function (todoItem) {
             t
             return {
                 status: 500,
-                message: "Couldn't create Todo node",
+                message: "Could not create node",
             }
 
         } else {
@@ -187,7 +180,7 @@ var createTodoNode = function (todoItem) {
         log.error(e);
         return {
             status: 500,
-            message: "Couldn't create Todo node",
+            message: "Couldn't create node",
         };
     }
 };

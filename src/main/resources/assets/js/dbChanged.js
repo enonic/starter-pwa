@@ -13,26 +13,36 @@
  */
 
 
+/**
+ * Interval gathering online items for multiple client support
+ */
+
+const localSync  = require('./Sync').default; 
+
+let interval;
+let updateInterval = () => {
+    if (interval){
+        clearInterval(interval)
+    }
+    interval = setInterval(syncronize, 3000);
+}
 
 
-module.exports = (type) => {
-    console.log("4 - dbChanged");
-    if(navigator.serviceWorker) {
+let syncronize = () => {
+    /*if(navigator.serviceWorker) {
         navigator.serviceWorker.ready.then(function (registration) {
-            console.log("registrating sync")
             registration.sync.register("Background-sync");
         });
         
-    } else if(navigator.onLine) {
-        console.log("I have been notified about database change and will proceed to sync. :D", type);
-        sync(); 
+    } else */
+    if(navigator.onLine) {
+        localSync(); 
     }
- 
+}
+    
+module.exports = (type) => {
+    //updateInterval()
+    syncronize()
 }
 
-let sync = () => {
-    console.error("online, non-serviceworker sync not implemented"); 
-    //use imported storage 
-    //update ui
-}
 

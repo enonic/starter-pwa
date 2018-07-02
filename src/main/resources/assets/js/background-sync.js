@@ -41,9 +41,9 @@ Service worker må fungere slik:
 
 
 
-const storage = require('./libs/Storage'); 
+const storage = require('./libs/Storage').default; 
 const storeNames = {
-    main : "OfflineStorage", 
+    offline : "OfflineStorage", 
     deletedWhileOffline : "DeletedWhileOffline"
 }
 const repoUrl =
@@ -107,7 +107,7 @@ let addTodo = () => {
         const item = new TodoItem(inputfield.value, new Date(), false);
         registeredTodos.push(item);
 
-        storage.add.offline(storeNames.main, item); 
+        storage.add.offline(storeNames.offline, item); 
         inputfield.value = "";
         updateUI()
     } else {
@@ -130,7 +130,7 @@ let removeTodo = (event) => {
     const id = parseInt(event.target.parentNode.children[1].id); 
     searchAndApply(id, (todoItem) => {
         storage.add.offline(storeNames.deletedWhileOffline, todoItem, true).then(
-        storage.delete.offline(storeNames.main, todoItem.id)).then(
+        storage.delete.offline(storeNames.offline, todoItem.id)).then(
             updateUI()
         )
         
@@ -148,7 +148,7 @@ let updateTodoView = () => {
     for (let todo of registeredTodos) {
         outputArea.innerHTML += `
             <div style="background-color:${todo.synced ? (todo.changed ? "yellow" : "green") : "red"}" class="todo-app__item">
-                <label class="todo-app__checkbox" style=" background-image: ${todo.isChecked ? "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-checked.gif)" : "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-unchecked.gif)"}
+                <label class="todo-app__checkbox" style=" background-image: ${todo.isChecked ? "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/offline/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-checked.gif)" : "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-unchecked.gif)"}
                 
                 "></label>
                 <div style="text-decoration:${todo.isChecked ? "line-through" : "none"}">
@@ -169,7 +169,7 @@ let editItemText = (event) => {
     const id = event.target.parentNode.children[1].id;
     var todoItem = searchAndApply(id, (item) => {
         item.text = event.target.value; 
-        registerChange(item, storeNames.main);    
+        registerChange(item, storeNames.offline);    
     }); 
     changeInputToLabel(); 
 }
@@ -182,7 +182,7 @@ let checkTodo = (checkboxElement) => {
     const id = checkboxElement.parentNode.children[1].children[1].id;
     searchAndApply(id, item => {
         item.isChecked = !item.isChecked;
-        registerChange(item, storeNames.main);    
+        registerChange(item, storeNames.offline);    
     }); 
 }
 
@@ -190,7 +190,7 @@ let checkTodo = (checkboxElement) => {
  * Should be run when an item is edited 
  * updated changed, sets to not synced and replaces in storage
  * @param item the edited item
- * @param storeName storeName to replaced in (probably storeNames.main)
+ * @param storeName storeName to replaced in (probably storeNames.offline)
  */
 let registerChange = (item, storeName) => {
     item.changed = true;// set to true in backend when eventually synced. 
@@ -235,7 +235,7 @@ document.onkeydown = (event) => {
 document.getElementById("todo-app__startButton").onclick = () => {
     document.getElementById("todo-app__startButton").style.display = "none"; 
     document.getElementById("todo-app__container").style.display = "block"; 
-    storage.get.offline(storeNames.main, items => {
+    storage.get.offline(storeNames.offline, items => {
         // transform from indexDB-item to TodoItem
         registeredTodos = items.map(item => new TodoItem(item.value.text, item.value.date, item.value.isChecked, item.value.id)); 
         updateUI("startbutton")
@@ -286,11 +286,8 @@ const updateListenersFor = {
 }
 
 
-let updateUI = (arg) => {
-    console.log(" updateui call from ", arg)
-    console.log("14 - Update UI");
-    storage.get.offline(storeNames.main, (items) => {
-        console.log("15 - Got items from db");
+export let updateUI = (arg) => {
+    storage.get.offline(storeNames.offline, (items) => {
         registeredTodos = items.map(item => new TodoItem(item.value.text, item.value.date, item.value.isChecked, item.value.id, item.value.synced))
         updateTodoView();
         updateListenersFor.everything(); 

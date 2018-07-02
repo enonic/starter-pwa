@@ -189,9 +189,10 @@ exports.storeSubscriptionAndGetNode = function(subscription) {
 };
 
 exports.storeBackgroundSyncItemAndGetNode = function (item) {
+    log.info("Add:" + new Date() + log.info(JSON.stringify(item, null, 4)))
     item.synced = true; 
     var repoConn = getRepoConnection();
-    log.info("Add:" + new Date() + log.info(JSON.stringify(item, null, 4)))
+
     var node = repoConn.create({
         _parentPath: BACKGROUND_SYNC_PATH,
         _permissions: ROOT_PERMISSIONS,
@@ -230,7 +231,6 @@ exports.deleteSubscription = function(subscription) {
 exports.deleteTodo = function (item) {
     log.info("DELETE:" + new Date() + log.info(JSON.stringify(item, null, 4)))
     var repoConn = getRepoConnection();
-    //log.info(JSON.stringify(item.data, null, 4)); 
     
     var hits = repoConn.query({
         query: "item.id = " + item.id 
@@ -239,7 +239,7 @@ exports.deleteTodo = function (item) {
         return "NOT_FOUND";
     }
     var repoConn = getRepoConnection();
-    var deleteRepsonse = hits.map(function(hit) {
+    hits.map(function(hit) {
         return repoConn.delete(hit.id)
     });
     
@@ -251,8 +251,8 @@ exports.deleteTodo = function (item) {
 
 
 exports.replaceTodo = function (item) {
-    //log.info("deleting item: " + JSON.stringify(item, null, 4));
     log.info("EDIT:" + new Date() + log.info(JSON.stringify(item, null, 4)))
+    
     var repoConn = getRepoConnection();
     var hits = repoConn.query({
         query:
@@ -267,12 +267,7 @@ exports.replaceTodo = function (item) {
         return hit.id;
     });
 
-    //replace
-
-
     var editor = function(node) {
-        //log.info(JSON.stringify(node,null,4)); 
-        //node.data.text = "EDITED"; 
         node.item.text = item.text;
         node.item.isChecked = item.isChecked;
         node.item.changed = false 
@@ -315,7 +310,8 @@ exports.storeKeyPair = function (keyPair) {
 };
 
 exports.getAllTodos = function() {
-    log.info("GET REQUEST" + new Date())
+    log.info("GET:" + new Date())
+   
     var repoConn = getRepoConnection();
     var hits = repoConn.query({
         count: 1000,
