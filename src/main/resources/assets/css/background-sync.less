@@ -7,28 +7,27 @@
 
 #todo-app__container {
     display: none;
+    position: absolute;
     /*set to "flex" in js*/
     font-family: "Roboto", "Helvetica", "Arial", sans-serif;
     width: 100vw;
+    top: 10vh; 
 }
 
-#todo-app__item-area {
-    overflow-y: scroll;
-}
 
 .todo-app__item {
-    padding: 15px; 
-    border-bottom-style: solid; 
-    border-bottom-width: 1px; 
+    padding: 15px;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
 }
 
 .todo-app__textfield {
-    margin-left: 5%; 
+    margin-left: 5%;
 }
-
 
 @media (min-width: @breakpoint_desktop) {
     #todo-app__container {
-        width: 20vw;
+        width: 40vw;
+        top: 20vh;
     }
 }

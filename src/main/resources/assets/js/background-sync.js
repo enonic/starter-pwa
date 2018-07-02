@@ -106,19 +106,19 @@ let updateTodoView = () => {
     outputArea.innerHTML = "";
     for (let todo of registeredTodos) {
         /**
-         * Legg på grid 
+         * Legg på grid   
          * mdl-grid
          * mdl-cell mdl-cell--4-col
          */
         outputArea.innerHTML += `
-            <li class="todo-app__item mdl-list__item>
-                <label class=" mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="${todo.id}">
+            <li class="todo-app__item mdl-list__item mdl-grid>
+                <label class="mdl-cell mdl-cell--4-col mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="${todo.id}">
 					<input type="checkbox" id="${todo.id}" class="mdl-checkbox__input todo-app__checkbox" ${todo.isChecked ? "checked" : ""}/>
                 </label>
-                <label id="${todo.id}" value="${todo.text}" class="todo-app__textfield ">${todo.text}</label>
+                <label id="${todo.id}" value="${todo.text}" class="mdl-cell mdl-cell--4-col todo-app__textfield ">${todo.text}</label>
                 <div>${todo.getFormattedDate()}</div>
-                <i class="material-icons">${todo.synced ? "network_wifi" : "signal_wifi_off"}</i>
-                <button class="remove-todo-button mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab">
+                <i class="mdl-cell mdl-cell--4-col material-icons">${todo.synced ? "network_wifi" : "signal_wifi_off"}</i>
+                <button class="mdl-cell mdl-cell--4-col remove-todo-button mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab">
 					<i class="material-icons" id=${todo.id}>delete_forever</i>
 				</button>
             </li>
@@ -161,7 +161,7 @@ let checkTodo = (checkboxElement) => {
 let registerChange = (item, storeName) => {
     item.changed = true;// set to true in backend when eventually synced. 
     storage.replace.offline(storeName, item);
-    updateUI("registerchange")
+    updateUI("registerchange"); 
 }
 
 let changeLabelToInput = (textfield) => {
@@ -268,7 +268,7 @@ export let updateUI = (arg) => {
         registeredTodos = items.map(item => new TodoItem(item.value.text, item.value.date, item.value.isChecked, item.value.id, item.value.synced))
         updateTodoView();
         updateListenersFor.everything(); 
-    })
+    }); 
 }
 
 
