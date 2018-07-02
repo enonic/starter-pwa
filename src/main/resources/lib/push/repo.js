@@ -189,7 +189,7 @@ exports.storeSubscriptionAndGetNode = function(subscription) {
 };
 
 exports.storeBackgroundSyncItemAndGetNode = function (item) {
-    log.info("Add:" + new Date() + log.info(JSON.stringify(item, null, 4)))
+    log.info("Add:" + new Date() + JSON.stringify(item, null, 4))
     item.synced = true; 
     var repoConn = getRepoConnection();
 
@@ -229,7 +229,7 @@ exports.deleteSubscription = function(subscription) {
 };
 
 exports.deleteTodo = function (item) {
-    log.info("DELETE:" + new Date() + log.info(JSON.stringify(item, null, 4)))
+    log.info("DELETE:" + new Date() + JSON.stringify(item, null, 4))
     var repoConn = getRepoConnection();
     
     var hits = repoConn.query({
@@ -251,7 +251,7 @@ exports.deleteTodo = function (item) {
 
 
 exports.replaceTodo = function (item) {
-    log.info("EDIT:" + new Date() + log.info(JSON.stringify(item, null, 4)))
+    log.info("EDIT:" + new Date() + JSON.stringify(item, null, 4))
     
     var repoConn = getRepoConnection();
     var hits = repoConn.query({

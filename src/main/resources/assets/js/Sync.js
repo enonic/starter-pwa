@@ -39,9 +39,14 @@ function removeItemsFromRepo(db){
 //resolving offline changes on online repository
 function resolveChanges(db){
     return Promise.all(db.map(item => {
-        return item.synced ? ( item.changed ? storage.rplace.online(repoUrl, item) : null) 
+
+        return item.synced ? item.changed ? storage.replace.online(repoUrl, item) : null
             : storage.add.online(repoUrl, item)
     }))
+
+    /**
+     * if synced & !inRepo = remove from db
+     */
 
 }
 
