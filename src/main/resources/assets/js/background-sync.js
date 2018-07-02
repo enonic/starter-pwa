@@ -146,8 +146,11 @@ let updateTodoView = () => {
     let outputArea = document.getElementById("todo-app__item-area");
     outputArea.innerHTML = "";
     for (let todo of registeredTodos) {
+        //let todoHTML = generateTodoHTML(todo); 
+        //outputArea.appendChild(todoHTML); 
+        /*
         outputArea.innerHTML += `
-            <div style="background-color:${todo.synced ? (todo.changed ? "yellow" : "green") : "red"}" class="todo-app__item">
+            <li style="background-color:${todo.synced ? (todo.changed ? "yellow" : "green") : "red"}" class="todo-app__item">
                 <label class="todo-app__checkbox" style=" background-image: ${todo.isChecked ? "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-checked.gif)" : "url(http://localhost:8080/admin/tool/com.enonic.xp.app.contentstudio/main/_/asset/com.enonic.xp.app.contentstudio:1529474547/admin/common/images/box-unchecked.gif)"}
                 
                 "></label>
@@ -156,9 +159,85 @@ let updateTodoView = () => {
                     <div id="${todo.id}">${todo.getFormattedDate()}</div>
                     <button class="remove-todo-button">X</button>
                 </div>
-            </div>
+            </li>
         `;
+        */
+        //MATERAL, TODO: replace with DOM-API
+        outputArea.innerHTML += `
+            <li class="mdl-list__item todo-app__item" style="background-color:${todo.synced ? (todo.changed ? "yellow" : "green") : "red"}; padding: 15px">
+                <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="${todo.id}">
+					<input type="checkbox" id="${todo.id}" class="mdl-checkbox__input"/>
+				</label>
+                <div class="mdl-list__item-primary-content">
+                    <label value="${todo.text}">${todo.text}</label>
+                    <div id="${todo.id}">${todo.getFormattedDate()}</div>
+                    <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab">
+						<i class="material-icons">delete_forever</i>
+					</button>
+                </div>
+            </li>
+        `;
+        
+
+        // container
+        
     }
+}
+
+let generateTodoHTML = (todo) => {
+    let container = document.createElement("li");
+    container.className = "mdl-list__item";
+    container.style.backgroundColor = (todo.synced ? "green" : "red");
+
+    // checkbox 
+    let checkboxContainer = document.createElement("label");
+    checkboxContainer.className = "mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect";
+    checkboxContainer.setAttribute("for", todo.id);
+
+    let checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.id = todo.id;
+    checkbox.classname = "mdl-checkbox__input";
+    componentHandler.upgradeElement(checkbox);
+
+    checkboxContainer.appendChild(checkbox);
+    console.log(checkboxContainer);
+    componentHandler.upgradeElement(checkboxContainer);
+
+    // other content
+    let contentContainer = document.createElement("div");
+    contentContainer.className = "mdl-list__item-primary-content";
+
+    let text = document.createElement("label");
+    text.value = todo.text;
+    text.innerHTML = todo.text;
+
+    let date = document.createElement("div");
+    date.id = todo.id;
+    date.innerHTML = todo.getFormattedDate();
+
+    let removeButton = document.createElement("button");
+    removeButton.className = "mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab";
+
+    let removeButtonIcon = document.createElement("i");
+    removeButtonIcon.className = "material-icons";
+    removeButtonIcon.innerHTML = "delete_forever";
+    componentHandler.upgradeElement(removeButtonIcon);
+
+    removeButton.appendChild(removeButtonIcon);
+    componentHandler.upgradeElement(removeButton);
+
+    contentContainer.appendChild(text);
+    contentContainer.appendChild(date);
+    contentContainer.appendChild(removeButton);
+    componentHandler.upgradeElement(contentContainer);
+
+
+    container.appendChild(checkboxContainer);
+    container.appendChild(contentContainer);
+    componentHandler.upgradeElement(container);
+
+    return container; 
 }
 
 /**
@@ -282,15 +361,17 @@ const updateListenersFor = {
         for (let inputfield of document.getElementsByClassName("todo-app__inputfield")) {
             inputfield.onblur = editItemText;
         }
+    }, 
+    materialItems : () => {
+        for (let item of document.getElementsByClassName("todo-app__item")) {
+            componentHandler.upgradeElements(item); 
+        }
     }
 }
 
 
 let updateUI = (arg) => {
-    console.log(" updateui call from ", arg)
-    console.log("14 - Update UI");
     storage.get.offline(storeNames.main, (items) => {
-        console.log("15 - Got items from db");
         registeredTodos = items.map(item => new TodoItem(item.value.text, item.value.date, item.value.isChecked, item.value.id, item.value.synced))
         updateTodoView();
         updateListenersFor.everything(); 
