@@ -265,6 +265,7 @@ const updateListenersFor = {
 
 export let updateUI = (arg) => {
     storage.get.offline(storeNames.offline, (items) => {
+        items.reverse()
         registeredTodos = items.map(item => new TodoItem(item.value.text, item.value.date, item.value.isChecked, item.value.id, item.value.synced))
         updateTodoView();
         updateListenersFor.everything(); 
