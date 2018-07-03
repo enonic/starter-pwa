@@ -1,29 +1,36 @@
 @breakpoint_desktop: 1025px;
-#todo-app__startButton {
-    z-index: 2;
-}
 
 /* TODO-APP*/
 
 #todo-app__container {
-    display: none;
     position: absolute;
     /*set to "flex" in js*/
     font-family: "Roboto", "Helvetica", "Arial", sans-serif;
     width: 100vw;
-    top: 10vh; 
+    top: 10vh;
 }
 
-
 .todo-app__item {
+    position: relative;
     padding: 15px;
     border-bottom-style: solid;
     border-bottom-width: 1px;
+    overflow-wrap: break-word;
 }
 
 .todo-app__textfield {
     margin-left: 5%;
 }
+
+/*
+.todo-item__line {
+    position: absolute;
+    width: 100%;
+    height: 0.25vh;
+    background-color: #263238;
+    margin-left: 5%; 
+}
+*/
 
 @media (min-width: @breakpoint_desktop) {
     #todo-app__container {
