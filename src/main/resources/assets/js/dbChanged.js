@@ -17,15 +17,16 @@
  * Interval gathering online items for multiple client support
  */
 
-const localSync  = require('./Sync').default; 
+var localSync = require('./Sync');
 
 let interval;
 let updateInterval = () => {
     if (interval){
         clearInterval(interval)
     }
-    interval = setInterval(syncronize, 3000);
+    interval = setInterval(localSync.isChangeDoneinRepo(), 10000);
 }
+
 
 
 let syncronize = () => {
@@ -35,13 +36,13 @@ let syncronize = () => {
             if(registration.sync){ // Only chrome supports
                 registration.sync.register("Background-sync");
             } else if(navigator.onLine) {
-                localSync();
-                updateInterval() 
+                localSync.syncronize();
+                updateInterval()
             }
         })
     } else if(navigator.onLine) {
-        localSync();
-        updateInterval() 
+        localSync.syncronize(); 
+        updateInterval()
     }
 }
     
@@ -50,6 +51,7 @@ module.exports = (type) => {
         clearInterval(interval)
     } else {
         syncronize()
+        
     }
 }
 

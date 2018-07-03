@@ -21,8 +21,8 @@ export default {
          * @param url the url to fetch from 
          * @returns Promise from fetch 
          */
-        online: (url) => {
-            return fetch(url,{
+        online: (url, data) => {
+            return fetch(url + "?data=" + String(data),{
                 method: 'GET'
             })
         }

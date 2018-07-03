@@ -47,7 +47,30 @@ function resolveChanges(db){
 }
 
 
-export default () => {
+export function isChangeDoneinRepo(){
+    getItemsFromRepo().then((repo) =>{
+        getItemsFromDB().then(values => {
+            let offlineStorage = values[1].reverse()
+            repo = repo.map(element => element.item)
+            if (repo.length != offlineStorage.length) {
+                syncronize()
+                return;
+            }
+            
+            repo.forEach( (item, i) => {
+                let offlineItem = offlineStorage[i]
+                if (JSON.stringify(item) !== JSON.stringify(offlineItem)){
+                    syncronize()
+                    return;
+                }
+            })
+        })
+    })
+}
+
+
+
+export function syncronize(){
     //read db, dbRemove and repo
     getItemsFromDB().then(values => {
         
