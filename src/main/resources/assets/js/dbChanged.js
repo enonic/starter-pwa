@@ -24,7 +24,8 @@ let updateInterval = () => {
     if (interval){
         clearInterval(interval)
     }
-    interval = setInterval(localSync.isChangeDoneinRepo(), 10000);
+    console.log("interval is set")
+    interval = setInterval(localSync.isChangeDoneinRepo, 3000);
 }
 
 
@@ -48,6 +49,7 @@ let syncronize = () => {
     
 module.exports = (type) => {
     if(type == 'edit'){
+        console.log("interval is cleared")
         clearInterval(interval)
     } else {
         syncronize()

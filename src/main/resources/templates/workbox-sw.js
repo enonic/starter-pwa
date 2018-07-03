@@ -91,28 +91,30 @@ let updateInterval = () => {
     if (interval){
         clearInterval(interval)
     }
-    interval = setInterval(isChangeDoneinRepo, 10000);
+    interval = setInterval(isChangeDoneinRepo, 3000);
 }
 
 function isChangeDoneinRepo(){
-    getItemsFromRepo().then((repo) =>{
-        getItemsFromDB().then(values => {
-            let offlineStorage = values[1].reverse()
-            repo = repo.map(element => element.item)
-            if (repo.length != offlineStorage.length) {
-                syncronize()
-                return;
-            }
-            
-            repo.forEach( (item, i) => {
-                let offlineItem = offlineStorage[i]
-                if (JSON.stringify(item) !== JSON.stringify(offlineItem)){
+    if(navigator.onLine){
+        getItemsFromRepo().then((repo) =>{
+            getItemsFromDB().then(values => {
+                let offlineStorage = values[1].reverse()
+                repo = repo.map(element => element.item)
+                if (repo.length != offlineStorage.length) {
                     syncronize()
                     return;
                 }
+                
+                repo.forEach( (item, i) => {
+                    let offlineItem = offlineStorage[i]
+                    if (JSON.stringify(item) !== JSON.stringify(offlineItem)){
+                        syncronize()
+                        return;
+                    }
+                })
             })
         })
-    })
+    }
 }
 
 
