@@ -1,5 +1,4 @@
 @breakpoint_desktop: 1025px;
-
 /* TODO-APP*/
 
 #todo-app__container {
@@ -8,6 +7,21 @@
     font-family: "Roboto", "Helvetica", "Arial", sans-serif;
     width: 100vw;
     top: 10vh;
+}
+
+#todo-app__input {
+    display: flex;
+    flex-basis: 100%;
+    justify-content: space-between;
+}
+
+#add-todo-text {
+    font-size: 2em;
+    width: 100%;
+}
+
+#add-todo-button {
+    border: solid #3F51B5;
 }
 
 .todo-app__item {
@@ -19,6 +33,7 @@
 }
 
 .todo-app__textfield {
+    text-align: left;
     margin-left: 5%;
 }
 
@@ -34,7 +49,7 @@
 
 @media (min-width: @breakpoint_desktop) {
     #todo-app__container {
-        width: 40vw;
+        width: 30vw;
         top: 20vh;
     }
 }

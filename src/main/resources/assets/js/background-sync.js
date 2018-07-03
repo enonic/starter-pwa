@@ -86,7 +86,7 @@ let addTodo = () => {
         updateUI()
     } else {
         // let user know something was wrong 
-        inputfield.style.border = "solid red";
+        inputfield.style.borderColor = "#f44336";
         setTimeout(() => {
             inputfield.style.border = "";
         }, 500);
