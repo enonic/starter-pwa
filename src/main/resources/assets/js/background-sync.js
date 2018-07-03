@@ -128,16 +128,15 @@ let updateTodoView = () => {
          */
         outputArea.innerHTML += `
             <li class="todo-app__item mdl-list__item mdl-grid>
-                <label class="mdl-cell mdl-cell--1-col mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="${todo.id}">
-					<input type="checkbox" id="${todo.id}" class="mdl-checkbox__input todo-app__checkbox" ${todo.isChecked ? "checked" : ""}/>
-                </label>
+            
+				<input type="checkbox" id="${todo.id}" class="mdl-checkbox__input todo-app__checkbox" style="color: ${todo.isChecked ? "grey" : ""}"/>
+                <i id="${todo.id}" class="todo-app__checkbox mdl-cell mdl-cell--1-col material-icons">${todo.isChecked ? "check_box" : "check_box_outline_blank"}</i>
+                
                 <label id="${todo.id}" value="${todo.text}" class="mdl-cell mdl-cell--9-col todo-app__textfield ">${todo.text}</label>
                 <div>${todo.getFormattedDate()}</div>
-                <i class="mdl-cell mdl-cell--1-col material-icons">${todo.synced ? "network_wifi" : "signal_wifi_off"}</i>
-                <button class="mdl-cell mdl-cell--1-col remove-todo-button mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab">
-					<i class="material-icons" id=${todo.id}>delete_forever</i>
-                </button>
-                <div class="todo-item__line" style="display:${todo.isChecked ? 'block' : 'none'}"></div>
+                <i class="mdl-cell mdl-cell--1-col material-icons">${todo.synced ? "cloud_done" : "cloud_off"}</i>
+                <i class="mdl-cell mdl-cell--1-col material-icons remove-todo-button" id=${todo.id}>close</i>
+                <div class="todo-item__line" style="display:${todo.isChecked ? "block" : "none"}"></div>
             </li>
         `;
     }
@@ -180,7 +179,8 @@ let checkTodo = (checkboxElement) => {
  * @param storeName storeName to replaced in (probably storeNames.offline)
  */
 let registerChange = (item, storeName) => {
-    item.changed = true;// set to true in backend when eventually synced. 
+    item.changed = true;
+    item.synced = false; 
     storage.replace.offline(storeName, item);
     updateUI("registerchange"); 
 }
@@ -291,11 +291,12 @@ export let updateUI = () => {
 /**
  * Listen to serviceworker
  */
+if(navigator.serviceWorker) {
+    navigator.serviceWorker.addEventListener("message", (event) => {
+        if (event.data.message === "synced") {
+            updateUI("serviceworker")
+        }
 
-navigator.serviceWorker.addEventListener("message", (event)=>{
-    if(event.data.message === "synced"){
-        updateUI("serviceworker")
-    }
-
-})
+    }); 
+}
     
