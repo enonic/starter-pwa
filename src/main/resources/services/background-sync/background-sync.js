@@ -101,7 +101,13 @@ exports.put = function (req) {
 }
 
 exports.get = function(req) {
-    var result = getAllTodoItems();
+    var result;
+    if (req.params.data == "undefined") {
+        result = getAllTodoItems();
+    } else {
+        result = getItem(req.params.data)
+    }
+     
     if (result.status && Number(result.status) >= 400) {
         return result;
     }
@@ -111,6 +117,36 @@ exports.get = function(req) {
             "Content-Type": "application/json"
         }
     };
+}
+
+var getItem = function(id){
+    log.info("id: " + id)
+    try {
+        var result = pushRepo.getTodo(id);
+        if (result === "NOT_FOUND") {
+            return {
+                status: 404,
+                message: "todoItem not found",
+            }
+
+        } else if (typeof result === 'string') {
+            return {
+                status: 500,
+                message: "Some nodes were not found",
+                nodeIds: result,
+            }
+        } 
+        else {
+            return result
+        }
+
+    } catch (e) {
+        log.error(e);
+        return {
+            status: 500,
+            message: "Could not delete node",
+        };
+    }
 }
 
 

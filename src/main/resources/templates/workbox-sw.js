@@ -91,7 +91,7 @@ let updateInterval = () => {
     if (interval){
         clearInterval(interval)
     }
-    interval = setInterval(isChangeDoneinRepo, 3000);
+    interval = setInterval(isChangeDoneinRepo, 10000);
 }
 
 function isChangeDoneinRepo(){
@@ -100,12 +100,9 @@ function isChangeDoneinRepo(){
             let offlineStorage = values[1]
             repo = repo.map(element => element.item)
             
-
+            
         })
     })
-    
-    
-    
 }
 
 
@@ -132,21 +129,28 @@ function removeItemsFromRepo(db){
     ))
 }
 
+
+function isElementInRepo(id){
+    return getApiCall(repoUrl, id).then(response => {
+        if (response.status == 404){
+            return false
+        }
+        return true
+    })
+}
+
 //resolving offline changes on online repository
 function resolveChanges(db){
     return Promise.all(db.map(item => {
-        return item.synced ? ( item.changed ? putApiCall(repoUrl, item) : null) 
-            : postApiCall(repoUrl, item)
+        if(!item.synced && item.changed){
+            isElementInRepo(item.id) ? putApiCall(repoUrl, item) : postApiCall(repoUrl, item)
+        }   
     }))
-
 }
 
 
 
-
-
 let syncronize = function(event){
-    updateInterval() 
     //read db, dbRemove and repo
     getItemsFromDB().then(values => {
 
@@ -181,7 +185,6 @@ let syncronize = function(event){
                         })
                     }) 
                 })
-
             })
         })  
     })
@@ -280,6 +283,7 @@ let open = function (indexDbName) {
 
 
 let getApiCall = (url, data) => {
+    console.log(data)
     return fetch(url + "?data=" + String(data),{
         method: 'GET'
     })
