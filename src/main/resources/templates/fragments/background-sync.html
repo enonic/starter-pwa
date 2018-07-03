@@ -4,7 +4,6 @@
 
 <body>
 	<div data-th-fragment="fragment-background-sync" data-th-remove="tag">
-		<button id="todo-app__startButton" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Start the list demo</button>
 		<div id="todo-app__container">
 			<!-- Input section -->
 			<div id="todo-app__input">
@@ -20,6 +19,9 @@
 				<!-- Stored todos show up here -->
 	        </ul>
 		</div>
+		<label class="mdl-cell mdl-cell--1-col mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="${todo.id}">
+			<input type="checkbox" id="${todo.id}" class="mdl-checkbox__input todo-app__checkbox" ${todo.isChecked ? "checked" : ""}/>
+		</label>
 	</div>
 </body>
 

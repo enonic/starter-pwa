@@ -12,6 +12,22 @@ const repoUrl =
 export let registeredTodos = []
 
 
+// NOTE: Dette sto før når man klikket på knappen. 
+// Det kjører, men fungerer ikke fordi error med IDB 
+storage.get.offline(storeNames.offline, items => {
+    // transform from indexDB-item to TodoItem
+    registeredTodos = items.map(
+        item =>
+        new TodoItem(
+            item.value.text,
+            item.value.date,
+            item.value.isChecked,
+            item.value.id
+        )
+    );
+    updateUI("startbutton");
+}); 
+
 
 /**
  * Model of a TodoItem 
@@ -112,17 +128,21 @@ let updateTodoView = () => {
          */
         outputArea.innerHTML += `
             <li class="todo-app__item mdl-list__item mdl-grid>
-                <label class="mdl-cell mdl-cell--4-col mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="${todo.id}">
+                <label class="mdl-cell mdl-cell--1-col mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="${todo.id}">
 					<input type="checkbox" id="${todo.id}" class="mdl-checkbox__input todo-app__checkbox" ${todo.isChecked ? "checked" : ""}/>
                 </label>
-                <label id="${todo.id}" value="${todo.text}" class="mdl-cell mdl-cell--4-col todo-app__textfield ">${todo.text}</label>
+                <label id="${todo.id}" value="${todo.text}" class="mdl-cell mdl-cell--9-col todo-app__textfield ">${todo.text}</label>
                 <div>${todo.getFormattedDate()}</div>
-                <i class="mdl-cell mdl-cell--4-col material-icons">${todo.synced ? "network_wifi" : "signal_wifi_off"}</i>
-                <button class="mdl-cell mdl-cell--4-col remove-todo-button mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab">
+                <i class="mdl-cell mdl-cell--1-col material-icons">${todo.synced ? "network_wifi" : "signal_wifi_off"}</i>
+                <button class="mdl-cell mdl-cell--1-col remove-todo-button mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab">
 					<i class="material-icons" id=${todo.id}>delete_forever</i>
-				</button>
+                </button>
+                <div class="todo-item__line" style="display:${todo.isChecked ? 'block' : 'none'}"></div>
             </li>
         `;
+    }
+    for (let cbox of document.getElementsByClassName("mdl-js-checkbox")) {
+        componentHandler.upgradeElements(cbox); 
     }
 }
 
@@ -148,6 +168,7 @@ let checkTodo = (checkboxElement) => {
     const id = checkboxElement.id; 
     searchAndApply(id, item => {
         item.isChecked = !item.isChecked;
+
         registerChange(item, storeNames.offline);    
     }); 
 }
@@ -204,15 +225,7 @@ document.onkeydown = (event) => {
         addTodo(); 
     }
 }
-document.getElementById("todo-app__startButton").onclick = () => {
-    document.getElementById("todo-app__startButton").style.display = "none"; 
-    document.getElementById("todo-app__container").style.display = "block"; 
-    storage.get.offline(storeNames.offline, items => {
-        // transform from indexDB-item to TodoItem
-        registeredTodos = items.map(item => new TodoItem(item.value.text, item.value.date, item.value.isChecked, item.value.id)); 
-        updateUI("startbutton")
-    }); 
-}
+
 
 /**
  * Methods for updating listeners 
@@ -263,7 +276,7 @@ const updateListenersFor = {
 }
 
 
-export let updateUI = (arg) => {
+export let updateUI = () => {
     storage.get.offline(storeNames.offline, (items) => {
         items.reverse()
         registeredTodos = items.map(item => new TodoItem(item.value.text, item.value.date, item.value.isChecked, item.value.id, item.value.synced))

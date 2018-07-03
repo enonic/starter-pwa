@@ -29,7 +29,7 @@ let updateInterval = () => {
 
 
 let syncronize = () => {
-    if(navigator.serviceWorker.sync) {
+    if(navigator.serviceWorker) {
         navigator.serviceWorker.ready.then(function (registration) {
             registration.sync.register("Background-sync");
         });
