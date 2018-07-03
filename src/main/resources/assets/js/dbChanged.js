@@ -29,13 +29,19 @@ let updateInterval = () => {
 
 
 let syncronize = () => {
-    if(navigator.serviceWorker.sync) {
+    if(navigator.serviceWorker) {  //chrome, firefox and safari supports
         navigator.serviceWorker.ready.then(function (registration) {
-            registration.sync.register("Background-sync");
-        });
-        
+            
+            if(registration.sync){ // Only chrome supports
+                registration.sync.register("Background-sync");
+            } else if(navigator.onLine) {
+                localSync();
+                updateInterval() 
+            }
+        })
     } else if(navigator.onLine) {
-        localSync(); 
+        localSync();
+        updateInterval() 
     }
 }
     
@@ -43,7 +49,6 @@ module.exports = (type) => {
     if(type == 'edit'){
         clearInterval(interval)
     } else {
-        updateInterval()
         syncronize()
     }
 }

@@ -82,6 +82,33 @@ self.addEventListener('sync', (event) => {
     }
 })
 
+/**
+ * Interval for implementation of multiple users
+ */
+
+let interval;
+let updateInterval = () => {
+    if (interval){
+        clearInterval(interval)
+    }
+    interval = setInterval(isChangeDoneinRepo, 3000);
+}
+
+function isChangeDoneinRepo(){
+    getItemsFromRepo().then((repo) =>{
+        getItemsFromDB().then(values => {
+            let offlineStorage = values[1]
+            repo = repo.map(element => element.item)
+            
+
+        })
+    })
+    
+    
+    
+}
+
+
 function getItemsFromRepo(){
     // fetching items from repo
     return getApiCall(repoUrl).then((response) => response.json().then(itemList => {
@@ -115,8 +142,11 @@ function resolveChanges(db){
 }
 
 
-let syncronize = function(event){
 
+
+
+let syncronize = function(event){
+    updateInterval() 
     //read db, dbRemove and repo
     getItemsFromDB().then(values => {
 
