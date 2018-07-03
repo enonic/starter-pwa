@@ -97,10 +97,20 @@ let updateInterval = () => {
 function isChangeDoneinRepo(){
     getItemsFromRepo().then((repo) =>{
         getItemsFromDB().then(values => {
-            let offlineStorage = values[1]
+            let offlineStorage = values[1].reverse()
             repo = repo.map(element => element.item)
+            if (repo.length != offlineStorage.length) {
+                syncronize()
+                return;
+            }
             
-            
+            repo.forEach( (item, i) => {
+                let offlineItem = offlineStorage[i]
+                if (JSON.stringify(item) !== JSON.stringify(offlineItem)){
+                    syncronize()
+                    return;
+                }
+            })
         })
     })
 }
@@ -143,14 +153,17 @@ function isElementInRepo(id){
 function resolveChanges(db){
     return Promise.all(db.map(item => {
         if(!item.synced && item.changed){
-            isElementInRepo(item.id) ? putApiCall(repoUrl, item) : postApiCall(repoUrl, item)
-        }   
+            return isElementInRepo(item.id).then(status => status ? putApiCall(repoUrl, item) : postApiCall(repoUrl, item))
+        }else if (!item.synced) {
+            return postApiCall(repoUrl, item)
+        }
     }))
 }
 
 
 
 let syncronize = function(event){
+    updateInterval()
     //read db, dbRemove and repo
     getItemsFromDB().then(values => {
 
@@ -283,7 +296,6 @@ let open = function (indexDbName) {
 
 
 let getApiCall = (url, data) => {
-    console.log(data)
     return fetch(url + "?data=" + String(data),{
         method: 'GET'
     })
