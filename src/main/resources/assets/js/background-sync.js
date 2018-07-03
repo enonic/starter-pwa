@@ -136,7 +136,6 @@ let updateTodoView = () => {
                 <div>${todo.getFormattedDate()}</div>
                 <i class="mdl-cell mdl-cell--1-col material-icons">${todo.synced ? "cloud_done" : "cloud_off"}</i>
                 <i class="mdl-cell mdl-cell--1-col material-icons remove-todo-button" id=${todo.id}>close</i>
-                <div class="todo-item__line" style="display:${todo.isChecked ? "block" : "none"}"></div>
             </li>
         `;
     }
