@@ -1,5 +1,5 @@
-const storage = require('./libs/Storage').default; 
-const dbChange = require('./dbChanged')
+const storage = require('./libs/storage').default; 
+const storageManager = require('./libs/storageManager')
 const storeNames = {
     offline : "OfflineStorage", 
     deletedWhileOffline : "DeletedWhileOffline"
@@ -190,7 +190,7 @@ let changeLabelToInput = (textfield) => {
     let id = parent.children[1].id; 
     let input = document.createElement("input"); 
 
-    dbChange("edit"); 
+    storageManager("edit"); 
 
     input.className = "todo-app__inputfield mdl-textfield__input"; 
     input.id = id; 

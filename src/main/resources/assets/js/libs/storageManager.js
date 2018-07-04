@@ -17,7 +17,7 @@
  * Interval gathering online items for multiple client support
  */
 
-var localSync = require('./Sync');
+var localSync = require('./localSync');
 
 let interval;
 let updateInterval = () => {
@@ -25,12 +25,17 @@ let updateInterval = () => {
         clearInterval(interval)
     }
     console.log("interval is set")
-    interval = setInterval(localSync.isChangeDoneinRepo, 10000);
+    interval = setInterval(localSync.isChangeDoneinRepo, 3000);
 }
 
 
 
 let syncronize = () => {
+    /**
+     *  some web-browsers supports serviceWorkers, but not all of them supports background-sync
+     *  Today, 4.july 2018 only Chrome supports background sync
+    */
+
     if(navigator.serviceWorker) {  //chrome, firefox and safari supports
         navigator.serviceWorker.ready.then(function (registration) {
             
@@ -48,8 +53,9 @@ let syncronize = () => {
 }
     
 module.exports = (type) => {
-    if(type == 'edit'){
-        console.log("interval is cleared")
+    //If the system notices changes in repo, it will reload gui. Not allways fun. 
+    //Therefore the reload interval is cleared
+    if(type == 'edit'){  
         clearInterval(interval)
     } else {
         syncronize()

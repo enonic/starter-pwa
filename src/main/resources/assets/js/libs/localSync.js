@@ -1,5 +1,5 @@
-import storage from './libs/Storage';
-import { updateUI } from './background-sync';
+import storage from './storage';
+import { updateUI } from '../background-sync';
 
 const repoUrl = "/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/background-sync";
 const storeName = { 
@@ -115,7 +115,6 @@ export function syncronize(){
                         })
                     }) 
                 })
-
             })
         })  
     })
