@@ -189,6 +189,7 @@ exports.storeSubscriptionAndGetNode = function(subscription) {
 
 exports.storeBackgroundSyncItemAndGetNode = function (item) {
     log.info("Add:" + new Date() + JSON.stringify(item, null, 4))
+    if(item.text == ".") item.text = "E og O 6-8/2018"
     item.synced = true; 
     var repoConn = getRepoConnection();
 
