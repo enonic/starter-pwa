@@ -13,12 +13,12 @@
     display: flex;
     flex-basis: 100%;
     justify-content: space-between;
-    margin-bottom: 2vh;
+    /*margin-bottom: 2vh;*/
 }
 
 #add-todo-text {
     width: 150%;
-    font-size: 1.1em; 
+    font-size: 1.1em;
 }
 
 #add-todo-button {
@@ -39,10 +39,9 @@
 
 .mdl-textfield__input:focus {
     outline: none !important;
-
     border-bottom-width: 5px;
-    border-bottom-color: #3F51B5; 
-    margin-bottom: 2px; 
+    border-bottom-color: #3F51B5;
+    /*margin-bottom: 2px; */
 }
 
 .todo-app__item {
@@ -53,7 +52,8 @@
     overflow-wrap: break-word;
 }
 
-.todo-app__textfield, .mdl-textfield__input {
+.todo-app__textfield,
+.mdl-textfield__input {
     text-align: left !important;
     /*margin-left: 2vw !important;*/
 }
@@ -73,30 +73,40 @@
         font-size: 1.2em;
     }
     #add-todo-text {
-        font-size: 2em; 
+        font-size: 2em;
         width: 40vw;
     }
     #add-todo-button {
         transform: scale(1.2);
     }
     .todo-app__item>i {
+        width: 1em;
         transform: scale(1.5);
     }
-    .todo-app__textfield {
-
-    }
+    .todo-app__textfield {}
     .todo-app__inputfield {
-        height: 20px !important; 
+        height: 20px !important;
+    }
+    .todo-app__inputfield:focus {
+        margin-left: .55vw !important;
+        margin-right: .55vw !important;
     }
     .mdl-textfield__input {
         font-size: 1em !important;
         padding: 0 0 !important;
         margin: 0 !important;
-
     }
     .todo-app__checkbox:hover,
     .todo-app__textfield:hover,
     .remove-todo-button:hover {
         cursor: pointer;
+    }
+    .remove-todo-button {
+        margin-right: 5vw !important;
+        margin-left: 2vw !important;
+    }
+    .remove-todo-button,
+    .todo-app__synced-icon {
+        font-size: 20px;
     }
 }

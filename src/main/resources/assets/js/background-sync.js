@@ -137,8 +137,8 @@ let updateTodoView = () => {
                 
 
                 <div class="todo-app__date mdl-cell mdl-cell--2-col">${todo.getFormattedDate()}</div>
-                <i class="remove-todo-button mdl-cell mdl-cell--2-col material-icons md-48" id=${todo.id}>close</i>
-                <i class="todo-app__synced-icon mdl-cell mdl-cell--1-col material-icons md-48">${todo.synced ? "cloud_done" : "cloud_off"}</i>
+                <i class="remove-todo-button mdl-cell mdl-cell--2-col material-icons" id=${todo.id}>close</i>
+                <i class="todo-app__synced-icon mdl-cell mdl-cell--1-col material-icons" style="color: black;">${todo.synced ? "cloud_done" : "cloud_off"}</i>
             </li>
         `;
     }
@@ -195,7 +195,7 @@ let changeLabelToInput = (textfield) => {
     let label = textfield.innerHTML;
     let parent = textfield.parentNode; 
     let id = parent.children[1].id; 
-    let input = document.createElement("textarea"); 
+    let input = document.createElement("input"); 
 
     storageManager("edit"); 
 
