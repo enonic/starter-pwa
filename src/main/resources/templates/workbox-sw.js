@@ -83,7 +83,7 @@ self.addEventListener('sync', (event) => {
 })
 
 /**
- * Interval for implementation of multiple users
+ * Interval for implementation of multiple users.
  */
 
 let interval;
@@ -91,7 +91,7 @@ let updateInterval = () => {
     if (interval){
         clearInterval(interval)
     }
-    interval = setInterval(isChangeDoneinRepo, 10000);
+    interval = setInterval(isChangeDoneinRepo, 3000);
 }
 
 function isChangeDoneinRepo(){
@@ -104,7 +104,7 @@ function isChangeDoneinRepo(){
                 } else {
                     repo = []
                 }
-
+        
                 if (repo.length != offlineStorage.length) {
                     syncronize()
                     return;
@@ -232,7 +232,7 @@ let DBPost = function (indexDbName,storeName,item){
         var dbStore = dbTransaction.objectStore(storeName);
         dbStore.add(item)
         dbStore.onerror = (event) => 
-            console.error("Something wentr wrong with your local databse. Make sure your browser supports indexDB")
+            console.error("Something went wrong with your local databse. Make sure your browser supports indexDB")
         
     })
 }

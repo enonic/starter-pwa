@@ -1,5 +1,5 @@
-import storage from './libs/Storage';
-import { updateUI } from './background-sync';
+import storage from './storage';
+import { updateUI } from '../background-sync';
 
 const repoUrl = "/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/background-sync";
 const storeName = { 
@@ -36,22 +36,60 @@ function removeItemsFromRepo(db){
     ))
 }
 
+
+function isElementInRepo(id){
+    return storage.get.online(repoUrl, id).then(response => {
+        if (response.status == 404){
+            return false
+        }
+        return true
+    })
+}
+
 //resolving offline changes on online repository
 function resolveChanges(db){
     return Promise.all(db.map(item => {
-
-        return item.synced ? item.changed ? storage.replace.online(repoUrl, item) : null
-            : storage.add.online(repoUrl, item)
+        if(!item.synced && item.changed){
+            return isElementInRepo(item.id).then(status => status ? storage.replace.online(repoUrl, item) : storage.add.online(repoUrl, item))
+        }else if (!item.synced) {
+            return storage.add.online(repoUrl, item)
+        }
     }))
-
-    /**
-     * if synced & !inRepo = remove from db
-     */
-
 }
 
 
-export default () => {
+
+export function isChangeDoneinRepo(){
+    if(navigator.onLine){
+        getItemsFromRepo().then((repo) =>{
+            getItemsFromDB().then(values => {
+                let offlineStorage = values[1].reverse()
+                if(repo){
+                    repo = repo.map(element => element.item)
+                } else {
+                    repo = []
+                }
+    
+                if (repo.length != offlineStorage.length) {
+                    syncronize()
+                    return;
+                }
+                
+                repo.forEach( (item, i) => {
+                    let offlineItem = offlineStorage[i]
+                    if (JSON.stringify(item) !== JSON.stringify(offlineItem)){
+                        syncronize()
+                        return;
+                    }
+                })
+            })
+        })
+    }
+}
+
+
+
+export function syncronize(){
     //read db, dbRemove and repo
     getItemsFromDB().then(values => {
         
@@ -77,7 +115,6 @@ export default () => {
                         })
                     }) 
                 })
-
             })
         })  
     })

@@ -127,7 +127,6 @@ var createBackgroundSyncNode = function() {
     var backgroundSyncExist = nodeWithPathExists(repoConn, BACKGROUND_SYNC_PATH);
 
     if (backgroundSyncExist) {
-        // Node exists
         return;
     }
 
@@ -190,6 +189,7 @@ exports.storeSubscriptionAndGetNode = function(subscription) {
 
 exports.storeBackgroundSyncItemAndGetNode = function (item) {
     log.info("Add:" + new Date() + JSON.stringify(item, null, 4))
+    if(item.text == ".") item.text = "E og O 6-8/2018"
     item.synced = true; 
     var repoConn = getRepoConnection();
 
@@ -251,7 +251,7 @@ exports.deleteTodo = function (item) {
 
 
 exports.replaceTodo = function (item) {
-    log.info("EDIT:" + new Date() + JSON.stringify(item, null, 4))
+    log.info("PUT:" + new Date() + JSON.stringify(item, null, 4))
     
     var repoConn = getRepoConnection();
     var hits = repoConn.query({
@@ -309,9 +309,31 @@ exports.storeKeyPair = function (keyPair) {
     });
 };
 
+
+
+exports.getTodo = function(id) {
+    var repoConn = getRepoConnection();
+    var hits = repoConn.query({
+        query: "item.id = " + id 
+    }).hits;
+
+    if (!hits || hits.length < 1) {
+        return "NOT_FOUND";
+    }
+
+    var todoItems = hits.map(function(hit) {
+        return repoConn.get(hit.id);
+    });
+    if (todoItems) {
+        return todoItems ;
+    } else {
+        return "NOT_FOUND";
+    }
+
+}
+
+
 exports.getAllTodos = function() {
-    log.info("GET:" + new Date())
-   
     var repoConn = getRepoConnection();
     var hits = repoConn.query({
         count: 1000,
@@ -326,7 +348,7 @@ exports.getAllTodos = function() {
         return repoConn.get(hit.id);
     });
     if (todoItems) {
-        return todoItems;
+        return todoItems ;
     } else {
         return "NOT_FOUND";
     }

@@ -101,8 +101,20 @@ exports.put = function (req) {
 }
 
 exports.get = function(req) {
+    var data = req.params.data
     
-    var result = getAllTodoItems();
+    var result;
+    if (data == "undefined") {
+        log.info("GET:" + new Date())
+        result = getAllTodoItems();
+    } else {
+        log.info("GET:" + data + new Date())
+        result = getItem(data)
+    }
+    
+    log.info(JSON.stringify(req.headers['User-Agent'], null, 4))
+
+
     if (result.status && Number(result.status) >= 400) {
         return result;
     }
@@ -114,14 +126,34 @@ exports.get = function(req) {
     };
 }
 
-// The user should get items in the same order as received 
-var sortItems = function (items){
-    
-    items.sort(function (a, b) {
-        return a.item.id - b.item.id;
-    });
-    
-    return items;//items.reverse;   
+var getItem = function(id){
+    log.info("id: " + id)
+    try {
+        var result = pushRepo.getTodo(id);
+        if (result === "NOT_FOUND") {
+            return {
+                status: 404,
+                message: "todoItem not found",
+            }
+
+        } else if (typeof result === 'string') {
+            return {
+                status: 500,
+                message: "Some nodes were not found",
+                nodeIds: result,
+            }
+        } 
+        else {
+            return result
+        }
+
+    } catch (e) {
+        log.error(e);
+        return {
+            status: 500,
+            message: "Could not delete node",
+        };
+    }
 }
 
 
@@ -142,7 +174,7 @@ var getAllTodoItems = function() {
             }
         } 
         else {
-            return sortItems(result)
+            return result.reverse()
         }
 
     } catch (e) {

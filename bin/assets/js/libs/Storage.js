@@ -1,5 +1,5 @@
 const IndexedDBInstance = require('./db/IndexedDB').default; 
-const dbChanged = require("../dbChanged"); 
+const storageManager = require('./storageManager'); 
 
 export default {
     /**
@@ -21,8 +21,8 @@ export default {
          * @param url the url to fetch from 
          * @returns Promise from fetch 
          */
-        online: (url) => {
-            return fetch(url,{
+        online: (url, data) => {
+            return fetch(url + "?data=" + String(data),{
                 method: 'GET'
             })
         }
@@ -41,7 +41,7 @@ export default {
             return IndexedDBInstance().then(instance => {
                 instance.add(storeName, item);   
                 if(!sync){
-                    dbChanged("delete"); 
+                    storageManager("delete"); 
                 } 
             }); 
         }, 
@@ -70,9 +70,9 @@ export default {
         offline : (storeName, identifier, sync) => {
             return IndexedDBInstance().then(instance => {
                 let req = instance.delete(storeName, identifier)
-                //req.onsuccess = () => dbChanged("delete");  
+                //req.onsuccess = () => storageManager("delete");  
                 if(!sync){
-                    dbChanged("delete"); 
+                    storageManager("delete"); 
                 }
             });
             
@@ -101,7 +101,7 @@ export default {
         offline : (storeName, item) => {
             return IndexedDBInstance().then(instance => {
                 instance.put(storeName, item);
-                dbChanged("replace"); 
+                storageManager("replace"); 
             });
             
         }, 

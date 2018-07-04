@@ -82,6 +82,47 @@ self.addEventListener('sync', (event) => {
     }
 })
 
+/**
+ * Interval for implementation of multiple users.
+ */
+
+let interval;
+let updateInterval = () => {
+    if (interval){
+        clearInterval(interval)
+    }
+    interval = setInterval(isChangeDoneinRepo, 3000);
+}
+
+function isChangeDoneinRepo(){
+    if(navigator.onLine){
+        getItemsFromRepo().then((repo) =>{
+            getItemsFromDB().then(values => {
+                let offlineStorage = values[1].reverse()
+                if(repo){
+                    repo = repo.map(element => element.item)
+                } else {
+                    repo = []
+                }
+        
+                if (repo.length != offlineStorage.length) {
+                    syncronize()
+                    return;
+                }
+                
+                repo.forEach( (item, i) => {
+                    let offlineItem = offlineStorage[i]
+                    if (JSON.stringify(item) !== JSON.stringify(offlineItem)){
+                        syncronize()
+                        return;
+                    }
+                })
+            })
+        })
+    }
+}
+
+
 function getItemsFromRepo(){
     // fetching items from repo
     return getApiCall(repoUrl).then((response) => response.json().then(itemList => {
@@ -105,18 +146,31 @@ function removeItemsFromRepo(db){
     ))
 }
 
+
+function isElementInRepo(id){
+    return getApiCall(repoUrl, id).then(response => {
+        if (response.status == 404){
+            return false
+        }
+        return true
+    })
+}
+
 //resolving offline changes on online repository
 function resolveChanges(db){
     return Promise.all(db.map(item => {
-        return item.synced ? ( item.changed ? putApiCall(repoUrl, item) : null) 
-            : postApiCall(repoUrl, item)
+        if(!item.synced && item.changed){
+            return isElementInRepo(item.id).then(status => status ? putApiCall(repoUrl, item) : postApiCall(repoUrl, item))
+        }else if (!item.synced) {
+            return postApiCall(repoUrl, item)
+        }
     }))
-
 }
 
 
-let syncronize = function(event){
 
+let syncronize = function(event){
+    updateInterval()
     //read db, dbRemove and repo
     getItemsFromDB().then(values => {
 
@@ -151,7 +205,6 @@ let syncronize = function(event){
                         })
                     }) 
                 })
-
             })
         })  
     })
@@ -179,14 +232,13 @@ let DBPost = function (indexDbName,storeName,item){
         var dbStore = dbTransaction.objectStore(storeName);
         dbStore.add(item)
         dbStore.onerror = (event) => 
-            console.error("Something wentr wrong with your local databse. Make sure your browser supports indexDB")
+            console.error("Something went wrong with your local databse. Make sure your browser supports indexDB")
         
     })
 }
 
 let getAllFromIndexDb = function(indexDbName, storeName, index, order) {
     return open(indexDbName).then((db) => {
-
         return new Promise((resolve, reject) => {
             var dbTransaction = db.transaction(storeName, 'readonly');
             var dbStore = dbTransaction.objectStore(storeName);
