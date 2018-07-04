@@ -24,7 +24,6 @@ let updateInterval = () => {
     if (interval){
         clearInterval(interval)
     }
-    console.log("interval is set")
     interval = setInterval(localSync.isChangeDoneinRepo, 3000);
 }
 

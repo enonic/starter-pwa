@@ -11,7 +11,7 @@ const repoUrl = "/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/ba
 const indexDbName = {Todolist: "Todolist"}
 const storeName = { 
     offline: "OfflineStorage", 
-    deletedWhileOffline: "DeletedWhileOffline"
+    deleted: "DeletedWhileOffline"
 }
 
 let indexDB; // indexDB instance
@@ -134,7 +134,7 @@ function getItemsFromRepo(){
 function getItemsFromDB() {
     return Promise.all([
         //fetching items from indexDB
-        getAllFromIndexDb(indexDbName.Todolist, storeName.deletedWhileOffline),
+        getAllFromIndexDb(indexDbName.Todolist, storeName.deleted),
         getAllFromIndexDb(indexDbName.Todolist, storeName.offline)
     ])
 }
@@ -186,7 +186,7 @@ let syncronize = function(event){
                     //flush db & dbRemove
                     Promise.all([
                         flushDB(indexDbName.Todolist, storeName.offline),
-                        flushDB(indexDbName.Todolist, storeName.deletedWhileOffline)
+                        flushDB(indexDbName.Todolist, storeName.deleted)
                     ]).then(() => {
                     
                         //add all items from repo into db.

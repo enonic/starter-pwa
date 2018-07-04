@@ -4,7 +4,7 @@ import { updateUI } from '../background-sync';
 const repoUrl = "/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/background-sync";
 const storeName = { 
     offline: "OfflineStorage", 
-    removed: "DeletedWhileOffline"
+    deleted: "DeletedWhileOffline"
 }
 
 
@@ -24,7 +24,7 @@ function getItemsFromRepo(){
 function getItemsFromDB() {
     return Promise.all([
         //fetching items from indexDB 
-        storage.get.offline(storeName.removed, nodes => nodes ? nodes.map(node => node.value) : []),
+        storage.get.offline(storeName.deleted, nodes => nodes ? nodes.map(node => node.value) : []),
         storage.get.offline(storeName.offline, nodes => nodes ? nodes.map(node => node.value) : [])
     ])
 }
@@ -104,7 +104,7 @@ export function syncronize(){
                     //flush db & dbRemove
                     Promise.all([
                         storage.flush.offline(storeName.offline),
-                        storage.flush.offline(storeName.removed)
+                        storage.flush.offline(storeName.deleted)
                     ]).then(() => {
 
                         //add all items from repo into db.
