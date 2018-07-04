@@ -104,13 +104,12 @@ function isChangeDoneinRepo(){
                 } else {
                     repo = []
                 }
-        
+                console.log(repo)
                 if (repo.length != offlineStorage.length) {
                     syncronize()
                     return;
                 }
-                
-                repo.forEach( (item, i) => {
+                repo.map( (item, i) => {
                     let offlineItem = offlineStorage[i]
                     if (JSON.stringify(item) !== JSON.stringify(offlineItem)){
                         syncronize()

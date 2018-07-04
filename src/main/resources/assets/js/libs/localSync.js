@@ -63,18 +63,18 @@ export function isChangeDoneinRepo(){
     if(navigator.onLine){
         getItemsFromRepo().then((repo) =>{
             getItemsFromDB().then(values => {
+                
                 let offlineStorage = values[1].reverse()
                 if(repo){
                     repo = repo.map(element => element.item)
                 } else {
                     repo = []
                 }
-    
+                console.log(repo)
                 if (repo.length != offlineStorage.length) {
                     syncronize()
                     return;
                 }
-                
                 repo.forEach( (item, i) => {
                     let offlineItem = offlineStorage[i]
                     if (JSON.stringify(item) !== JSON.stringify(offlineItem)){
