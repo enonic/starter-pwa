@@ -91,7 +91,7 @@ let updateInterval = () => {
     if (interval){
         clearInterval(interval)
     }
-    interval = setInterval(isChangeDoneinRepo, 10000);
+    interval = setInterval(isChangeDoneinRepo, 3000);
 }
 
 function isChangeDoneinRepo(){
