@@ -91,7 +91,7 @@ let updateInterval = () => {
     if (interval){
         clearInterval(interval)
     }
-    interval = setInterval(isChangeDoneinRepo, 3000);
+    interval = setInterval(isChangeDoneinRepo, 10000);
 }
 
 function isChangeDoneinRepo(){
@@ -104,13 +104,12 @@ function isChangeDoneinRepo(){
                 } else {
                     repo = []
                 }
-        
+                console.log(repo)
                 if (repo.length != offlineStorage.length) {
                     syncronize()
                     return;
                 }
-                
-                repo.forEach( (item, i) => {
+                repo.map( (item, i) => {
                     let offlineItem = offlineStorage[i]
                     if (JSON.stringify(item) !== JSON.stringify(offlineItem)){
                         syncronize()
