@@ -37,7 +37,7 @@
 
 .todo-app__textfield {
     text-align: left;
-    margin-left: 5%;
+    margin-left: 2vw;
 }
 
 @media (min-width: @breakpoint_desktop) {
@@ -67,7 +67,16 @@
         transform: scale(1.5);
     }
     .todo-app__textfield {
-        padding-left: 2vw;
+        padding-left: 2em;
+    }
+    .mdl-textfield__input {
+        font-size: 2em !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        margin-left: 2vw !important;
+    }
+    .mdl-textfield__input:focus {
+        border: none !important;
     }
     .todo-app__checkbox:hover,
     .todo-app__textfield:hover,

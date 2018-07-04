@@ -1,3 +1,5 @@
+import { log } from 'util';
+
 const storage = require('./libs/Storage').default; 
 const dbChange = require('./dbChanged')
 const storeNames = {
@@ -152,10 +154,11 @@ let updateTodoView = () => {
 let editItemText = (event) => {
     const id = event.target.id; 
     searchAndApply(id, (item) => {
-        item.text = event.target.value; 
+        if(!(event.target.value == "")){
+            item.text = event.target.value;
+        } 
         registerChange(item, storeNames.offline);    
     }); 
-    changeInputToLabel(); 
 }
 
 
@@ -192,27 +195,15 @@ let changeLabelToInput = (textfield) => {
 
     dbChange("edit"); 
 
-    input.className = "todo-app__inputfield mdl-textfield__input"; 
+    input.className = "todo-app__inputfield mdl-textfield__input mdl-cell mdl-cell--7-col"; 
     input.id = id; 
     input.value = label; 
     parent.replaceChild(input, parent.children[1]);
 
+
     input.focus();
     
     updateListenersFor.inputfields(); 
-}
-
-let changeInputToLabel = () => {
-    let input = document.getElementsByClassName("todo-app__inputfield")[0]; 
-
-    let parent = input.parentNode;
-
-    let label = document.createElement("label");
-    label.className = "todo-app__textfield";
-    label.innerHTML = input.value;
-    parent.replaceChild(label, parent.children[1]);
-
-    updateListenersFor.textfields(); 
 }
 
 // Listeners
@@ -221,12 +212,14 @@ document.onkeydown = (event) => {
                         //enter
     const inputfield = document.getElementById("add-todo-text");  
 
+    // actions on enter 
     if(event.keyCode == 13) {
         // adding an item
         if (document.activeElement === inputfield) {
             addTodo(); 
             // changing an item
         } else if (document.activeElement.className.split(" ").includes("todo-app__inputfield")) {
+            // changing is triggered onblur in updateListenersFor.inputfields
             document.activeElement.blur(); 
         }
     }
