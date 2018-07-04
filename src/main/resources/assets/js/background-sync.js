@@ -129,13 +129,13 @@ let updateTodoView = () => {
         outputArea.innerHTML += `
             <li class="todo-app__item mdl-list__item mdl-grid>
             
-				<input type="checkbox" id="${todo.id}" class="mdl-checkbox__input todo-app__checkbox" style="color: ${todo.isChecked ? "grey" : ""}"/>
-                <i id="${todo.id}" class="todo-app__checkbox mdl-cell mdl-cell--2-col material-icons md-48">${todo.isChecked ? "check_box" : "check_box_outline_blank"}</i>
+				<input type="checkbox" id="${todo.id}" class="todo-app__checkbox mdl-checkbox__input" style="color: ${todo.isChecked ? "grey" : ""}"/>
+                <i id="${todo.id}" class="todo-app__checkbox mdl-cell mdl-cell--1-col material-icons md-48">${todo.isChecked ? "check_box" : "check_box_outline_blank"}</i>
                 
-                <label id="${todo.id}" value="${todo.text}" class="todo-app__textfield mdl-cell mdl-cell--4-col">${todo.text}</label>
+                <label id="${todo.id}" value="${todo.text}" class="todo-app__textfield mdl-cell mdl-cell--7-col">${todo.text}</label>
                 <div class="todo-app__date mdl-cell mdl-cell--2-col">${todo.getFormattedDate()}</div>
-                <i class="todo-app__synced-icon mdl-cell mdl-cell--2-col material-icons md-48">${todo.synced ? "cloud_done" : "cloud_off"}</i>
                 <i class="remove-todo-button mdl-cell mdl-cell--2-col material-icons md-48" id=${todo.id}>close</i>
+                <i class="todo-app__synced-icon mdl-cell mdl-cell--1-col material-icons md-48">${todo.synced ? "cloud_done" : "cloud_off"}</i>
             </li>
         `;
     }
@@ -220,8 +220,15 @@ document.getElementById("add-todo-button").onclick = addTodo;
 document.onkeydown = (event) => {
                         //enter
     const inputfield = document.getElementById("add-todo-text");  
-    if (event.keyCode === 13 && document.activeElement === inputfield) {
-        addTodo(); 
+
+    if(event.keyCode == 13) {
+        // adding an item
+        if (document.activeElement === inputfield) {
+            addTodo(); 
+            // changing an item
+        } else if (document.activeElement.className.split(" ").includes("todo-app__inputfield")) {
+            document.activeElement.blur(); 
+        }
     }
 }
 
