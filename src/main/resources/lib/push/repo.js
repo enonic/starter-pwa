@@ -311,8 +311,6 @@ exports.storeKeyPair = function (keyPair) {
 
 
 exports.getTodo = function(id) {
-    log.info("GET:" + new Date() + id)
-   
     var repoConn = getRepoConnection();
     var hits = repoConn.query({
         query: "item.id = " + id 
@@ -335,8 +333,6 @@ exports.getTodo = function(id) {
 
 
 exports.getAllTodos = function() {
-    log.info("GET:" + new Date())
-   
     var repoConn = getRepoConnection();
     var hits = repoConn.query({
         count: 1000,

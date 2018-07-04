@@ -101,13 +101,20 @@ exports.put = function (req) {
 }
 
 exports.get = function(req) {
+    var data = req.params.data
+    
     var result;
-    if (req.params.data == "undefined") {
+    if (data == "undefined") {
+        log.info("GET:" + new Date())
         result = getAllTodoItems();
     } else {
-        result = getItem(req.params.data)
+        log.info("GET:" + data + new Date())
+        result = getItem(data)
     }
-     
+    
+    log.info(JSON.stringify(req.headers['User-Agent'], null, 4))
+
+
     if (result.status && Number(result.status) >= 400) {
         return result;
     }
