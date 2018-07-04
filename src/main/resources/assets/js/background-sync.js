@@ -51,8 +51,8 @@ class TodoItem {
     }
     getFormattedDate() {
         return  ""
-        + this.date.getHours() + ":" + this.date.getMinutes() + " " 
-        + this.date.getDate() + "/" + (this.date.getMonth() + 1) + "/" + this.date.getFullYear();
+        + this.date.getDate() + "/" + (this.date.getMonth() + 1) + "/" + this.date.getFullYear() + " "
+        + this.date.getHours() + ":" + this.date.getMinutes(); 
     }
 }
 
@@ -130,12 +130,12 @@ let updateTodoView = () => {
             <li class="todo-app__item mdl-list__item mdl-grid>
             
 				<input type="checkbox" id="${todo.id}" class="mdl-checkbox__input todo-app__checkbox" style="color: ${todo.isChecked ? "grey" : ""}"/>
-                <i id="${todo.id}" class="todo-app__checkbox mdl-cell mdl-cell--1-col material-icons">${todo.isChecked ? "check_box" : "check_box_outline_blank"}</i>
+                <i id="${todo.id}" class="todo-app__checkbox mdl-cell mdl-cell--2-col material-icons md-48">${todo.isChecked ? "check_box" : "check_box_outline_blank"}</i>
                 
-                <label id="${todo.id}" value="${todo.text}" class="mdl-cell mdl-cell--9-col todo-app__textfield ">${todo.text}</label>
-                <div>${todo.getFormattedDate()}</div>
-                <i class="mdl-cell mdl-cell--1-col material-icons">${todo.synced ? "cloud_done" : "cloud_off"}</i>
-                <i class="mdl-cell mdl-cell--1-col material-icons remove-todo-button" id=${todo.id}>close</i>
+                <label id="${todo.id}" value="${todo.text}" class="todo-app__textfield mdl-cell mdl-cell--4-col">${todo.text}</label>
+                <div class="todo-app__date mdl-cell mdl-cell--2-col">${todo.getFormattedDate()}</div>
+                <i class="todo-app__synced-icon mdl-cell mdl-cell--2-col material-icons md-48">${todo.synced ? "cloud_done" : "cloud_off"}</i>
+                <i class="remove-todo-button mdl-cell mdl-cell--2-col material-icons md-48" id=${todo.id}>close</i>
             </li>
         `;
     }

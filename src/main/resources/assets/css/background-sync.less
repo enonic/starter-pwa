@@ -5,23 +5,26 @@
     position: absolute;
     font-family: "Roboto", "Helvetica", "Arial", sans-serif;
     top: 10vh;
-    right: 4vw; 
-    left: 4vw; 
+    right: 4vw;
+    left: 4vw;
 }
 
 #todo-app__input {
     display: flex;
     flex-basis: 100%;
     justify-content: space-between;
+    margin-bottom: 2vh;
 }
 
 #add-todo-text {
     font-size: 2em;
-    width: 100%;
+    width: 150%;
+    text-indent: 1em;
 }
 
 #add-todo-button {
     border: solid #3F51B5;
+    bottom: 1vh;
 }
 
 .todo-app__item {
@@ -37,20 +40,27 @@
     margin-left: 5%;
 }
 
-/*
-.todo-item__line {
-    position: absolute;
-    width: 100%;
-    height: 0.25vh;
-    background-color: #263238;
-    margin-left: 5%; 
-}
-*/
-
 @media (min-width: @breakpoint_desktop) {
     #todo-app__container {
-        width: 30vw;
+        width: 70vw;
         top: 20vh;
-        margin: auto; 
+        margin: auto;
+    }
+    #todo-app__input {
+        position: relative;
+        width: 70vw;
+        margin-bottom: 6vh;
+    }
+    #todo-app__input>* {
+        font-size: 2em;
+    }
+    #add-todo-text {
+        width: 40vw;
+    }
+    .todo-app__item>* {
+        font-size: 2em;
+    }
+    .todo-app__item > i {
+        transform: scale(2); 
     }
 }
