@@ -132,14 +132,19 @@ let updateTodoView = () => {
 				<input type="checkbox" id="${todo.id}" class="todo-app__checkbox mdl-checkbox__input" style="color: ${todo.isChecked ? "grey" : ""}"/>
                 <i id="${todo.id}" class="todo-app__checkbox mdl-cell mdl-cell--1-col material-icons md-48">${todo.isChecked ? "check_box" : "check_box_outline_blank"}</i>
                 
+            	
                 <label id="${todo.id}" value="${todo.text}" class="todo-app__textfield mdl-cell mdl-cell--7-col">${todo.text}</label>
                 
+
                 <div class="todo-app__date mdl-cell mdl-cell--2-col">${todo.getFormattedDate()}</div>
-                <i class="remove-todo-button mdl-cell mdl-cell--2-col material-icons md-48" id=${todo.id}>close</i>
-                <i class="todo-app__synced-icon mdl-cell mdl-cell--1-col material-icons md-48">${todo.synced ? "cloud_done" : "cloud_off"}</i>
+                <i class="remove-todo-button mdl-cell mdl-cell--2-col material-icons" id=${todo.id}>close</i>
+                <i class="todo-app__synced-icon mdl-cell mdl-cell--1-col material-icons" style="color: black;">${todo.synced ? "cloud_done" : "cloud_off"}</i>
             </li>
         `;
     }
+    /**
+     * <input id="${todo.id}" value="${todo.text}" class="todo-app__textfield mdl-textfield__input mdl-cell mdl-cell--7-col">${todo.text}</input>
+     */
     for (let cbox of document.getElementsByClassName("mdl-js-checkbox")) {
         componentHandler.upgradeElements(cbox); 
     }
@@ -190,7 +195,7 @@ let changeLabelToInput = (textfield) => {
     let label = textfield.innerHTML;
     let parent = textfield.parentNode; 
     let id = parent.children[1].id; 
-    let input = document.createElement("textarea"); 
+    let input = document.createElement("input"); 
 
     storageManager("edit"); 
 
