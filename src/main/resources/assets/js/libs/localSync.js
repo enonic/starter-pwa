@@ -70,7 +70,6 @@ export function isChangeDoneinRepo(){
                 } else {
                     repo = []
                 }
-                console.log(repo)
                 if (repo.length != offlineStorage.length) {
                     syncronize()
                     return;

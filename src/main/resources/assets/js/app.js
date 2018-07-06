@@ -4,7 +4,6 @@ require("../css/background-sync.less");
 require('./background-sync'); 
 const storageManager = require('./libs/storageManager')
 
-
 var ToasterInstance = require("./libs/Toaster").default;
 
 module.exports = {

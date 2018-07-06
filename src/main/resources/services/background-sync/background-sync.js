@@ -111,9 +111,6 @@ exports.get = function(req) {
         log.info("GET:" + data + new Date())
         result = getItem(data)
     }
-    
-    log.info(JSON.stringify(req.headers['User-Agent'], null, 4))
-
 
     if (result.status && Number(result.status) >= 400) {
         return result;
@@ -127,7 +124,6 @@ exports.get = function(req) {
 }
 
 var getItem = function(id){
-    log.info("id: " + id)
     try {
         var result = pushRepo.getTodo(id);
         if (result === "NOT_FOUND") {

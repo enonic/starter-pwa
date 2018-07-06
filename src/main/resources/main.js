@@ -89,7 +89,7 @@ router.get('/webrtc', function() { return renderPage('webrtc', 'WebRTC functiona
 router.get('/sw.js', renderSW);
 router.get('/manifest.json', renderManifest);
 
-exports.get = function (req) {
+exports.get = function (req) {    
     return router.dispatch(req);
 };
 
