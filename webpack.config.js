@@ -32,7 +32,23 @@ module.exports = {
     },
 
     module: {
+
         rules: [
+            {
+                enforce: "pre",
+                test: /\.js$/,
+                exclude: /node_modules/,
+                loader: "eslint-loader",
+                options: {
+                    failOnWarning: false,
+                    failOnError: true
+                }
+            },
+            {
+                test: /\.js$/,
+                exclude: /node_modules/,
+                loader: "babel-loader",
+            },
             {
                 test: /.less$/,
                 loader: extractTextPlugin.extract({
@@ -49,6 +65,6 @@ module.exports = {
             globPatterns: ['precache/**\/*'],
             swSrc: path.join(templatesPath, 'workbox-sw.js'),
             swDest: path.join(buildTemplatesPath, 'sw.js')
-        }),
+        })
     ]
 };
