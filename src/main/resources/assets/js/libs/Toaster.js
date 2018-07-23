@@ -14,20 +14,9 @@
  * limitations under the License.
  */
 
-export default function ToasterInstance() {
-
-    if (typeof window.ToasterInstance_ !== 'undefined')
-        return Promise.resolve(window.ToasterInstance_);
-
-    window.ToasterInstance_ = new Toaster();
-
-    return Promise.resolve(window.ToasterInstance_);
-}
-
 class Toaster {
-
     constructor() {
-        this.view = document.querySelector(".toast-view"); 
+        this.view = document.querySelector('.toast-view');
         this.hideTimeout = 0;
         this.hideBound = this.hide.bind(this);
     }
@@ -42,4 +31,13 @@ class Toaster {
     hide() {
         this.view.classList.remove('toast-view--visible');
     }
+}
+
+export default function ToasterInstance() {
+    if (typeof window.ToasterInstance_ !== 'undefined')
+        return Promise.resolve(window.ToasterInstance_);
+
+    window.ToasterInstance_ = new Toaster();
+
+    return Promise.resolve(window.ToasterInstance_);
 }
