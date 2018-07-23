@@ -15,18 +15,30 @@
  * limitations under the License.
  */
 
-function ConfigManagerInstance() {
-
-    if (typeof window.ConfigManagerInstance_ !== 'undefined')
-        return Promise.resolve(window.ConfigManagerInstance_);
-
-    window.ConfigManagerInstance_ = new ConfigManager();
-
-    return Promise.resolve(window.ConfigManagerInstance_);
-}
+const Config = {
+    name: 'Todolist',
+    version: 1,
+    stores: {
+        OfflineStorage: {
+            properties: {
+                keyPath: 'id'
+            },
+            indexes: {
+                todoItem: { unique: false }
+            }
+        },
+        DeletedWhileOffline: {
+            properties: {
+                keyPath: 'id'
+            },
+            indexes: {
+                todoItem: { unique: false }
+            }
+        }
+    }
+};
 
 class ConfigManager {
-
     constructor() {
         this.config = Config;
     }
@@ -42,30 +54,15 @@ class ConfigManager {
     getStore(storeName) {
         return this.config_.stores[storeName];
     }
-
 }
 
-const Config = {
-    name: 'Todolist',
-    version: 1,
-    stores: {
-        'OfflineStorage': {
-            properties: {
-                keyPath: 'id'
-            },
-            indexes: {
-                todoItem: { unique : false }
-            }
-        }, 
-        'DeletedWhileOffline': {
-            properties: {
-                keyPath: 'id'
-            },
-            indexes: {
-                todoItem: { unique: false }
-            }
-        }
-    }
-};
+function ConfigManagerInstance() {
+    if (typeof window.ConfigManagerInstance_ !== 'undefined')
+        return Promise.resolve(window.ConfigManagerInstance_);
+
+    window.ConfigManagerInstance_ = new ConfigManager();
+
+    return Promise.resolve(window.ConfigManagerInstance_);
+}
 
 export default ConfigManagerInstance;

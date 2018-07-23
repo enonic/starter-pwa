@@ -300,7 +300,7 @@ function updateSubscriptionOnServer(subscription) {
             broadcastSubscriberCountChange();
         },
 
-        function(error) { 
+        function(error) {
             isSubscribed = false;
             displayErrorStatus(
                 'Failed to subscribe to push notifications',

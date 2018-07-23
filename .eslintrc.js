@@ -11,7 +11,7 @@ module.exports = {
         'no-use-before-define': ['error', { functions: false }],
         'linebreak-style': ['off'],
         'prettier/prettier': [
-            'error',
+            'error', 
             {
                 printWidth: 80,
                 singleQuote: true,
@@ -29,5 +29,8 @@ module.exports = {
         log: true,
         env: true,
         app: true
+    }, 
+    parserOptions: {
+        sourceType: "module",
     }
 };

@@ -49,7 +49,7 @@ let syncronize = () => {
     }
 };
 
-module.exports = type => {
+module.exports = function(type) {
     // If the system notices changes in repo, it will reload gui. Not allways fun.
     // Therefore the reload interval is cleared
     if (type === 'edit') {
