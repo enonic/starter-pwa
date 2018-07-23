@@ -1,5 +1,5 @@
-const IndexedDBInstance = require('./db/IndexedDB').default; 
-const storageManager = require('./storageManager'); 
+const IndexedDBInstance = require('./db/indexed-db').default; 
+const storageManager = require('./storage-manager'); 
 
 export default {
     /**
@@ -30,7 +30,7 @@ export default {
     /**
      * Methods for adding to storage
      */
-    add : {
+    add : { 
         /**
          * Adds item to indexDB
          * @param storeName name of the indexDB store

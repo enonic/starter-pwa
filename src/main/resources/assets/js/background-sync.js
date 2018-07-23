@@ -1,5 +1,6 @@
-const storage = require('./libs/storage').default; 
-const storageManager = require('./libs/storageManager')
+const storage = require('./libs/background-sync/Storage').default; 
+const storageManager = require('./libs/background-sync/storage-manager')
+require("./background-sync"); 
 const storeNames = {
     offline : "OfflineStorage", 
     deletedWhileOffline : "DeletedWhileOffline"

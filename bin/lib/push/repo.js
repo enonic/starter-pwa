@@ -337,16 +337,25 @@ exports.getAllTodos = function() {
     var repoConn = getRepoConnection();
     var hits = repoConn.query({
         count: 1000,
+        start: 0,
         query: "item.type = 'TodoItem'"
     }).hits;
     if (!hits || hits.length < 1) {
         return "NOT_FOUND";
     }
-
+     /**
+     * The query does not fetch items inline with order they were added.
+     */
+    
 
     var todoItems = hits.map(function(hit) {
         return repoConn.get(hit.id);
     });
+
+    todoItems.sort(function(a,b){return a.item.id - b.item.id})
+
+   
+
     if (todoItems) {
         return todoItems ;
     } else {

@@ -17,7 +17,7 @@
  * Interval gathering online items for multiple client support
  */
 
-var localSync = require('./localSync');
+var localSync = require('./local-sync');
 
 let interval;
 let updateInterval = () => {
