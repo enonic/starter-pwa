@@ -1,4 +1,4 @@
-const storage = require('./libs/background-sync/Storage').default; 
+const storage = require('./libs/background-sync/storage').default; 
 const storageManager = require('./libs/background-sync/storage-manager')
 require("./background-sync"); 
 const storeNames = {

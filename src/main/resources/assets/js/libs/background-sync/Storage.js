@@ -33,7 +33,7 @@ export default {
     add : { 
         /**
          * Adds item to indexDB
-         * @param storeName name of the indexDB store
+         * @param storeName name of the indexDB store 
          * @param item the item to add 
          * @param noSync set to true if no sync with repo is wanted 
          */

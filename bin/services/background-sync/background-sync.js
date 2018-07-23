@@ -194,7 +194,6 @@ var createTodoNode = function (todoItem) {
                     incoming_TodoItem: todoItem,
                     resulting_node: Node
                 }, null, 2));
-            t
             return {
                 status: 500,
                 message: "Could not create node",
