@@ -234,8 +234,8 @@ const registerChange = (item, storeName) => {
 };
 const changeLabelToInput = textfield => {
     const label = textfield.innerHTML;
-    const id = parent.children[1].id;
     let parent = textfield.parentNode;
+    const id = parent.children[1].id;
     let input = document.createElement('input');
     storageManager('edit');
     input.className =
