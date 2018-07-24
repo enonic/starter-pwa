@@ -5,8 +5,11 @@
 
 require('../css/styles.less');
 require('./../css/background-sync.less');
+
 const storage = require('./libs/background-sync/storage').default;
 const storageManager = require('./libs/background-sync/storage-manager');
+const ToasterInstance = require('./libs/toaster').default;
+
 const storeNames = {
     offline: 'OfflineStorage',
     deletedWhileOffline: 'DeletedWhileOffline'
@@ -16,6 +19,9 @@ let registeredTodos;
 const toggleOnlineStatus = function() {
     if (navigator.onLine) {
         storageManager('online');
+        ToasterInstance().then(toaster => {
+            toaster.toast('All offline changes are synced to the storage.');
+        });
     }
 };
 
@@ -83,7 +89,7 @@ class TodoItem {
  * Search for TodoItem based on ID and use callback
  * @param {string} id item identifier
  */
-let searchAndApply = (id, callback) => {
+const searchAndApply = (id, callback) => {
     for (let todo of registeredTodos) {
         if (todo.id === parseInt(id, 10)) {
             callback(todo);
@@ -94,7 +100,7 @@ let searchAndApply = (id, callback) => {
 /**
  * Adds a todo to the list.
  */
-let addTodo = () => {
+const addTodo = () => {
     const inputfield = document.getElementById('add-todo-text');
     // Only add if user actually entered something
     if (inputfield.value !== '') {
@@ -137,7 +143,7 @@ let removeTodo = event => {
  * Updates the list view
  * NOTE: Updates all elements regardless. Must be imrpoved later
  */
-let updateTodoView = () => {
+const updateTodoView = () => {
     let outputArea = document.getElementById('todo-app__item-area');
     outputArea.innerHTML = '';
     for (let todo of registeredTodos) {
@@ -192,7 +198,7 @@ let updateTodoView = () => {
  * edits an item based on onclick
  * updates storage
  */
-let editItemText = event => {
+const editItemText = event => {
     const id = event.target.id;
     searchAndApply(id, item => {
         let changedItem = item;
@@ -205,7 +211,7 @@ let editItemText = event => {
 /**
  * Takes the DOM element and makes it TodoItem counterpart checked/unchecked
  */
-let checkTodo = checkboxElement => {
+const checkTodo = checkboxElement => {
     const id = checkboxElement.id;
     searchAndApply(id, item => {
         let changedItem = item;
@@ -219,17 +225,17 @@ let checkTodo = checkboxElement => {
  * @param item the edited item
  * @param storeName storeName to replaced in (probably storeNames.offline)
  */
-let registerChange = (item, storeName) => {
+const registerChange = (item, storeName) => {
     let changedItem = item;
     changedItem.changed = true;
     changedItem.synced = false;
     storage.replace.offline(storeName, changedItem);
     updateUI('registerchange');
 };
-let changeLabelToInput = textfield => {
-    let label = textfield.innerHTML;
+const changeLabelToInput = textfield => {
+    const label = textfield.innerHTML;
+    const id = parent.children[1].id;
     let parent = textfield.parentNode;
-    let id = parent.children[1].id;
     let input = document.createElement('input');
     storageManager('edit');
     input.className =
@@ -324,7 +330,7 @@ const updateListenersFor = {
         }
     }
 };
-export let updateUI = () => {
+export const updateUI = () => {
     storage.get.offline(storeNames.offline, items => {
         items.reverse();
         registeredTodos = items.map(
