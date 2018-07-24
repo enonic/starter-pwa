@@ -70,7 +70,9 @@ class TodoItem {
  */
 let searchAndApply = (id, callback) => {
     for (let todo of registeredTodos) {
-        if (todo.id === id) {
+        console.log('looking for: ', id, ' looking at: ', todo.id);
+        if (todo.id === parseInt(id, 10)) {
+            console.log('running callback on item', todo);
             callback(todo);
         }
     }
@@ -187,9 +189,13 @@ let editItemText = event => {
  * Takes the DOM element and makes it TodoItem counterpart checked/unchecked
  */
 let checkTodo = checkboxElement => {
+    console.log('checking is running');
     const id = checkboxElement.id;
+    console.log('checkboxID', id);
     searchAndApply(id, item => {
+        console.log('item', item);
         let changedItem = item;
+        console.log('changedItem', changedItem);
         changedItem.isChecked = !item.isChecked;
         registerChange(changedItem, storeNames.offline);
     });
@@ -201,6 +207,7 @@ let checkTodo = checkboxElement => {
  * @param storeName storeName to replaced in (probably storeNames.offline)
  */
 let registerChange = (item, storeName) => {
+    console.log('change running');
     let changedItem = item;
     changedItem.changed = true;
     changedItem.synced = false;
