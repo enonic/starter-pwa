@@ -1,3 +1,6 @@
+/* eslint no-console: 0 */ // --> OFF, in this file, logging is part of wanted functionality
+/* eslint no-useless-escape: 0 */ // --> OFF, needed in urlB64ToUint8Array() 
+
 /**
  * Client-side code for push notifications
  */
@@ -140,16 +143,15 @@ function postApiCall(url, data, callbackSuccess, callbackFailure) {
  * @param {boolean} [abort] - If true, the GUI stops: the push form is disabled, and the subscribe button is hidden.
  * @param {Error} [err] - If submitted, logs the error to the console.
  */
-// function displayErrorStatus(message, abort, err) {
-function displayErrorStatus(message, abort) {
+function displayErrorStatus(message, abort, err) {
     displayingError = true;
 
-    // var log = abort ? console.error : console.warn;
-    // log(message);
+    var log = abort ? console.error : console.warn;
+    log(message);
 
-    // if (err) {
-    //     console.error(err);
-    // }
+    if (err) {
+        console.error(err);
+    }
     elemSubscribeStatus.textContent = message;
     elemSubscribeStatus.classList.remove('subscribing');
     elemSubscribeStatus.classList.remove('blocked');
@@ -221,9 +223,8 @@ function requestPermissionIfNeeded() {
 function urlB64ToUint8Array(base64String) {
     const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
     const base64 = (base64String + padding)
-        .replace(/_/g, '+')
+        .replace(/\-/g, '+')
         .replace(/_/g, '/');
-
     const rawData = window.atob(base64);
     const outputArray = new Uint8Array(rawData.length);
 
@@ -240,7 +241,6 @@ function urlB64ToUint8Array(base64String) {
  */
 function subscribeUser() {
     var publicKey = $subscribeForm.attr('data-public-key');
-
     const applicationServerKey = urlB64ToUint8Array(publicKey);
     swRegistration.pushManager
         .subscribe({
@@ -267,7 +267,7 @@ function updateSubscriptionOnServer(subscription) {
     }
 
     var url = $subscribeForm.attr('action');
-    // console.log('url', url)
+    console.log('url', url);
     const subObj = JSON.parse(JSON.stringify(subscription));
 
     const params = {
@@ -288,13 +288,15 @@ function updateSubscriptionOnServer(subscription) {
                 isSubscribed = true;
             }
             // Log server messages/data deviations
-            // else {
-            //     console.warn('Server response: status=200, but not with success=true. Response data:');
-            //     console.log(data);
-            // }
-            // if (data.message) {
-            //     console.log(data.message);
-            // }
+            else {
+                console.warn(
+                    'Server response: status=200, but not with success=true. Response data:'
+                );
+                console.log(data);
+            }
+            if (data.message) {
+                console.log(data.message);
+            }
 
             updateGUI();
             broadcastSubscriberCountChange();
@@ -373,13 +375,15 @@ function removeSubscriptionOnServer() {
                     subscriptionAuth = null;
 
                     // Log server messages/data deviations
-                } // else {
-                //     console.warn('Server response: status=200, but not with success=true. Response data:');
-                //     console.log(data);
-                // }
-                // if (data.message) {
-                //     console.log(data.message);
-                // }
+                } else {
+                    console.warn(
+                        'Server response: status=200, but not with success=true. Response data:'
+                    );
+                    console.log(data);
+                }
+                if (data.message) {
+                    console.log(data.message);
+                }
 
                 updateGUI();
                 broadcastSubscriberCountChange();
@@ -414,16 +418,17 @@ function clickPushButton(event) {
             $pushForm.attr('action'),
             { message: elemPushField.value },
 
-            function() {
-                // function(data) {
-                // console.log('url', $pushForm.attr('action'));
-                // // Log server messages/data deviations
-                // if ((data || {}).success === true) {
-                //     console.log('Push succeeded');
-                // } else {
-                //     console.warn('Server response: status=200, but not with success=true. Response data:');
-                //     console.log(data);
-                // }
+            function(data) {
+                console.log('url', $pushForm.attr('action'));
+                // Log server messages/data deviations
+                if ((data || {}).success === true) {
+                    console.log('Push succeeded');
+                } else {
+                    console.warn(
+                        'Server response: status=200, but not with success=true. Response data:'
+                    );
+                    console.log(data);
+                }
 
                 elemPushButton.disabled = false;
                 elemPushField.disabled = false;
