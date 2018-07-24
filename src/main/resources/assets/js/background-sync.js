@@ -143,9 +143,9 @@ let updateTodoView = () => {
         }"/>
                 <i id="${
                     todo.id
-                }" class="todo-app__checkbox mdl-cell mdl-cell--1-col material-icons md-48">${
-            todo.isChecked ? 'check_box' : 'check_box_outline_blank'
-        }</i>
+                }" class="todo-app__checkbox mdl-cell mdl-cell--1-col material-icons md-48" title="${
+            todo.isChecked ? 'Mark as incomplete' : 'Mark as completed'
+        }">${todo.isChecked ? 'check_box' : 'check_box_outline_blank'}</i>
                 
             	
                 <label id="${todo.id}" value="${

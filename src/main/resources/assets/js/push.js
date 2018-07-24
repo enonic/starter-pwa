@@ -1,5 +1,5 @@
 /* eslint no-console: 0 */ // --> OFF, in this file, logging is part of wanted functionality
-/* eslint no-useless-escape: 0 */ // --> OFF, needed in urlB64ToUint8Array() 
+/* eslint no-useless-escape: 0 */ // --> OFF, needed in urlB64ToUint8Array()
 
 /**
  * Client-side code for push notifications
