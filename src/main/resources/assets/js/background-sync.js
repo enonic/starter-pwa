@@ -158,9 +158,13 @@ let updateTodoView = () => {
                 <i class="remove-todo-button mdl-cell mdl-cell--2-col material-icons" id=${
                     todo.id
                 }>close</i>
-                <i class="todo-app__synced-icon mdl-cell mdl-cell--1-col material-icons" style="color: black;">${
-                    todo.synced ? 'cloud_done' : 'cloud_off'
-                }</i>
+                <i class="todo-app__synced-icon mdl-cell mdl-cell--1-col material-icons" title="${
+                    todo.synced
+                        ? 'Synced with storage'
+                        : 'Not synced to the storage'
+                }" style="color: black;">${
+            todo.synced ? 'cloud_done' : 'cloud_off'
+        }</i>
             </li>
         `;
     }
