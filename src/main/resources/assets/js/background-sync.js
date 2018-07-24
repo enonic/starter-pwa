@@ -320,10 +320,19 @@ export let updateUI = () => {
                     item.value.synced
                 )
         );
+        focusIfEmpty();
         updateTodoView();
         updateListenersFor.everything();
     });
 };
+
+const focusIfEmpty = () => {
+    const inputfield = document.getElementById('add-todo-text');
+    if (inputfield && registeredTodos.length <= 0) {
+        inputfield.focus();
+    }
+};
+
 /**
  * Listen to serviceworker
  */
