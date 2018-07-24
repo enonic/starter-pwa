@@ -70,8 +70,10 @@ class TodoItem {
             '/' +
             this.date.getFullYear() +
             ' ' +
+            (this.date.getHours() < 10 ? '0' : '') +
             this.date.getHours() +
             ':' +
+            (this.date.getMinutes() < 10 ? '0' : '') +
             this.date.getMinutes()
         );
     }
