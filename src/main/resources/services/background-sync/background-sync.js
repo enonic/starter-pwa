@@ -102,9 +102,9 @@ exports.put = function (req) {
 
 exports.get = function(req) {
     var data = req.params.data
-    
+    log.info("DATA:" + data)
     var result;
-    if (data == "undefined") {
+    if (data === undefined) {
         log.info("GET:" + new Date())
         result = getAllTodoItems();
     } else {

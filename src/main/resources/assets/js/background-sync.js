@@ -39,7 +39,7 @@ storage.get.offline(storeNames.offline, items => {
             new TodoItem(
                 item.value.text,
                 item.value.date,
-                item.value.isChecked,
+                item.value.completed,
                 item.value.id
             )
     );
@@ -54,12 +54,12 @@ class TodoItem {
      *
      * @param {string} text
      * @param {string} date
-     * @param {boolean} isChecked
+     * @param {boolean} completed
      */
-    constructor(text, date, isChecked, id, synced) {
+    constructor(text, date, completed, id, synced) {
         this.text = text;
         this.date = typeof date === 'string' ? new Date(date) : date;
-        this.isChecked = isChecked;
+        this.completed = completed;
         // only give new ID of old one is not supplied
         this.id = !id ? new Date().valueOf() : id; // unique id}
         this.synced = !synced ? false : synced;
@@ -158,13 +158,13 @@ const updateTodoView = () => {
 				<input type="checkbox" id="${
                     todo.id
                 }" class="todo-app__checkbox mdl-checkbox__input" style="color: ${
-            todo.isChecked ? 'grey' : ''
+            todo.completed ? 'grey' : ''
         }"/>
                 <i id="${
                     todo.id
                 }" class="todo-app__checkbox mdl-cell mdl-cell--1-col material-icons md-48" title="${
-            todo.isChecked ? 'Mark as incomplete' : 'Mark as completed'
-        }">${todo.isChecked ? 'check_box' : 'check_box_outline_blank'}</i>
+            todo.completed ? 'Mark as incomplete' : 'Mark as completed'
+        }">${todo.completed ? 'check_box' : 'check_box_outline_blank'}</i>
                 
             	
                 <label id="${todo.id}" value="${
@@ -215,7 +215,7 @@ const checkTodo = checkboxElement => {
     const id = checkboxElement.id;
     searchAndApply(id, item => {
         const changedItem = item;
-        changedItem.isChecked = !item.isChecked;
+        changedItem.completed = !item.completed;
         registerChange(changedItem, storeNames.offline);
     });
 };
@@ -330,7 +330,7 @@ export const updateUI = () => {
                 new TodoItem(
                     item.value.text,
                     item.value.date,
-                    item.value.isChecked,
+                    item.value.completed,
                     item.value.id,
                     item.value.synced
                 )

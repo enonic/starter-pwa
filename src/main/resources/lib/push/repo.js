@@ -269,7 +269,7 @@ exports.replaceTodo = function (item) {
 
     var editor = function(node) {
         node.item.text = item.text;
-        node.item.isChecked = item.isChecked;
+        node.item.completed = item.completed;
         node.item.changed = false 
         return node; 
     }

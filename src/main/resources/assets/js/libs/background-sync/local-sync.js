@@ -45,7 +45,7 @@ function removeItemsFromRepo(db) {
 
 function isElementInRepo(id) {
     return storage.get.online(repoUrl, id).then(response => {
-        if (response.status === 404) {
+        if (response.status >= 404) {
             return false;
         }
         return true;

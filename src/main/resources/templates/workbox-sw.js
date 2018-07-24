@@ -86,7 +86,7 @@ self.addEventListener('sync', (event) => {
  */
 
 let interval;
-let updateInterval = () => {
+const updateInterval = () => {
     if (interval){
         clearInterval(interval)
     }
@@ -96,6 +96,9 @@ let updateInterval = () => {
 function isChangeDoneinRepo(){
     if(navigator.onLine){
         getItemsFromRepo().then((repo) =>{
+            if(!repo){
+                return;
+            }
             getItemsFromDB().then(values => {
                 let offlineStorage = values[1].reverse()
                 if(repo){
@@ -145,7 +148,7 @@ function removeItemsFromRepo(db){
 
 
 function isElementInRepo(id){
-    return getApiCall(repoUrl, id).then(response => {
+    return getItemApiCall(repoUrl, id).then(response => {
         if (response.status == 404){
             return false
         }
@@ -166,7 +169,7 @@ function resolveChanges(db){
 
 
 
-let syncronize = function(event){
+const syncronize = function(event){
     updateInterval()
     //read db, dbRemove and repo
     getItemsFromDB().then(values => {
@@ -223,7 +226,7 @@ function flushDB(indexDbName, storeName){
     })
 }
 
-let DBPost = function (indexDbName,storeName,item){
+const DBPost = function (indexDbName,storeName,item){
     return open(indexDbName).then(db => {
         var dbTransaction = db.transaction(storeName, 'readwrite');
         var dbStore = dbTransaction.objectStore(storeName);
@@ -234,7 +237,7 @@ let DBPost = function (indexDbName,storeName,item){
     })
 }
 
-let getAllFromIndexDb = function(indexDbName, storeName, index, order) {
+const getAllFromIndexDb = function(indexDbName, storeName, index, order) {
     return open(indexDbName).then((db) => {
         return new Promise((resolve, reject) => {
             var dbTransaction = db.transaction(storeName, 'readonly');
@@ -272,7 +275,7 @@ let getAllFromIndexDb = function(indexDbName, storeName, index, order) {
 }
 
 
-let open = function (indexDbName) {
+const open = function (indexDbName) {
     if (indexDB){
         return Promise.resolve(indexDB);
     }
@@ -299,8 +302,15 @@ let open = function (indexDbName) {
  */
 
 
-let getApiCall = (url, data) => {
-    return fetch(url + "?data=" + String(data),{
+let getApiCall = (url) => {
+    return fetch(url, {
+        method: 'GET'
+    })
+}
+
+
+let getItemApiCall = (url, data) => {
+    return fetch(url + "?data=" + String(data), {
         method: 'GET'
     })
 }

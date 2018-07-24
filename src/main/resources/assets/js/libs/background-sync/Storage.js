@@ -1,3 +1,4 @@
+/* eslint no-console: 0 */ // --> OFF
 const IndexedDBInstance = require('./db/indexed-db').default;
 const storageManager = require('./storage-manager');
 
@@ -22,7 +23,12 @@ export default {
          * @returns Promise from fetch
          */
         online: (url, data) => {
-            return fetch(url + '?data=' + String(data), {
+            if (data !== undefined) {
+                return fetch(url + '?data=' + String(data), {
+                    method: 'GET'
+                });
+            }
+            return fetch(url, {
                 method: 'GET'
             });
         }
