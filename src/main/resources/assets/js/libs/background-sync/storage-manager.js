@@ -19,14 +19,14 @@
 var localSync = require('./local-sync');
 
 let interval;
-let updateInterval = () => {
+const updateInterval = () => {
     if (interval) {
         clearInterval(interval);
     }
     interval = setInterval(localSync.isChangeDoneinRepo, 3000);
 };
 
-let syncronize = () => {
+const syncronize = () => {
     /**
      *  some web-browsers supports serviceWorkers, but not all of them supports background-sync
      *  Today, 4.july 2018 only Chrome supports background sync

@@ -70,7 +70,7 @@ export default {
         offline: (storeName, identifier, sync) => {
             // keeping this for now, as I know it caused an error that I can check once the linter lets me build
             return IndexedDBInstance().then(instance => {
-                let req = instance.delete(storeName, identifier);
+                const req = instance.delete(storeName, identifier);
                 req.onsuccess = () => storageManager('delete');
                 if (!sync) {
                     storageManager('delete');

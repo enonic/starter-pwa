@@ -90,7 +90,7 @@ class TodoItem {
  * @param {string} id item identifier
  */
 const searchAndApply = (id, callback) => {
-    for (let todo of registeredTodos) {
+    for (const todo of registeredTodos) {
         if (todo.id === parseInt(id, 10)) {
             callback(todo);
         }
@@ -123,7 +123,7 @@ const addTodo = () => {
  * Removes the item associated with the clicked button
  * @param event may be event or TodoItem
  */
-let removeTodo = event => {
+const removeTodo = event => {
     /* Find the element data with DOM api 
     Loop through register and remove from local 
     Update view */
@@ -144,9 +144,9 @@ let removeTodo = event => {
  * NOTE: Updates all elements regardless. Must be imrpoved later
  */
 const updateTodoView = () => {
-    let outputArea = document.getElementById('todo-app__item-area');
+    const outputArea = document.getElementById('todo-app__item-area');
     outputArea.innerHTML = '';
-    for (let todo of registeredTodos) {
+    for (const todo of registeredTodos) {
         /**
          * Legg på grid
          * mdl-grid
@@ -190,7 +190,7 @@ const updateTodoView = () => {
     /**
      * <input id="${todo.id}" value="${todo.text}" class="todo-app__textfield mdl-textfield__input mdl-cell mdl-cell--7-col">${todo.text}</input>
      */
-    for (let cbox of document.getElementsByClassName('mdl-js-checkbox')) {
+    for (const cbox of document.getElementsByClassName('mdl-js-checkbox')) {
         componentHandler.upgradeElements(cbox);
     }
 };
@@ -201,7 +201,7 @@ const updateTodoView = () => {
 const editItemText = event => {
     const id = event.target.id;
     searchAndApply(id, item => {
-        let changedItem = item;
+        const changedItem = item;
         if (!(event.target.value === '')) {
             changedItem.text = event.target.value;
         }
@@ -214,7 +214,7 @@ const editItemText = event => {
 const checkTodo = checkboxElement => {
     const id = checkboxElement.id;
     searchAndApply(id, item => {
-        let changedItem = item;
+        const changedItem = item;
         changedItem.isChecked = !item.isChecked;
         registerChange(changedItem, storeNames.offline);
     });
@@ -226,7 +226,7 @@ const checkTodo = checkboxElement => {
  * @param storeName storeName to replaced in (probably storeNames.offline)
  */
 const registerChange = (item, storeName) => {
-    let changedItem = item;
+    const changedItem = item;
     changedItem.changed = true;
     changedItem.synced = false;
     storage.replace.offline(storeName, changedItem);
@@ -234,9 +234,9 @@ const registerChange = (item, storeName) => {
 };
 const changeLabelToInput = textfield => {
     const label = textfield.innerHTML;
-    let parent = textfield.parentNode;
+    const parent = textfield.parentNode;
     const id = parent.children[1].id;
-    let input = document.createElement('input');
+    const input = document.createElement('input');
     storageManager('edit');
     input.className =
         'todo-app__inputfield mdl-textfield__input mdl-cell mdl-cell--7-col';
@@ -253,26 +253,13 @@ const changeLabelToInput = textfield => {
 //     addButton.onclick = addTodo;
 // }
 document.getElementById('add-todo-button').onclick = addTodo;
-// document.getElementById('add-todo-button').onclick = addTodo;
-document.onkeydown = event => {
-    // enter
-    const inputfield = document.getElementById('add-todo-text');
+document.getElementById('add-todo-text').addEventListener('keydown', event => {
     // actions on enter
     if (event.keyCode === 13) {
-        // adding an item
-        if (document.activeElement === inputfield) {
-            addTodo();
-            // changing an item
-        } else if (
-            document.activeElement.className
-                .split(' ')
-                .includes('todo-app__inputfield')
-        ) {
-            // changing is triggered onblur in updateListenersFor.inputfields
-            document.activeElement.blur();
-        }
+        addTodo();
     }
-};
+});
+
 /**
  * Methods for updating listeners
  * By wrapping in objects, a call to one of
@@ -285,14 +272,14 @@ const updateListenersFor = {
      * Runs every update method except for itself
      */
     everything: () => {
-        for (let key of Object.keys(updateListenersFor)) {
+        for (const key of Object.keys(updateListenersFor)) {
             if (key !== 'everything') {
                 updateListenersFor[key]();
             }
         }
     },
     removeButtons: () => {
-        for (let button of document.getElementsByClassName(
+        for (const button of document.getElementsByClassName(
             'remove-todo-button'
         )) {
             button.onclick = removeTodo;
@@ -303,7 +290,7 @@ const updateListenersFor = {
             'todo-app__checkbox'
         );
         if (checkboxes) {
-            for (let checkbox of checkboxes) {
+            for (const checkbox of checkboxes) {
                 checkbox.onclick = () => {
                     checkTodo(checkbox);
                 };
@@ -311,21 +298,26 @@ const updateListenersFor = {
         }
     },
     textfields: () => {
-        for (let textfield of document.getElementsByClassName(
+        for (const textfield of document.getElementsByClassName(
             'todo-app__textfield'
         )) {
             textfield.onclick = () => changeLabelToInput(textfield);
         }
     },
     inputfields: () => {
-        for (let inputfield of document.getElementsByClassName(
+        for (const inputfield of document.getElementsByClassName(
             'todo-app__inputfield'
         )) {
+            inputfield.addEventListener('keydown', event => {
+                if (event.keyCode === 13) {
+                    inputfield.blur();
+                }
+            });
             inputfield.onblur = editItemText;
         }
     },
     materialItems: () => {
-        for (let item of document.getElementsByClassName('todo-app__item')) {
+        for (const item of document.getElementsByClassName('todo-app__item')) {
             componentHandler.upgradeElements(item);
         }
     }

@@ -76,7 +76,7 @@ export function isChangeDoneinRepo() {
     if (navigator.onLine) {
         getItemsFromRepo().then(repo => {
             getItemsFromDB().then(values => {
-                let offlineStorage = values[1].reverse();
+                const offlineStorage = values[1].reverse();
                 let newRepo = repo;
                 if (newRepo) {
                     newRepo = repo.map(element => element.item);
@@ -88,7 +88,7 @@ export function isChangeDoneinRepo() {
                     return;
                 }
                 repo.forEach((item, i) => {
-                    let offlineItem = offlineStorage[i];
+                    const offlineItem = offlineStorage[i];
                     if (JSON.stringify(item) !== JSON.stringify(offlineItem)) {
                         syncronize();
                     }
