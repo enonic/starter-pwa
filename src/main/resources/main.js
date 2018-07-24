@@ -38,9 +38,13 @@ function renderPage(pageId, title) {
         };
     
     }
-
+    // Data only needed for the background-sync page:
     if (pageId === "background-sync") {
         model.pushUrl = portalLib.serviceUrl({ service: "background-sync" });
+        model.pageContributions = {
+            headEnd:
+                '<script defer type="text/javascript" src="' + portalLib.assetUrl({ path: 'precache/backgroundSync-bundle.js' }) + '"></script>'
+        };
     }
     return {
         body: thymeleaf.render(resolve('templates/page.html'), model),

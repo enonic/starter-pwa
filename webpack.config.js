@@ -17,7 +17,8 @@ const buildTemplatesPath = path.join(__dirname, paths.buildTemplates);
 module.exports = {
     entry: {
         app: path.join(assetsPath, 'js/app.js'),
-        push: path.join(assetsPath, 'js/push.js')
+        push: path.join(assetsPath, 'js/push.js'), 
+        backgroundSync: path.join(assetsPath, 'js/background-sync.js')
     },
 
     output: {

@@ -1,6 +1,5 @@
 importScripts('{{appUrl}}js/workbox-sw.prod.v2.0.1.js'); 
 
-
 const swVersion = '{{appVersion}}';
 const workboxSW = new self.WorkboxSW({
     skipWaiting: true,

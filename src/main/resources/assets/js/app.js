@@ -1,13 +1,11 @@
 // Stylesheets
 require('../css/styles.less');
-require('../css/background-sync.less');
-require('./background-sync');
-require('../css/background-sync.less'); // having this in background-sync.js overwrites the other styles
+// require('./background-sync');
+// require('../css/background-sync.less'); // having this in background-sync.js overwrites the other styles
 
-const storageManager = require('./libs/background-sync/storage-manager');
+// const storageManager = require('./libs/background-sync/storage-manager');
 
 var ToasterInstance = require('./libs/toaster').default;
-
 module.exports = {
     notifyAboutNewVersion: function() {
         var snackbarContainer = document.querySelector('#notification-bar');
@@ -27,9 +25,7 @@ module.exports = {
         }
 
         const toggleOnlineStatus = function() {
-            if (navigator.onLine) {
-                storageManager('online');
-            } else {
+            if (!navigator.onLine) {
                 ToasterInstance().then(toaster => {
                     toaster.toast('Connection is off.');
                 });
