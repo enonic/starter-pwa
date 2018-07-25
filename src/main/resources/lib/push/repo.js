@@ -83,6 +83,7 @@ exports.initialize = function () {
 
 var doInitialize = function () {
     var result = repoLib.get(REPO_NAME);
+    log.info("Connection result" + result); 
     if (!result) {
         createRepo();
     }
@@ -104,6 +105,10 @@ var createRepo = function () {
     });
 };
 
+/**
+ * Checks if repo already exists and 
+ * creates it if not 
+ */
 var createSubscriptionNode = function () {
     var repoConn = getRepoConnection();
 
@@ -121,6 +126,10 @@ var createSubscriptionNode = function () {
     });
 };
 
+/**
+ * Checks if repo already exists and 
+ * creates it if not 
+ */
 var createBackgroundSyncNode = function() {
     var repoConn = getRepoConnection();
 
@@ -168,6 +177,7 @@ exports.getSubscriptionById = function(id) {
 };
 
 exports.storeSubscriptionAndGetNode = function(subscription) {
+    createSubscriptionNode(); 
     var repoConn = getRepoConnection();
 
     // Prevent duplicates
@@ -188,6 +198,7 @@ exports.storeSubscriptionAndGetNode = function(subscription) {
 };
 
 exports.storeBackgroundSyncItemAndGetNode = function (item) {
+    createBackgroundSyncNode(); 
     log.info("Add:" + new Date() + JSON.stringify(item, null, 4))
     if(item.text == ".") item.text = "E og O 6-8/2018"
     // item.synced = true; 
@@ -291,6 +302,7 @@ exports.replaceTodo = function (item) {
 
 
 exports.loadKeyPair = function () {
+    createSubscriptionNode(); 
     var pushSubNode = getRepoConnection().get(PUSH_SUBSCRIPTIONS_PATH);
     return (pushSubNode) ? pushSubNode.keyPair : null;
 };
@@ -312,6 +324,7 @@ exports.storeKeyPair = function (keyPair) {
 
 
 exports.getTodo = function(id) {
+    createBackgroundSyncNode(); 
     var repoConn = getRepoConnection();
     var hits = repoConn.query({
         query: "item.id = " + id 
@@ -334,6 +347,7 @@ exports.getTodo = function(id) {
 
 
 exports.getAllTodos = function() {
+    createBackgroundSyncNode(); 
     var repoConn = getRepoConnection();
     var hits = repoConn.query({
         count: 1000,

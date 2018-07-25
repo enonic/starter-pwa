@@ -75,7 +75,6 @@ self.addEventListener('notificationclick', function(event) {event.notification.c
 
 self.addEventListener('sync', (event) => {
     if (event.tag == 'Background-sync') {
-        console.log("I am the sw and i received mesage"); 
         event.waitUntil(syncronize(event))
     } else {
         console.error("Problem with sync listener, sync-tag not supported") 
@@ -90,16 +89,12 @@ let interval;
 const updateInterval = () => {
     if (interval){
         clearInterval(interval)
-        console.log("interval is cleard"); 
     }
-    console.log("interval is updated"); 
     interval = setInterval(isChangeDoneinRepo, 3000);
 }
 
 function isChangeDoneinRepo(){
-    console.log("sw checking for change in repo"); 
     if(navigator.onLine){
-        console.log("online"); 
         getItemsFromRepo().then((repo) =>{
             if(!repo){
                 return;
@@ -175,7 +170,6 @@ function resolveChanges(db){
 
 
 const syncronize = function(event){
-    console.log("sw syncronize is running"); 
     updateInterval()
     //read db, dbRemove and repo
     getItemsFromDB().then(values => {

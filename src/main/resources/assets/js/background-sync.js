@@ -346,11 +346,8 @@ const focusIfEmpty = () => {
  * Listen to serviceworker
  */
 if (navigator.serviceWorker) {
-    console.log('navigator eventlistener registered');
     navigator.serviceWorker.addEventListener('message', event => {
-        console.log('message recieved');
         if (event.data.message === 'synced') {
-            console.log('synced');
             updateUI('serviceworker');
         }
     });
