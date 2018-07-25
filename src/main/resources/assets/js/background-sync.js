@@ -168,7 +168,7 @@ const updateTodoView = () => {
         }</label>
                 
                 <div class="todo-app__date mdl-cell mdl-cell--2-col">${todo.getFormattedDate()}</div>
-                <i class="remove-todo-button mdl-cell mdl-cell--2-col material-icons" id=${
+                <i class="remove-todo-button mdl-cell mdl-cell--2-col material-icons" title="Delete" id=${
                     todo.id
                 }>close</i>
                 <i class="todo-app__synced-icon mdl-cell mdl-cell--1-col material-icons" title="${
