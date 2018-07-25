@@ -83,7 +83,6 @@ exports.initialize = function () {
 
 var doInitialize = function () {
     var result = repoLib.get(REPO_NAME);
-    log.info("Connection result" + result); 
     if (!result) {
         createRepo();
     }
@@ -91,10 +90,6 @@ var doInitialize = function () {
     if (!repoLib.get(REPO_NAME)) {
         throw Error('Something went wrong when creating (and/or getting) repo:' + REPO_NAME);
     }
-
-    //Creates repositories
-    createSubscriptionNode();
-    createBackgroundSyncNode(); 
 };
 
 var createRepo = function () {
@@ -110,10 +105,9 @@ var createRepo = function () {
  * creates it if not 
  */
 var createSubscriptionNode = function () {
+    // create node if it des not already exist
     var repoConn = getRepoConnection();
-
     var pushSubscriptionsExist = nodeWithPathExists(repoConn, PUSH_SUBSCRIPTIONS_PATH);
-
     if (pushSubscriptionsExist) {
         // Node exists
         return;
@@ -131,10 +125,9 @@ var createSubscriptionNode = function () {
  * creates it if not 
  */
 var createBackgroundSyncNode = function() {
+    // create node if it des not already exist
     var repoConn = getRepoConnection();
-
     var backgroundSyncExist = nodeWithPathExists(repoConn, BACKGROUND_SYNC_PATH);
-
     if (backgroundSyncExist) {
         return;
     }
