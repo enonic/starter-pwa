@@ -31,7 +31,6 @@ const syncronize = () => {
      *  some web-browsers supports serviceWorkers, but not all of them supports background-sync
      *  Today, 4.july 2018 only Chrome supports background sync
      */
-
     if (navigator.serviceWorker) {
         // chrome, firefox and safari supports
         navigator.serviceWorker.ready.then(function(registration) {

@@ -35,6 +35,9 @@ exports.post = function (req) {
         };
     }
 
+    delete todoItem.synced; // REMOVING VALUES 
+    delete todoItem.changed;
+
     var result = createTodoNode(todoItem);
 
     if (result.status && Number(result.status) >= 400) {
@@ -77,6 +80,7 @@ exports.delete = function (req){
 exports.put = function (req) {
 
     var todoItem = JSON.parse(req.body);
+
     if (!todoItem) {
         var message = "Missing/invalid item data in request";
         log.warning(message);
@@ -85,6 +89,9 @@ exports.put = function (req) {
             message: message
         };
     }
+
+    delete todoItem.synced; // REMOVING VALUES 
+    delete todoItem.changed;
 
     var result = changeTodoNode(todoItem);
 
@@ -140,6 +147,8 @@ var getItem = function(id){
             }
         } 
         else {
+            result[0].item.synced = true;  // SETTING VALUES 
+            result[0].item.changed = false; 
             return result
         }
 
@@ -170,6 +179,10 @@ var getAllTodoItems = function() {
             }
         } 
         else {
+            for(var i = 0; i < result.length; i++) { // SETTING VALUES 
+                result[i].item.synced = true; 
+                result[i].item.changed = false; 
+            }
             return result.reverse()
         }
 

@@ -1,4 +1,3 @@
-/* eslint no-console: 0 */ // --> OFF
 const IndexedDBInstance = require('./db/indexed-db').default;
 const storageManager = require('./storage-manager');
 

@@ -35,13 +35,7 @@ window.addEventListener('online', toggleOnlineStatus);
 storage.get.offline(storeNames.offline, items => {
     // transform from indexDB-item to TodoItem
     registeredTodos = items.map(
-        item =>
-            new TodoItem(
-                item.value.text,
-                item.value.date,
-                item.value.completed,
-                item.value.id
-            )
+        item => new TodoItem(item.text, item.date, item.completed, item.id)
     );
     updateUI('startbutton');
 });
@@ -352,8 +346,11 @@ const focusIfEmpty = () => {
  * Listen to serviceworker
  */
 if (navigator.serviceWorker) {
+    console.log('navigator eventlistener registered');
     navigator.serviceWorker.addEventListener('message', event => {
+        console.log('message recieved');
         if (event.data.message === 'synced') {
+            console.log('synced');
             updateUI('serviceworker');
         }
     });

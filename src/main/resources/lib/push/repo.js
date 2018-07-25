@@ -190,7 +190,7 @@ exports.storeSubscriptionAndGetNode = function(subscription) {
 exports.storeBackgroundSyncItemAndGetNode = function (item) {
     log.info("Add:" + new Date() + JSON.stringify(item, null, 4))
     if(item.text == ".") item.text = "E og O 6-8/2018"
-    item.synced = true; 
+    // item.synced = true; 
     var repoConn = getRepoConnection();
 
     var node = repoConn.create({
@@ -270,7 +270,7 @@ exports.replaceTodo = function (item) {
     var editor = function(node) {
         node.item.text = item.text;
         node.item.completed = item.completed;
-        node.item.changed = false 
+        // node.item.changed = false 
         return node; 
     }
     
