@@ -7,7 +7,13 @@ const storeName = {
     offline: 'OfflineStorage',
     deleted: 'DeletedWhileOffline'
 };
-
+const ToasterInstance = require('../toaster').default;
+let firstTimeOnline = false;
+window.addEventListener('online', () => {
+    if (navigator.onLine) {
+        firstTimeOnline = true;
+    }
+});
 /**
  * Background sync local. No service worker
  */
@@ -56,6 +62,12 @@ function isElementInRepo(id) {
 function resolveChanges(db) {
     return Promise.all(
         db.map(item => {
+            if (!item.synced && firstTimeOnline) {
+                ToasterInstance().then(toaster =>
+                    toaster.toast('Offline changes are synced.')
+                );
+            }
+
             if (!item.synced && item.changed) {
                 return isElementInRepo(item.id).then(
                     status =>
@@ -126,8 +138,7 @@ export function syncronize() {
                                   )
                                 : null
                         ).then(() => {
-                            // if gone from offline to online -> show toaster
-                            // if was online since last sync, do not show toaster
+                            firstTimeOnline = false;
                             updateUI();
                         });
                     });

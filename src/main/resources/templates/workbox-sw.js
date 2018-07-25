@@ -106,7 +106,6 @@ self.addEventListener('sync', event => {
 
 self.addEventListener('message', event => {
     if (event.data === 'online') {
-        console.log(event.data, " was online"); 
         firstTimeOnline = true; 
     }
 })
