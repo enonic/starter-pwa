@@ -51,9 +51,11 @@ const syncronize = () => {
 module.exports = function(type) {
     // If the system notices changes in repo, it will reload gui. Not allways fun.
     // Therefore the reload interval is cleared
-    if (type === 'edit') {
-        clearInterval(interval);
-    } else {
-        syncronize();
+    if (navigator.onLine) {
+        if (type === 'edit') {
+            clearInterval(interval);
+        } else {
+            syncronize();
+        }
     }
 };
