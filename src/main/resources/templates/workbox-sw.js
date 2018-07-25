@@ -15,6 +15,7 @@ const storeName = {
 };
 
 let indexDB; // indexDB instance
+let firstTimeOnline = false; 
 
 // This is a placeholder for manifest dynamically injected from webpack.config.js
 workboxSW.precache([]);
@@ -83,15 +84,7 @@ self.addEventListener('push', function(event) {
         var subscriberData = JSON.stringify({
             subscriberCount: data.subscriberCount
         });
-        self.clients.matchAll().then(function(clients) {
-            if (clients && clients.length > 0) {
-                clients[0].postMessage(subscriberData);
-            } else {
-                console.error(
-                    "Can't update the DOM: serviceworker can't find a client (page)"
-                );
-            }
-        });
+        sendMessageToClient(subscriberData);
     }
 });
 
@@ -105,11 +98,18 @@ self.addEventListener('notificationclick', function(event) {
 
 self.addEventListener('sync', event => {
     if (event.tag === 'Background-sync') {
-        event.waitUntil(syncronize(event));
+        event.waitUntil(syncronize());
     } else {
         console.error('Problem with sync listener, sync-tag not supported');
     }
 });
+
+self.addEventListener('message', event => {
+    if (event.data === 'online') {
+        console.log(event.data, " was online"); 
+        firstTimeOnline = true; 
+    }
+})
 
 /**
  * Interval for implementation of multiple users.
@@ -187,6 +187,10 @@ function isElementInRepo(id) {
 function resolveChanges(db) {
     return Promise.all(
         db.map(item => {
+            if(!item.synced && firstTimeOnline) {
+                sendMessageToClient("showSyncMessage");
+            }
+
             if (!item.synced && item.changed) {
                 return isElementInRepo(item.id).then(
                     status =>
@@ -202,7 +206,7 @@ function resolveChanges(db) {
     );
 }
 
-const syncronize = function() {
+const syncronize = function(type) {
     updateInterval();
     // read db, dbRemove and repo
     getItemsFromDB().then(values => {
@@ -221,28 +225,19 @@ const syncronize = function() {
                         Promise.resolve(
                             repo
                                 ? Promise.all(
-                                      repo.map(element =>
-                                          DBPost(
-                                              indexDbName.Todolist,
-                                              storeName.offline,
-                                              element.item
-                                          )
-                                      )
-                                  )
+                                        repo.map(element =>
+                                            DBPost(
+                                                indexDbName.Todolist,
+                                                storeName.offline,
+                                                element.item
+                                            )
+                                        )
+                                    )
                                 : null
                         ).then(() => {
                             const data = { message: 'synced' };
-                            self.clients.matchAll().then(function(clients) {
-                                if (clients && clients.length > 0) {
-                                    clients.forEach(client =>
-                                        client.postMessage(data)
-                                    );
-                                } else {
-                                    console.error(
-                                        "Can't update the DOM: serviceworker can't find a client (page)"
-                                    );
-                                }
-                            });
+                            firstTimeOnline = false; 
+                            sendMessageToClient(data); 
                         });
                     });
                 });
@@ -363,3 +358,17 @@ const putApiCall = (url, data) => {
         method: 'PUT'
     });
 };
+
+const sendMessageToClient = (message) => {
+    self.clients.matchAll().then(function (clients) {
+        if (clients && clients.length > 0) {
+            clients.forEach(client =>
+                client.postMessage(message)
+            );
+        } else {
+            console.error(
+                "Can't update the DOM: serviceworker can't find a client (page)"
+            );
+        }
+    });
+}

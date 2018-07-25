@@ -16,7 +16,7 @@
  * Interval gathering online items for multiple client support
  */
 
-var localSync = require('./local-sync');
+const localSync = require('./local-sync');
 
 let interval;
 const updateInterval = () => {
@@ -26,7 +26,7 @@ const updateInterval = () => {
     interval = setInterval(localSync.isChangeDoneinRepo, 3000);
 };
 
-const syncronize = () => {
+const syncronize = type => {
     /**
      *  some web-browsers supports serviceWorkers, but not all of them supports background-sync
      *  Today, 4.july 2018 only Chrome supports background sync
@@ -37,13 +37,18 @@ const syncronize = () => {
             if (registration.sync) {
                 // Only chrome supports
                 registration.sync.register('Background-sync');
+
+                // indicate that this is going online after being offline
+                if (type === 'online') {
+                    navigator.serviceWorker.controller.postMessage(type);
+                }
             } else if (navigator.onLine) {
                 localSync.syncronize();
                 updateInterval();
             }
         });
     } else if (navigator.onLine) {
-        localSync.syncronize();
+        localSync.syncronize(type);
         updateInterval();
     }
 };
@@ -55,7 +60,7 @@ module.exports = function(type) {
         if (type === 'edit') {
             clearInterval(interval);
         } else {
-            syncronize();
+            syncronize(type);
         }
     }
 };

@@ -126,6 +126,8 @@ export function syncronize() {
                                   )
                                 : null
                         ).then(() => {
+                            // if gone from offline to online -> show toaster
+                            // if was online since last sync, do not show toaster
                             updateUI();
                         });
                     });

@@ -19,9 +19,6 @@ let registeredTodos;
 const toggleOnlineStatus = function() {
     if (navigator.onLine) {
         storageManager('online');
-        ToasterInstance().then(toaster => {
-            toaster.toast('All offline changes are synced to the storage.');
-        });
     }
 };
 
@@ -30,8 +27,6 @@ toggleOnlineStatus();
 window.addEventListener('offline', toggleOnlineStatus);
 window.addEventListener('online', toggleOnlineStatus);
 
-// NOTE: Dette sto før når man klikket på knappen.
-// Det kjører, men fungerer ikke fordi error med IDB
 storage.get.offline(storeNames.offline, items => {
     // transform from indexDB-item to TodoItem
     registeredTodos = items.map(
@@ -135,7 +130,6 @@ const removeTodo = event => {
 
 /**
  * Updates the list view
- * NOTE: Updates all elements regardless. Must be imrpoved later
  */
 const updateTodoView = () => {
     const outputArea = document.getElementById('todo-app__item-area');
@@ -349,6 +343,10 @@ if (navigator.serviceWorker) {
     navigator.serviceWorker.addEventListener('message', event => {
         if (event.data.message === 'synced') {
             updateUI('serviceworker');
+        } else if (event.data === 'showSyncMessage') {
+            ToasterInstance().then(toaster =>
+                toaster.toast('Offline changes are synced')
+            );
         }
     });
 }
