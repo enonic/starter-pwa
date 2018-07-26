@@ -20,6 +20,22 @@ module.exports = {
             }
         ]
     },
+    overrides: [
+        {
+            'files': ['src/main/resources/assets/js/push.js'],
+            'rules': {
+                'no-console': 'off'
+            }
+        }, 
+        {
+            'files': ['src/main/resources/assets/js/background-sync.js'],
+            'rules': {
+                'no-use-before-define': 'off', 
+                'no-undef': 'off', 
+                'no-restricted-syntax': 'off'
+            }
+        }
+    ], 
     env: {
         node: true,
         es6: true

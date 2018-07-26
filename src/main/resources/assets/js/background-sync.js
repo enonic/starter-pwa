@@ -1,8 +1,3 @@
-/* eslint no-use-before-define: 0 */ // --> OFF, as some functions here are two-way-dependent
-/* eslint no-undef: 0 */ // --> OFF, so md-lite's componenthandler will work
-/* eslint no-restricted-syntax: 0 */ // --> OFF
-/* eslint no-console: 0 */ // --> OFF
-
 require('../css/styles.less');
 require('./../css/background-sync.less');
 
