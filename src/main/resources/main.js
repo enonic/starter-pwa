@@ -5,7 +5,7 @@ var siteTitle = 'PWA Starter';
 var mustache = require('/lib/xp/mustache');
 var pushRepo = require('/lib/push/repo');
 
-log.info("repo initialized from main"); 
+// Initialize repo on application initialization 
 pushRepo.initialize();
 
 var pushKeys = require('/lib/push/keys');
