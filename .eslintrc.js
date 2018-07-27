@@ -32,7 +32,8 @@ module.exports = {
             'rules': {
                 'no-use-before-define': 'off', 
                 'no-undef': 'off', 
-                'no-restricted-syntax': 'off'
+                'no-restricted-syntax': 'off',
+                'no-loop-func': 'off'
             }
         }
     ], 

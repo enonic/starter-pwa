@@ -16,6 +16,7 @@ const toggleOnlineStatus = function() {
         storageManager('online');
     }
 };
+let beforeLastChange = '';
 
 toggleOnlineStatus();
 
@@ -217,6 +218,7 @@ const registerChange = (item, storeName) => {
 };
 const changeLabelToInput = textfield => {
     const label = textfield.innerHTML;
+    beforeLastChange = label;
     const parent = textfield.parentNode;
     const id = parent.children[1].id;
     const input = document.createElement('input');
@@ -230,6 +232,7 @@ const changeLabelToInput = textfield => {
 
     updateListenersFor.inputfields();
 };
+
 // Listeners
 // const addButton = document.getElementById('add-todo-button');
 // if (addButton) {
@@ -284,7 +287,10 @@ const updateListenersFor = {
         for (const textfield of document.getElementsByClassName(
             'todo-app__textfield'
         )) {
-            textfield.onclick = () => changeLabelToInput(textfield);
+            textfield.onclick = () => {
+                beforeLastChange = textfield.innerHTML;
+                changeLabelToInput(textfield);
+            };
         }
     },
     inputfields: () => {
@@ -294,6 +300,10 @@ const updateListenersFor = {
             inputfield.addEventListener('keydown', event => {
                 if (event.keyCode === 13) {
                     inputfield.blur();
+                } else if (event.keyCode === 27) {
+                    // cancel the change
+                    document.activeElement.value = beforeLastChange;
+                    document.activeElement.blur();
                 }
             });
             inputfield.onblur = editItemText;
