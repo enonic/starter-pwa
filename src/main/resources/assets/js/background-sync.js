@@ -28,7 +28,6 @@ storage.get.offline(storeNames.offline, items => {
     registeredTodos = items.map(
         item => new TodoItem(item.text, item.date, item.completed, item.id)
     );
-    updateUI('startbutton');
 });
 
 /**
@@ -94,7 +93,6 @@ const addTodo = () => {
 
         storage.add.offline(storeNames.offline, item);
         inputfield.value = '';
-        updateUI();
     } else {
         // let user know something was wrong
         inputfield.style.borderColor = '#f44336';
@@ -117,10 +115,7 @@ const removeTodo = event => {
     searchAndApply(id, todoItem => {
         storage.add
             .offline(storeNames.deletedWhileOffline, todoItem, true)
-            .then(storage.delete.offline(storeNames.offline, todoItem.id))
-            .then(updateUI());
-
-        // do not check more items than neccecary
+            .then(storage.delete.offline(storeNames.offline, todoItem.id));
     });
 };
 
@@ -187,8 +182,8 @@ const editItemText = event => {
     searchAndApply(id, item => {
         const changedItem = item;
         if (
-            !(event.target.value === '') ||
-            event.target.value === beforeLastChange
+            !(event.target.value === '') &&
+            event.target.value !== beforeLastChange
         ) {
             changedItem.text = event.target.value;
             registerChange(changedItem, storeNames.offline);
@@ -217,7 +212,6 @@ const registerChange = (item, storeName) => {
     changedItem.changed = true;
     changedItem.synced = false;
     storage.replace.offline(storeName, changedItem);
-    updateUI('registerchange');
 };
 const changeLabelToInput = textfield => {
     const label = textfield.innerHTML;
