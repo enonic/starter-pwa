@@ -109,13 +109,13 @@ exports.put = function (req) {
 
 exports.get = function(req) {
     var data = req.params.data
-    log.info("DATA:" + data)
+    // log.info("DATA:" + data)
     var result;
     if (data === undefined) {
-        log.info("GET:" + new Date())
+        // log.info("GET:" + new Date())
         result = getAllTodoItems();
     } else {
-        log.info("GET:" + data + new Date())
+        // log.info("GET:" + data + new Date())
         result = getItem(data)
     }
 
@@ -153,7 +153,7 @@ var getItem = function(id){
         }
 
     } catch (e) {
-        log.error(e);
+        // log.error(e);
         return {
             status: 500,
             message: "Could not delete node",
@@ -187,7 +187,7 @@ var getAllTodoItems = function() {
         }
 
     } catch (e) {
-        log.error(e);
+        // log.error(e);
         return {
             status: 500,
             message: "Could not delete node",
@@ -202,11 +202,11 @@ var createTodoNode = function (todoItem) {
     try {
         var Node = pushRepo.storeBackgroundSyncItemAndGetNode(todoItem);
         if (!Node) {
-            log.error("Tried creating Todo node, but something seems wrong: " + JSON.stringify(
-                {
-                    incoming_TodoItem: todoItem,
-                    resulting_node: Node
-                }, null, 2));
+            // log.error("Tried creating Todo node, but something seems wrong: " + JSON.stringify(
+                // {
+                //     incoming_TodoItem: todoItem,
+                //     resulting_node: Node
+                // }, null, 2));
             return {
                 status: 500,
                 message: "Could not create node",
@@ -217,7 +217,7 @@ var createTodoNode = function (todoItem) {
         }
 
     } catch (e) {
-        log.error(e);
+        // log.error(e);
         return {
             status: 500,
             message: "Couldn't create node",
@@ -252,7 +252,7 @@ var deleteTodoNode = function (todoItem) {
         }
 
     } catch (e) {
-        log.error(e);
+        // log.error(e);
         return {
             status: 500,
             message: "Couldn't delete node",
@@ -286,7 +286,7 @@ var changeTodoNode = function (todoItem) {
         }
 
     } catch (e) {
-        log.error(e);
+        // log.error(e);
         return {
             status: 500,
             message: "Couldn't delete node",

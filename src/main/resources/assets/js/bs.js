@@ -16,6 +16,7 @@ const toggleOnlineStatus = function() {
         storageManager('online');
     }
 };
+let beforeLastChange = '';
 
 toggleOnlineStatus();
 
@@ -27,7 +28,6 @@ storage.get.offline(storeNames.offline, items => {
     registeredTodos = items.map(
         item => new TodoItem(item.text, item.date, item.completed, item.id)
     );
-    updateUI('startbutton');
 });
 
 /**
@@ -93,7 +93,6 @@ const addTodo = () => {
 
         storage.add.offline(storeNames.offline, item);
         inputfield.value = '';
-        updateUI();
     } else {
         // let user know something was wrong
         inputfield.style.borderColor = '#f44336';
@@ -116,10 +115,7 @@ const removeTodo = event => {
     searchAndApply(id, todoItem => {
         storage.add
             .offline(storeNames.deletedWhileOffline, todoItem, true)
-            .then(storage.delete.offline(storeNames.offline, todoItem.id))
-            .then(updateUI());
-
-        // do not check more items than neccecary
+            .then(storage.delete.offline(storeNames.offline, todoItem.id));
     });
 };
 
@@ -152,7 +148,7 @@ const updateTodoView = () => {
             	
                 <label id="${todo.id}" value="${
             todo.text
-        }" class="todo-app__textfield mdl-cell mdl-cell--7-col">${
+        }" class="todo-app__textfield mdl-cell mdl-cell--7-col" title="Click to edit">${
             todo.text
         }</label>
                 
@@ -185,10 +181,13 @@ const editItemText = event => {
     const id = event.target.id;
     searchAndApply(id, item => {
         const changedItem = item;
-        if (!(event.target.value === '')) {
+        if (
+            !(event.target.value === '') &&
+            event.target.value !== beforeLastChange
+        ) {
             changedItem.text = event.target.value;
+            registerChange(changedItem, storeNames.offline);
         }
-        registerChange(changedItem, storeNames.offline);
     });
 };
 /**
@@ -213,10 +212,10 @@ const registerChange = (item, storeName) => {
     changedItem.changed = true;
     changedItem.synced = false;
     storage.replace.offline(storeName, changedItem);
-    updateUI('registerchange');
 };
 const changeLabelToInput = textfield => {
     const label = textfield.innerHTML;
+    beforeLastChange = label;
     const parent = textfield.parentNode;
     const id = parent.children[1].id;
     const input = document.createElement('input');
@@ -224,12 +223,14 @@ const changeLabelToInput = textfield => {
     input.className =
         'todo-app__inputfield mdl-textfield__input mdl-cell mdl-cell--7-col';
     input.id = id;
+    input.title = 'Click to edit';
     input.value = label;
     parent.replaceChild(input, parent.children[1]);
     input.focus();
 
     updateListenersFor.inputfields();
 };
+
 // Listeners
 // const addButton = document.getElementById('add-todo-button');
 // if (addButton) {
@@ -284,7 +285,10 @@ const updateListenersFor = {
         for (const textfield of document.getElementsByClassName(
             'todo-app__textfield'
         )) {
-            textfield.onclick = () => changeLabelToInput(textfield);
+            textfield.onclick = () => {
+                beforeLastChange = textfield.innerHTML;
+                changeLabelToInput(textfield);
+            };
         }
     },
     inputfields: () => {
@@ -294,8 +298,13 @@ const updateListenersFor = {
             inputfield.addEventListener('keydown', event => {
                 if (event.keyCode === 13) {
                     inputfield.blur();
+                } else if (event.keyCode === 27) {
+                    // cancel the change
+                    document.activeElement.value = beforeLastChange;
+                    document.activeElement.blur();
                 }
             });
+
             inputfield.onblur = editItemText;
         }
     },
