@@ -23,7 +23,7 @@ const updateInterval = () => {
     if (interval) {
         clearInterval(interval);
     }
-    interval = setInterval(localSync.isChangeDoneinRepo, 3000);
+    interval = setInterval(localSync.isChangeDoneinRepo, 5000);
 };
 
 const syncronize = type => {
