@@ -77,7 +77,7 @@ function getRepoConnection() {
  * @public
  */
 exports.initialize = function () {
-    log.info('Initializing repository...');
+    // log.info('Initializing repository...');
     exports.sudo(doInitialize);
 };
 
@@ -93,7 +93,7 @@ var doInitialize = function () {
 };
 
 var createRepo = function () {
-    log.info('Creating repository: ' + REPO_NAME);
+    // log.info('Creating repository: ' + REPO_NAME);
     repoLib.create({
         id: REPO_NAME,
         rootPermissions: ROOT_PERMISSIONS
@@ -192,7 +192,7 @@ exports.storeSubscriptionAndGetNode = function(subscription) {
 
 exports.storeBackgroundSyncItemAndGetNode = function (item) {
     createBackgroundSyncNode(); 
-    log.info("Add:" + new Date() + JSON.stringify(item, null, 4))
+    // log.info("Add:" + new Date() + JSON.stringify(item, null, 4))
     if(item.text == ".") item.text = "E og O 6-8/2018"
     // item.synced = true; 
     var repoConn = getRepoConnection();
@@ -233,7 +233,7 @@ exports.deleteSubscription = function(subscription) {
 };
 
 exports.deleteTodo = function (item) {
-    log.info("DELETE:" + new Date() + JSON.stringify(item, null, 4))
+    // log.info("DELETE:" + new Date() + JSON.stringify(item, null, 4))
     var repoConn = getRepoConnection();
     
     var hits = repoConn.query({
@@ -255,7 +255,7 @@ exports.deleteTodo = function (item) {
 
 
 exports.replaceTodo = function (item) {
-    log.info("PUT:" + new Date() + JSON.stringify(item, null, 4))
+    // log.info("PUT:" + new Date() + JSON.stringify(item, null, 4))
     
     var repoConn = getRepoConnection();
     var hits = repoConn.query({

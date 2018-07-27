@@ -102,7 +102,7 @@ class OnlineDatabase {
     }
 
     get(storeName, value) {
-        log.info("get")
+        // log.info("get")
         return new Promise((resolve, reject) => {
 
             var xhr = new XMLHttpRequest();
