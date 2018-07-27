@@ -19,45 +19,11 @@ workbox.precaching.precacheAndRoute(self.__precacheManifest || []);
 // Here we precache custom defined Urls
 workbox.precaching.precacheAndRoute(['{{appUrl}}']);
 
-workbox.routing.setDefaultHandler(workbox.strategies.networkFirst());
-
 /**
  * Sets the caching strategy for the client: tries contacting the network first
  */
-/*
-workbox.router.registerRoute(
-    '{{appUrl}}offline',
-    workbox.strategies.networkFirst()
-);
-workbox.router.registerRoute(
-    '{{appUrl}}push',
-    workbox.strategies.networkFirst()
-);
-workbox.router.registerRoute(
-    '{{appUrl}}cache-first',
-    workbox.strategies.networkFirst()
-);
-workbox.router.registerRoute(
-    '{{appUrl}}background-sync',
-    workbox.strategies.networkFirst()
-);
-workbox.router.registerRoute(
-    '{{appUrl}}bluetooth',
-    workbox.strategies.networkFirst()
-);
-workbox.router.registerRoute(
-    '{{appUrl}}audio',
-    workbox.strategies.networkFirst()
-);
-workbox.router.registerRoute(
-    '{{appUrl}}video',
-    workbox.strategies.networkFirst()
-);
-workbox.router.registerRoute(
-    '{{appUrl}}webrtc',
-    workbox.strategies.networkFirst()
-);
-*/
+workbox.routing.setDefaultHandler(workbox.strategies.networkFirst());
+
 /**
  * Handles the event of receiving of a subscribed push notification
  */
