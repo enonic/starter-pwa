@@ -153,7 +153,7 @@ const updateTodoView = () => {
             	
                 <label id="${todo.id}" value="${
             todo.text
-        }" class="todo-app__textfield mdl-cell mdl-cell--7-col">${
+        }" class="todo-app__textfield mdl-cell mdl-cell--7-col" title="Click to edit">${
             todo.text
         }</label>
                 
@@ -226,6 +226,7 @@ const changeLabelToInput = textfield => {
     input.className =
         'todo-app__inputfield mdl-textfield__input mdl-cell mdl-cell--7-col';
     input.id = id;
+    input.title = 'Click to edit';
     input.value = label;
     parent.replaceChild(input, parent.children[1]);
     input.focus();
