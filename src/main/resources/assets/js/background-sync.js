@@ -306,7 +306,12 @@ const updateListenersFor = {
                     document.activeElement.blur();
                 }
             });
-            inputfield.onblur = editItemText;
+            inputfield.onblur = () => {
+                // some change has actually occured
+                if (inputfield.value !== beforeLastChange) {
+                    inputfield.onblur = editItemText;
+                }
+            };
         }
     },
     materialItems: () => {
