@@ -1,3 +1,6 @@
+// For some reason, this does not work when disabled in config
+/* eslint no-useless-escape: 0 */ // --> OFF, needed in urlB64ToUint8Array()
+
 /**
  * Client-side code for push notifications
  */
@@ -5,14 +8,13 @@
 var $ = require('jquery');
 
 // Components - see templates/fragments/push.html
-var elemSubscribeStatus = $("#subscribe-status")[0];
-var elemSubscribeButton = $("#subscribe-button")[0];
-var elemPushField = $("#push-field")[0];
-var elemPushButton = $("#push-button")[0];
-var elemSubscriberCount = $("#subscriber-count")[0];
+var elemSubscribeStatus = $('#subscribe-status')[0];
+var elemSubscribeButton = $('#subscribe-button')[0];
+var elemPushField = $('#push-field')[0];
+var elemPushButton = $('#push-button')[0];
+var elemSubscriberCount = $('#subscriber-count')[0];
 var $subscribeForm = $('#subscribe-form');
-var $pushForm = $("#push-form");
-
+var $pushForm = $('#push-form');
 
 // State
 var isSubscribed = false;
@@ -25,59 +27,51 @@ var swRegistration = null;
 
 var displayingError = false;
 
-
 // -------------------------------------------------------  Setup  --------------------------------------------------------------
 
 /**
  * Setup the service worker and trigger initialization
  */
 if ('serviceWorker' in navigator && 'PushManager' in window) {
-   // Service Worker and Push is supported
-    navigator.serviceWorker.ready
-        .then(
-            function(reg) {
-                // Service Worker is ready
-                swRegistration = reg;
-                initializeUI();
-
-            }, function(err) {
-                displayErrorStatus('Service Worker is not ready.', false, err);
-            }
-        );
-
-
+    // Service Worker and Push is supported
+    navigator.serviceWorker.ready.then(
+        function(reg) {
+            // Service Worker is ready
+            swRegistration = reg;
+            initializeUI();
+        },
+        function(err) {
+            displayErrorStatus('Service Worker is not ready.', false, err);
+        }
+    );
 } else {
     displayErrorStatus('Push messaging is not supported', true);
 }
-
 
 /**
  * Initialization: add button click listeners, check the current subscription state and update GUI elements accordingly
  */
 function initializeUI() {
-
     // Add button click listeners
     elemSubscribeButton.addEventListener('click', clickSubscriptionButton);
     elemPushButton.addEventListener('click', clickPushButton);
 
     // Get the initial subscription state and store it
-    swRegistration.pushManager.getSubscription()
-        .then(function(subscr) {
-            var subscription = JSON.parse(JSON.stringify(subscr || {}));
-            var keys = subscription.keys || {};
+    swRegistration.pushManager.getSubscription().then(function(subscr) {
+        var subscription = JSON.parse(JSON.stringify(subscr || {}));
+        var keys = subscription.keys || {};
 
-            subscriptionEndpoint = subscription.endpoint;
-            subscriptionKey = keys.p256dh;
-            subscriptionAuth = keys.auth;
-
-            isSubscribed = subscriptionEndpoint && subscriptionKey && subscriptionAuth;
-            if (isSubscribed) {
-                isSubscribed = updateSubscriptionOnServer(subscr);
-            }
-            updateGUI(isSubscribed);
-        });
+        subscriptionEndpoint = subscription.endpoint;
+        subscriptionKey = keys.p256dh;
+        subscriptionAuth = keys.auth;
+        isSubscribed =
+            subscriptionEndpoint && subscriptionKey && subscriptionAuth;
+        if (isSubscribed) {
+            isSubscribed = updateSubscriptionOnServer(subscr);
+        }
+        updateGUI(isSubscribed);
+    });
 }
-
 
 // -----------------------------------------------  Frequently used utility functions:  ---------------------------------------------
 
@@ -90,50 +84,58 @@ function updateGUI() {
         return;
     }
 
-    elemSubscribeButton.classList.remove("hidden");
+    elemSubscribeButton.classList.remove('hidden');
     elemSubscribeButton.disabled = false;
 
     if (Notification.permission === 'denied') {
-        displayErrorStatus('Notifications are blocked. See your page settings.');
+        displayErrorStatus(
+            'Notifications are blocked. See your page settings.'
+        );
         elemSubscribeButton.textContent = 'Subscribe';
-        elemSubscribeButton.classList.remove("subscribing");
-
+        elemSubscribeButton.classList.remove('subscribing');
+    } else if (isSubscribed) {
+        elemSubscribeStatus.textContent = 'Subscribed to notifications';
+        elemSubscribeStatus.classList.add('subscribing');
+        elemSubscribeStatus.classList.remove('blocked');
+        elemSubscribeButton.textContent = 'Unsubscribe';
+        elemSubscribeButton.classList.add('subscribing');
     } else {
-        if (isSubscribed) {
-            elemSubscribeStatus.textContent = 'Subscribed to notifications';
-            elemSubscribeStatus.classList.add("subscribing");
-            elemSubscribeStatus.classList.remove("blocked");
-            elemSubscribeButton.textContent = 'Unsubscribe';
-            elemSubscribeButton.classList.add("subscribing");
-
-        } else {
-            elemSubscribeStatus.textContent = 'Unsubscribed from notifications';
-            elemSubscribeStatus.classList.remove("subscribing");
-            elemSubscribeStatus.classList.remove("blocked");
-            elemSubscribeButton.textContent = 'Subscribe';
-            elemSubscribeButton.classList.remove("subscribing");
-        }
+        elemSubscribeStatus.textContent = 'Unsubscribed from notifications';
+        elemSubscribeStatus.classList.remove('subscribing');
+        elemSubscribeStatus.classList.remove('blocked');
+        elemSubscribeButton.textContent = 'Subscribe';
+        elemSubscribeButton.classList.remove('subscribing');
     }
+
+    // else { // eslint does not like lonely if-statements
+    //     if (isSubscribed) {
+    //         elemSubscribeStatus.textContent = 'Subscribed to notifications';
+    //         elemSubscribeStatus.classList.add('subscribing');
+    //         elemSubscribeStatus.classList.remove('blocked');
+    //         elemSubscribeButton.textContent = 'Unsubscribe';
+    //         elemSubscribeButton.classList.add('subscribing');
+
+    //     } else {
+    //         elemSubscribeStatus.textContent = 'Unsubscribed from notifications';
+    //         elemSubscribeStatus.classList.remove('subscribing');
+    //         elemSubscribeStatus.classList.remove('blocked');
+    //         elemSubscribeButton.textContent = 'Subscribe';
+    //         elemSubscribeButton.classList.remove('subscribing');
+    //     }
+    // }
 }
-
-
-
 
 /**
  * Post data to an API endpoint. If successful (as in, HTTP call was successful, but the response may contain warnings, error messages etc),
  * trigger callbackSuccess with the response object. If not, trigger callbackFailure with the error.
  */
 function postApiCall(url, data, callbackSuccess, callbackFailure) {
-        $.post({
-            url: url,
-            data: data,
-            dataType: "json",
-        }).then(callbackSuccess, callbackFailure);
+    $.post({
+        url: url,
+        data: data,
+        dataType: 'json'
+    }).then(callbackSuccess, callbackFailure);
 }
-
-
-
-
 /**
  * Catch-all error handling, displaying an error message in the status footer.
  * @private
@@ -144,20 +146,20 @@ function postApiCall(url, data, callbackSuccess, callbackFailure) {
 function displayErrorStatus(message, abort, err) {
     displayingError = true;
 
-    var log = (abort) ? console.error : console.warn;
+    var log = abort ? console.error : console.warn;
     log(message);
 
     if (err) {
         console.error(err);
     }
     elemSubscribeStatus.textContent = message;
-    elemSubscribeStatus.classList.remove("subscribing");
-    elemSubscribeStatus.classList.remove("blocked");
+    elemSubscribeStatus.classList.remove('subscribing');
+    elemSubscribeStatus.classList.remove('blocked');
 
     if (abort) {
-        elemSubscribeStatus.classList.add("blocked");
-        $pushForm[0].classList.add("disabled");
-        elemSubscribeButton.classList.add("hidden");
+        elemSubscribeStatus.classList.add('blocked');
+        $pushForm[0].classList.add('disabled');
+        elemSubscribeButton.classList.add('hidden');
     }
 }
 
@@ -173,7 +175,6 @@ function clickSubscriptionButton(event) {
 
     if (isSubscribed) {
         unsubscribeUser();
-
     } else {
         requestPermissionIfNeeded()
             .then(function(permission) {
@@ -187,33 +188,30 @@ function clickSubscriptionButton(event) {
             .catch(function(err) {
                 displayErrorStatus('Failed to subscribe the user', false, err);
                 if (!isSubscribed) {
-                    swRegistration.pushManager.getSubscription()
+                    swRegistration.pushManager
+                        .getSubscription()
                         .then(function(subscription) {
                             if (subscription) {
                                 return subscription.unsubscribe();
                             }
-                        })
+                            return null; // eslint consistent return
+                        });
                 }
             });
     }
 }
 
-
-
 // ------------------------------------------------  Programmatically requesting permissions changes -----------------
 
 function requestPermissionIfNeeded() {
     var permission = Notification.permission;
-    if (permission !== "granted") {
+    if (permission !== 'granted') {
         // Triggering a permission request.
         // A popup should appear if the current permission is 'default', otherwise the permissions must be manually changed.
         return Notification.requestPermission();
     }
     return Promise.resolve(permission);
 }
-
-
-
 
 // ------------------------------------------------  Adding a subscription:  -----------------------------------------
 
@@ -223,11 +221,10 @@ function requestPermissionIfNeeded() {
  * @returns {Uint8Array}
  */
 function urlB64ToUint8Array(base64String) {
-    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
     const base64 = (base64String + padding)
         .replace(/\-/g, '+')
         .replace(/_/g, '/');
-
     const rawData = window.atob(base64);
     const outputArray = new Uint8Array(rawData.length);
 
@@ -237,17 +234,16 @@ function urlB64ToUint8Array(base64String) {
     return outputArray;
 }
 
-
 /**
  * Add a subscription, both to the service worker's push manager, and to the server's registry of active subscriptions.
  * To test this locally, open the push page in two different browsers, subscribe in both of them, and send a message from one of them.
  * Two notifications should appear.
  */
 function subscribeUser() {
-    var publicKey = $subscribeForm.attr("data-public-key");
-
+    var publicKey = $subscribeForm.attr('data-public-key');
     const applicationServerKey = urlB64ToUint8Array(publicKey);
-    swRegistration.pushManager.subscribe({
+    swRegistration.pushManager
+        .subscribe({
             userVisibleOnly: true,
             applicationServerKey: applicationServerKey
         })
@@ -257,20 +253,21 @@ function subscribeUser() {
             cancelSubscriptionLocally();
         });
 }
-
-
 /**
  * Sends a request to the server for adding the client's subscription.
  */
 function updateSubscriptionOnServer(subscription) {
     if (!subscription) {
-        displayErrorStatus('Subscription failed: no subscription object to update', true);
+        displayErrorStatus(
+            'Subscription failed: no subscription object to update',
+            true
+        );
         cancelSubscriptionLocally();
         return;
     }
 
     var url = $subscribeForm.attr('action');
-
+    console.log('url', url);
     const subObj = JSON.parse(JSON.stringify(subscription));
 
     const params = {
@@ -282,18 +279,19 @@ function updateSubscriptionOnServer(subscription) {
     postApiCall(
         url,
         params,
-
-        function (data) {
-            if (((data || {}).success === true)) {
+        function(data) {
+            if ((data || {}).success === true) {
                 // Successfully subscribed to push notification
                 subscriptionEndpoint = params.endpoint;
                 subscriptionKey = params.key;
                 subscriptionAuth = params.auth;
                 isSubscribed = true;
-
+            }
             // Log server messages/data deviations
-            } else {
-                console.warn("Server response: status=200, but not with success=true. Response data:");
+            else {
+                console.warn(
+                    'Server response: status=200, but not with success=true. Response data:'
+                );
                 console.log(data);
             }
             if (data.message) {
@@ -304,9 +302,13 @@ function updateSubscriptionOnServer(subscription) {
             broadcastSubscriberCountChange();
         },
 
-        function (error) {
+        function(error) {
             isSubscribed = false;
-            displayErrorStatus('Failed to subscribe to push notifications', true, error);
+            displayErrorStatus(
+                'Failed to subscribe to push notifications',
+                true,
+                error
+            );
             cancelSubscriptionLocally();
             updateGUI();
         }
@@ -314,16 +316,13 @@ function updateSubscriptionOnServer(subscription) {
 }
 
 function cancelSubscriptionLocally() {
-    swRegistration.pushManager.getSubscription()
-        .then(function(subscription) {
-            if (subscription) {
-                return subscription.unsubscribe();
-            }
-        });
+    swRegistration.pushManager.getSubscription().then(function(subscription) {
+        if (subscription) {
+            return subscription.unsubscribe();
+        }
+        return null; // eslint consistent return
+    });
 }
-
-
-
 
 // ------------------------------------------------  Removing a subscription:  -----------------------------------------
 
@@ -331,11 +330,13 @@ function cancelSubscriptionLocally() {
  * Removes an existing subscription, first from the service worker's push manager, and then from the server's subscriptions registry.
  */
 function unsubscribeUser() {
-    swRegistration.pushManager.getSubscription()
+    swRegistration.pushManager
+        .getSubscription()
         .then(function(subscription) {
             if (subscription) {
                 return subscription.unsubscribe();
             }
+            return null; // eslint consistent return
         })
         .then(removeSubscriptionOnServer)
         .catch(function(err) {
@@ -343,13 +344,16 @@ function unsubscribeUser() {
         });
 }
 
-
 /**
  * Sends a request to the server for removing the client's subscription.
  */
 function removeSubscriptionOnServer() {
-    if (isSubscribed && subscriptionEndpoint && subscriptionKey && subscriptionAuth) {
-
+    if (
+        isSubscribed &&
+        subscriptionEndpoint &&
+        subscriptionKey &&
+        subscriptionAuth
+    ) {
         var url = $subscribeForm.attr('action');
         const params = {
             cancelSubscription: true,
@@ -363,17 +367,18 @@ function removeSubscriptionOnServer() {
             params,
 
             function(data) {
-                if (((data || {}).success === true)) {
-                    //Successfully unsubscribed from push notification
+                if ((data || {}).success === true) {
+                    // Successfully unsubscribed from push notification
                     isSubscribed = false;
                     subscriptionEndpoint = null;
                     subscriptionKey = null;
                     subscriptionAuth = null;
 
-
-                // Log server messages/data deviations
+                    // Log server messages/data deviations
                 } else {
-                    console.warn("Server response: status=200, but not with success=true. Response data:");
+                    console.warn(
+                        'Server response: status=200, but not with success=true. Response data:'
+                    );
                     console.log(data);
                 }
                 if (data.message) {
@@ -385,18 +390,17 @@ function removeSubscriptionOnServer() {
             },
 
             function(err) {
-                displayErrorStatus('Failed to unsubscribe from push notifications', true, err);
+                displayErrorStatus(
+                    'Failed to unsubscribe from push notifications',
+                    true,
+                    err
+                );
             }
         );
-
-
     } else {
-        displayErrorStatus("No subscription to remove");
+        displayErrorStatus('No subscription to remove');
     }
 }
-
-
-
 
 // ---------------------------------------  Pushing a message to subscribing clients:  -----------------------------------------
 
@@ -405,31 +409,33 @@ function clickPushButton(event) {
     displayingError = false;
 
     // Don't send empty messages.
-    if (((elemPushField.value || "") + "").trim() === "") {
+    if (((elemPushField.value || '') + '').trim() === '') {
         displayErrorStatus('Empty message. Write something to push it.');
-
     } else {
         elemPushButton.disabled = true;
         elemPushField.disabled = true;
         postApiCall(
             $pushForm.attr('action'),
-            {message: elemPushField.value},
+            { message: elemPushField.value },
 
-            function (data) {
+            function(data) {
+                console.log('url', $pushForm.attr('action'));
                 // Log server messages/data deviations
                 if ((data || {}).success === true) {
-                    console.log("Push succeeded");
+                    console.log('Push succeeded');
                 } else {
-                    console.warn("Server response: status=200, but not with success=true. Response data:");
+                    console.warn(
+                        'Server response: status=200, but not with success=true. Response data:'
+                    );
                     console.log(data);
                 }
 
                 elemPushButton.disabled = false;
                 elemPushField.disabled = false;
-                elemPushField.value = "";
+                elemPushField.value = '';
             },
 
-            function (error) {
+            function(error) {
                 displayErrorStatus('Push failed.', true, error);
             }
         );
@@ -438,37 +444,37 @@ function clickPushButton(event) {
     return false;
 }
 
-
-
 // -----------------------------------  Call to broadcast to all subscribers when the number of subscribers changes:  ----------------------
 
 function getSubscriberCountUrl() {
     if (subscriberCountUrl === null) {
-        subscriberCountUrl = $subscribeForm.attr("data-subscribercount-url");
+        subscriberCountUrl = $subscribeForm.attr('data-subscribercount-url');
     }
     return subscriberCountUrl;
 }
-
 
 function broadcastSubscriberCountChange() {
     postApiCall(
         getSubscriberCountUrl(),
         null,
-        function(response){
+        function(response) {
             if (response.subscriberCount != null) {
                 updateSubscriberCountInGUI(response.subscriberCount, false);
             }
         },
         function(err) {
-            displayErrorStatus("Failed to broadcast subscriber change", false, err);
+            displayErrorStatus(
+                'Failed to broadcast subscriber change',
+                false,
+                err
+            );
         }
     );
 }
 
-
 // Receiving broadcast data from the service worker, triggering a GUI update
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.addEventListener("message", function(event) {
+    navigator.serviceWorker.addEventListener('message', function(event) {
         if (event.data != null) {
             // Page received data message
             var data = JSON.parse(event.data);
@@ -480,18 +486,18 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-
 /** Updating subscriber count in the DOM */
 function updateSubscriberCountInGUI(subscriberCount, live) {
-    elemSubscriberCount.textContent = subscriberCount + " subscriber" + (subscriberCount === 1 ? "" : "s");
+    elemSubscriberCount.textContent =
+        subscriberCount + ' subscriber' + (subscriberCount === 1 ? '' : 's');
     if (live) {
-        elemSubscriberCount.classList.add("live");
+        elemSubscriberCount.classList.add('live');
     } else {
-        elemSubscriberCount.classList.remove("live");
+        elemSubscriberCount.classList.remove('live');
     }
     if (subscriberCount === 0) {
-        $pushForm[0].classList.add("disabled");
+        $pushForm[0].classList.add('disabled');
     } else {
-        $pushForm[0].classList.remove("disabled");
+        $pushForm[0].classList.remove('disabled');
     }
 }

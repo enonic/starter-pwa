@@ -17,8 +17,8 @@
     <meta name="Description" data-th-content="${title}">
 
     <script type="text/javascript" data-th-src="${portal.assetUrl({'_path=precache/js/material.min.js'})}" async></script>
-    <script type="text/javascript" data-th-src="${portal.assetUrl({'_path=precache/app-bundle.js'})}" async></script>
-    <link rel="stylesheet" type="text/css" data-th-href="${portal.assetUrl({'_path=precache/bundle.css'})}">
+    <script type="text/javascript" data-th-src="${portal.assetUrl({'_path=bundles/app-bundle.js'})}" async></script>
+    <link rel="stylesheet" type="text/css" data-th-href="${portal.assetUrl({'_path=bundles/bundle.css'})}">
 
     <link rel="stylesheet" type="text/css" data-th-href="${portal.assetUrl({'_path=precache/css/material.indigo-pink.min.css'})}">
     <link rel="stylesheet" type="text/css" data-th-href="${portal.assetUrl({'_path=precache/css/icon.css'})}">
@@ -57,16 +57,21 @@
             <div data-th-case="'push'" data-th-remove="tag">
                 <div data-th-replace="/templates/fragments/push::fragment-push"></div>
             </div>
+            <div data-th-case="'background-sync'" data-th-remove="tag">
+                <div data-th-replace="/templates/fragments/background-sync::fragment-background-sync"></div>
+            </div>
             <div data-th-case="*" data-th-remove="tag">
                 <div data-th-replace="/templates/fragments/under_construction::fragment-page-under-construction"></div>
             </div>
         </div>
+        <aside class="toast-view"></aside>
     </main>
 
     <footer id="notification-bar" class="mdl-js-snackbar mdl-snackbar" aria-hidden="true">
         <div class="mdl-snackbar__text"></div>
         <button class="mdl-snackbar__action" type="button"></button>
     </footer>
+    
 </div>
 
 <script type="text/javascript">

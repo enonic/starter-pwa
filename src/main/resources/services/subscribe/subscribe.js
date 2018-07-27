@@ -24,8 +24,7 @@ var pushRepo = require('/lib/push/repo');
  * @returns {{body: Object, [status]: number, headers: Object}} HTTP Response object
  */
 exports.post = function (req) {
-    //log.info(JSON.stringify({subscribe_request:req}, null, 2));
-
+    // log.info(JSON.stringify({subscribe_request:req}, null, 2));
     var subscription = getSubscriptionObj(req.params);
     if (!subscription) {
         var message = 'Missing/invalid subscription data in request';
@@ -68,13 +67,13 @@ var getSubscriptionObj = function(params) {
 var createSubscriptionNode = function (subscription) {
     try {
         var node = pushRepo.storeSubscriptionAndGetNode(subscription);
-        if (!node) {
-            log.error("Tried creating subscripton node, but something seems wrong: " + JSON.stringify(
-                {
-                    incoming_subscription:subscription,
-                    resulting_node:node
-                }, null, 2));
-
+        if (!node)  {
+            // log.error("Tried creating subscripton node, but something seems wrong: " + JSON.stringify(
+            //     {
+            //         incoming_subscription:subscription,
+            //         resulting_node:node
+            //     }, null, 2));
+t
             return {
                 status: 500,
                 message: "Couldn't create subscription node",
@@ -85,7 +84,7 @@ var createSubscriptionNode = function (subscription) {
         }
 
     } catch (e) {
-        log.error(e);
+        // log.error(e);
         return {
             status: 500,
             message: "Couldn't create subscription node",
@@ -118,7 +117,7 @@ var deleteSubscriptionNode = function (subscription) {
         }
 
     } catch (e) {
-        log.error(e);
+        // log.error(e);
         return {
             status: 500,
             message: "Couldn't delete subscription node",

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+
+<body>
+	<div data-th-fragment="fragment-background-sync" data-th-remove="tag">
+		<div id="todo-app__container">
+			<!-- Input section -->
+			<div id="todo-app__input">
+				<div class="mdl-textfield mdl-js-textfield">
+					<input id="add-todo-text" class="mdl-textfield__input" placeholder="Add Todo" type="text" tabindex="1"></input>
+				</div>
+				<button id="add-todo-button" class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect" tabindex="3">
+					<i class="material-icons">add</i>
+				</button>
+			</div>
+			<!-- Item section -->
+	        <ul id="todo-app__item-area" class="todo-app__item-area mdl-list">
+				<!-- Stored todos show up here -->
+	        </ul>
+		</div>
+	</div>
+</body>
+
+</html>
+
+<!-- 
+	BEFORE MATERIAL 
+
+	<div data-th-fragment="fragment-background-sync" data-th-remove="tag">
+		<button id="todo-app__startButton">Start the list demo</button>
+		<div id="todo-app__container">
+			<div class="todo-app__input">
+				<input id="add-todo-text" type="text" placeholder="New todo" tabindex="1">
+				<button id="add-todo-button" tabindex="3">Add</button>
+			</div>
+			<ul id="todo-app__item-area" class="todo-app__item-area mdl-list">
+			</ul>
+		</div>
+	</div>
+-->

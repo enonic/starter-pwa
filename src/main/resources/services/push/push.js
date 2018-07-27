@@ -18,8 +18,6 @@ var pushKeys = require('/lib/push/keys');
  * @returns {{body: Object, status: number, headers: Object}} HTTP Response object
  */
 exports.post = function (req) {
-    //log.info(JSON.stringify({push_request:req}, null, 2));
-
     var response = {
         status: 200,
         headers: {
@@ -45,7 +43,7 @@ exports.post = function (req) {
         }
 
     } catch (e) {
-        log.error(e);
+        // log.error(e);
         response.status = 500;
         response.body = {
             success: false,
@@ -82,9 +80,6 @@ exports.sendPushNotificationToAllSubscribers = function (payload) {
             sendPushNotification(keyPair, node.subscription, payload);
             actuallySent++;
 
-        } else {
-            log.info("Found a subscription hit that doesn't seem to have a subscription in it:");
-            log.info(JSON.stringify(hit, null, 2));
         }
     }
     return (actuallySent > 0);
@@ -109,9 +104,6 @@ var sendPushNotification = function (keyPair, subscription, payload) {
         auth: subscription.auth,
         receiverKey: subscription.key,
         payload: payload,
-        success: function () {
-            //log.info('Push notification sent successfully');
-        },
         error: function () {
             throw Error("Could not send push notification payload: '" + JSON.stringify(payload) + "'");
         }

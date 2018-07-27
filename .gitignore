@@ -28,6 +28,7 @@ Temporary Items
 ### Gradle ###
 .gradle
 build/
+bin/
 
 # Ignore Gradle GUI config
 gradle-app.setting
@@ -89,3 +90,4 @@ crashlytics-build.properties
 
 # Node modules
 node_modules/
+build/

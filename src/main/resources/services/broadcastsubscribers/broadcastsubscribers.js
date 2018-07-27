@@ -2,7 +2,7 @@ var pushRepo = require('/lib/push/repo');
 var pushService= require('/services/push/push');
 
 exports.post = function (req) {
-    //log.info(JSON.stringify({broadcastsubscription_request:req}, null, 2));
+    // log.info(JSON.stringify({broadcastsubscription_request:req}, null, 2));
     var response = {
         status: 200,
         headers: {
@@ -16,7 +16,7 @@ exports.post = function (req) {
         response.body = {success: true, subscriberCount:subscriberCount};
 
     } catch (e) {
-        log.error(e);
+        // log.error(e);
         response.status = 500;
     }
 

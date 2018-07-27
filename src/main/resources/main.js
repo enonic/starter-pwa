@@ -5,6 +5,7 @@ var siteTitle = 'PWA Starter';
 var mustache = require('/lib/xp/mustache');
 var pushRepo = require('/lib/push/repo');
 
+// Initialize repo on application initialization 
 pushRepo.initialize();
 
 var pushKeys = require('/lib/push/keys');
@@ -34,15 +35,22 @@ function renderPage(pageId, title) {
         model.pageContributions = {
             headEnd:
                 '<link rel="stylesheet" type="text/css" href="' + portalLib.assetUrl({path: 'precache/css/pushform.css'}) + '"/>' +
-                '<script defer type="text/javascript" src="' + portalLib.assetUrl({path: 'precache/push-bundle.js'}) + '"></script>'
+                '<script defer type="text/javascript" src="' + portalLib.assetUrl({path: 'bundles/push-bundle.js'}) + '"></script>'
+        };
+    
+    }
+    // Data only needed for the background-sync page:
+    if (pageId === "background-sync") {
+        model.pushUrl = portalLib.serviceUrl({ service: "background-sync" });
+        model.pageContributions = {
+            headEnd:
+                '<script defer type="text/javascript" src="' + portalLib.assetUrl({ path: 'bundles/bs-bundle.js' }) + '"></script>'
         };
     }
-
     return {
         body: thymeleaf.render(resolve('templates/page.html'), model),
     };
 }
-
 
 function renderSW() {
     var appUrl = getAppUrl();
@@ -58,6 +66,7 @@ function renderSW() {
             appVersion: app.version,
             appName: app.name,
             iconUrl: portalLib.assetUrl({path: "/precache/icons/icon.png"}),
+            serviceUrl: portalLib.serviceUrl({service: 'background-sync'})
         })
     };
 }
@@ -84,7 +93,7 @@ router.get('/webrtc', function() { return renderPage('webrtc', 'WebRTC functiona
 router.get('/sw.js', renderSW);
 router.get('/manifest.json', renderManifest);
 
-exports.get = function (req) {
+exports.get = function (req) {    
     return router.dispatch(req);
 };
 
