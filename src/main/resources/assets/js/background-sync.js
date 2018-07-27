@@ -186,10 +186,13 @@ const editItemText = event => {
     const id = event.target.id;
     searchAndApply(id, item => {
         const changedItem = item;
-        if (!(event.target.value === '')) {
+        if (
+            !(event.target.value === '') ||
+            event.target.value === beforeLastChange
+        ) {
             changedItem.text = event.target.value;
+            registerChange(changedItem, storeNames.offline);
         }
-        registerChange(changedItem, storeNames.offline);
     });
 };
 /**
@@ -307,12 +310,8 @@ const updateListenersFor = {
                     document.activeElement.blur();
                 }
             });
-            inputfield.onblur = () => {
-                // some change has actually occured
-                if (inputfield.value !== beforeLastChange) {
-                    inputfield.onblur = editItemText;
-                }
-            };
+
+            inputfield.onblur = editItemText;
         }
     },
     materialItems: () => {
