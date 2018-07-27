@@ -1,13 +1,9 @@
-importScripts('{{appUrl}}js/workbox-sw.prod.v2.0.1.js');
-
 const swVersion = '{{appVersion}}';
-const workboxSW = new self.WorkboxSW({
-    skipWaiting: true,
-    clientsClaim: true
-});
 
-const repoUrl =
-    '/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/background-sync';
+workbox.clientsClaim();
+workbox.skipWaiting();
+
+const serviceUrl = '{{serviceUrl}}';
 const indexDbName = { Todolist: 'Todolist' };
 const storeName = {
     offline: 'OfflineStorage',
@@ -18,47 +14,50 @@ let indexDB; // indexDB instance
 let firstTimeOnline = false; 
 
 // This is a placeholder for manifest dynamically injected from webpack.config.js
-workboxSW.precache([]);
+workbox.precaching.precacheAndRoute(self.__precacheManifest || []);
 
 // Here we precache custom defined Urls
-workboxSW.precache(['{{appUrl}}']);
+workbox.precaching.precacheAndRoute(['{{appUrl}}']);
+
+workbox.routing.setDefaultHandler(workbox.strategies.networkFirst());
 
 /**
  * Sets the caching strategy for the client: tries contacting the network first
  */
-workboxSW.router.registerRoute(
+/*
+workbox.router.registerRoute(
     '{{appUrl}}offline',
-    workboxSW.strategies.networkFirst()
+    workbox.strategies.networkFirst()
 );
-workboxSW.router.registerRoute(
+workbox.router.registerRoute(
     '{{appUrl}}push',
-    workboxSW.strategies.networkFirst()
+    workbox.strategies.networkFirst()
 );
-workboxSW.router.registerRoute(
+workbox.router.registerRoute(
     '{{appUrl}}cache-first',
-    workboxSW.strategies.networkFirst()
+    workbox.strategies.networkFirst()
 );
-workboxSW.router.registerRoute(
+workbox.router.registerRoute(
     '{{appUrl}}background-sync',
-    workboxSW.strategies.networkFirst()
+    workbox.strategies.networkFirst()
 );
-workboxSW.router.registerRoute(
+workbox.router.registerRoute(
     '{{appUrl}}bluetooth',
-    workboxSW.strategies.networkFirst()
+    workbox.strategies.networkFirst()
 );
-workboxSW.router.registerRoute(
+workbox.router.registerRoute(
     '{{appUrl}}audio',
-    workboxSW.strategies.networkFirst()
+    workbox.strategies.networkFirst()
 );
-workboxSW.router.registerRoute(
+workbox.router.registerRoute(
     '{{appUrl}}video',
-    workboxSW.strategies.networkFirst()
+    workbox.strategies.networkFirst()
 );
-workboxSW.router.registerRoute(
+workbox.router.registerRoute(
     '{{appUrl}}webrtc',
-    workboxSW.strategies.networkFirst()
+    workbox.strategies.networkFirst()
 );
-
+*/
 /**
  * Handles the event of receiving of a subscribed push notification
  */
@@ -98,7 +97,7 @@ self.addEventListener('notificationclick', function(event) {
 
 self.addEventListener('sync', event => {
     if (event.tag === 'Background-sync') {
-        event.waitUntil(syncronize());
+        event.waitUntil(synchronize());
     } else {
         console.error('Problem with sync listener, sync-tag not supported');
     }
@@ -136,13 +135,13 @@ function isChangeDoneinRepo() {
                     repo = [];
                 }
                 if (repo.length !== offlineStorage.length) {
-                    syncronize();
+                    synchronize();
                     return;
                 }
                 repo.map((item, i) => {
                     const offlineItem = offlineStorage[i];
                     if (JSON.stringify(item) !== JSON.stringify(offlineItem)) {
-                        syncronize();
+                        synchronize();
                     }
                 });
             });
@@ -152,7 +151,7 @@ function isChangeDoneinRepo() {
 
 function getItemsFromRepo() {
     // fetching items from repo
-    return getApiCall(repoUrl).then(response =>
+    return getApiCall(serviceUrl).then(response =>
         response.json().then(itemList => {
             // item fetched from repo is an object called TodoItems, we are interested in it's values
             return itemList.TodoItems;
@@ -170,11 +169,11 @@ function getItemsFromDB() {
 
 // deleting all items in repo contained in a database
 function removeItemsFromRepo(db) {
-    return Promise.all(db.map(item => deleteApiCall(repoUrl, item)));
+    return Promise.all(db.map(item => deleteApiCall(serviceUrl, item)));
 }
 
 function isElementInRepo(id) {
-    return getItemApiCall(repoUrl, id).then(response => {
+    return getItemApiCall(serviceUrl, id).then(response => {
         if (response.status === 404) {
             return false;
         }
@@ -194,18 +193,18 @@ function resolveChanges(db) {
                 return isElementInRepo(item.id).then(
                     status =>
                         status
-                            ? putApiCall(repoUrl, item)
-                            : postApiCall(repoUrl, item)
+                            ? putApiCall(serviceUrl, item)
+                            : postApiCall(serviceUrl, item)
                 );
             }
             if (!item.synced) {
-                return postApiCall(repoUrl, item);
+                return postApiCall(serviceUrl, item);
             }
         })
     );
 }
 
-const syncronize = function(type) {
+const synchronize = function(type) {
     updateInterval();
     // read db, dbRemove and repo
     getItemsFromDB().then(values => {

@@ -35,7 +35,7 @@ function renderPage(pageId, title) {
         model.pageContributions = {
             headEnd:
                 '<link rel="stylesheet" type="text/css" href="' + portalLib.assetUrl({path: 'precache/css/pushform.css'}) + '"/>' +
-                '<script defer type="text/javascript" src="' + portalLib.assetUrl({path: 'precache/push-bundle.js'}) + '"></script>'
+                '<script defer type="text/javascript" src="' + portalLib.assetUrl({path: 'bundles/push-bundle.js'}) + '"></script>'
         };
     
     }
@@ -44,7 +44,7 @@ function renderPage(pageId, title) {
         model.pushUrl = portalLib.serviceUrl({ service: "background-sync" });
         model.pageContributions = {
             headEnd:
-                '<script defer type="text/javascript" src="' + portalLib.assetUrl({ path: 'precache/backgroundSync-bundle.js' }) + '"></script>'
+                '<script defer type="text/javascript" src="' + portalLib.assetUrl({ path: 'bundles/bs-bundle.js' }) + '"></script>'
         };
     }
     return {
@@ -66,11 +66,10 @@ function renderSW() {
             appVersion: app.version,
             appName: app.name,
             iconUrl: portalLib.assetUrl({path: "/precache/icons/icon.png"}),
+            serviceUrl: portalLib.serviceUrl({service: 'background-sync'})
         })
     };
 }
-
-
 
 function renderManifest() {
 

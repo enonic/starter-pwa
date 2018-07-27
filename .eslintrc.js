@@ -28,7 +28,7 @@ module.exports = {
             }
         }, 
         {
-            'files': ['src/main/resources/assets/js/background-sync.js'],
+            'files': ['src/main/resources/assets/js/bs.js'],
             'rules': {
                 'no-use-before-define': 'off', 
                 'no-undef': 'off', 
