@@ -116,13 +116,21 @@ function isChangeDoneinRepo() {
 }
 
 function getItemsFromRepo() {
-    // fetching items from repo
-    return getApiCall(serviceUrl).then(response =>
-        response.json().then(itemList => {
-            // item fetched from repo is an object called TodoItems, we are interested in it's values
-            return itemList.TodoItems;
-        })
-    );
+    return self.clients.matchAll().then(function (clients) {
+       if (clients.every(windowClient => windowClient.url.indexOf('background-sync') == -1)) {
+           return;
+        }
+
+
+        // fetching items from repo
+        return getApiCall(serviceUrl).then(response =>
+               response.json().then(itemList => {
+                // item fetched from repo is an object called TodoItems, we are interested in it's values
+                    return itemList.TodoItems;
+            })
+        );
+    });
+
 }
 
 function getItemsFromDB() {
