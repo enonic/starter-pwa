@@ -63,6 +63,7 @@ module.exports = function(type) {
             syncronize(type);
         }
     } else {
+        console.log(bs);
         bs.updateUI();
     }
 };

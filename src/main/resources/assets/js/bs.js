@@ -10,15 +10,35 @@ const storeNames = {
     deletedWhileOffline: 'DeletedWhileOffline'
 };
 let registeredTodos;
+
+export const updateUI = () => {
+    storage.get.offline(storeNames.offline, items => {
+        items.reverse();
+        registeredTodos = items.map(
+            item =>
+                new TodoItem(
+                    item.value.text,
+                    item.value.date,
+                    item.value.completed,
+                    item.value.id,
+                    item.value.synced
+                )
+        );
+        focusIfEmpty();
+        updateTodoView();
+        updateListenersFor.everything();
+    });
+};
+
 // Speparating from the similar listener in app.js
 const toggleOnlineStatus = function() {
+    updateUI();
     if (navigator.onLine) {
         storageManager('online');
     }
 };
-let beforeLastChange = '';
-
 toggleOnlineStatus();
+let beforeLastChange = '';
 
 window.addEventListener('offline', toggleOnlineStatus);
 window.addEventListener('online', toggleOnlineStatus);
@@ -313,24 +333,6 @@ const updateListenersFor = {
             componentHandler.upgradeElements(item);
         }
     }
-};
-export const updateUI = () => {
-    storage.get.offline(storeNames.offline, items => {
-        items.reverse();
-        registeredTodos = items.map(
-            item =>
-                new TodoItem(
-                    item.value.text,
-                    item.value.date,
-                    item.value.completed,
-                    item.value.id,
-                    item.value.synced
-                )
-        );
-        focusIfEmpty();
-        updateTodoView();
-        updateListenersFor.everything();
-    });
 };
 
 const focusIfEmpty = () => {
