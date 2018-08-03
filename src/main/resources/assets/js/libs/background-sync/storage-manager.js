@@ -17,7 +17,7 @@
  */
 
 const localSync = require('./local-sync');
-const bs = require('../../background-sync');
+const bs = require('../../bs');
 
 let interval;
 const updateInterval = () => {
