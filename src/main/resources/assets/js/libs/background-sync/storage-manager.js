@@ -17,6 +17,7 @@
  */
 
 const localSync = require('./local-sync');
+const bs = require('../../background-sync');
 
 let interval;
 const updateInterval = () => {
@@ -37,7 +38,6 @@ const syncronize = type => {
             if (registration.sync) {
                 // Only chrome supports
                 registration.sync.register('Background-sync');
-
                 // indicate that this is going online after being offline
                 if (type === 'online') {
                     navigator.serviceWorker.controller.postMessage(type);
@@ -62,5 +62,7 @@ module.exports = function(type) {
         } else {
             syncronize(type);
         }
+    } else {
+        bs.updateUI();
     }
 };
