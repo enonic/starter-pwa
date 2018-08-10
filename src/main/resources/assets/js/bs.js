@@ -46,7 +46,13 @@ window.addEventListener('online', toggleOnlineStatus);
 storage.get.offline(storeNames.offline, items => {
     // transform from indexDB-item to TodoItem
     registeredTodos = items.map(
-        item => new TodoItem(item.text, item.date, item.completed, item.id)
+        item =>
+            new TodoItem(
+                item.value.text,
+                item.value.date,
+                item.value.completed,
+                item.key
+            )
     );
 });
 
@@ -113,6 +119,7 @@ const addTodo = () => {
 
         storage.add.offline(storeNames.offline, item);
         inputfield.value = '';
+        updateUI();
     } else {
         // let user know something was wrong
         inputfield.style.borderColor = '#f44336';
@@ -136,6 +143,7 @@ const removeTodo = event => {
         storage.add
             .offline(storeNames.deletedWhileOffline, todoItem, true)
             .then(storage.delete.offline(storeNames.offline, todoItem.id));
+        updateUI();
     });
 };
 
@@ -151,14 +159,13 @@ const updateTodoView = () => {
          * mdl-grid
          * mdl-cell mdl-cell--4-col
          */
+        const checkedClass = todo.completed ? 'checked' : '';
         outputArea.innerHTML += `
-            <li class="todo-app__item mdl-list__item mdl-grid>
+            <li class="todo-app__item mdl-list__item mdl-grid ${checkedClass}">
             
 				<input type="checkbox" id="${
                     todo.id
-                }" class="todo-app__checkbox mdl-checkbox__input" style="color: ${
-            todo.completed ? 'grey' : ''
-        }"/>
+                }" class="todo-app__checkbox mdl-checkbox__input"/>
                 <i id="${
                     todo.id
                 }" class="todo-app__checkbox mdl-cell mdl-cell--1-col material-icons md-48" title="${
@@ -180,9 +187,7 @@ const updateTodoView = () => {
                     todo.synced
                         ? 'Synced with storage'
                         : 'Not synced to the storage'
-                }" style="color: black;">${
-            todo.synced ? 'cloud_done' : 'cloud_off'
-        }</i>
+                }">${todo.synced ? 'cloud_done' : 'cloud_off'}</i>
             </li>
         `;
     }
@@ -207,6 +212,8 @@ const editItemText = event => {
         ) {
             changedItem.text = event.target.value;
             registerChange(changedItem, storeNames.offline);
+        } else {
+            updateUI();
         }
     });
 };
@@ -232,12 +239,13 @@ const registerChange = (item, storeName) => {
     changedItem.changed = true;
     changedItem.synced = false;
     storage.replace.offline(storeName, changedItem);
+    updateUI();
 };
 const changeLabelToInput = textfield => {
     const label = textfield.innerHTML;
     beforeLastChange = label;
     const parent = textfield.parentNode;
-    const id = parent.children[1].id;
+    const id = parent.children[2].id;
     const input = document.createElement('input');
     storageManager('edit');
     input.className =
@@ -245,7 +253,7 @@ const changeLabelToInput = textfield => {
     input.id = id;
     input.title = 'Click to edit';
     input.value = label;
-    parent.replaceChild(input, parent.children[1]);
+    parent.replaceChild(input, parent.children[2]);
     input.focus();
 
     updateListenersFor.inputfields();

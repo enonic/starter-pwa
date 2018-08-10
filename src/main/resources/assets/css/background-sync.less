@@ -43,17 +43,48 @@
 
 .mdl-textfield__input:focus {
     outline: none !important;
-    border-bottom-width: 3px;
     border-bottom-color: #3F51B5;
     /*margin-bottom: 2px; */
 }
 
-.todo-app__item {
+.todo-app__checkbox {
+    display: none;
+}
+
+.todo-app__checkbox, .todo-app__textfield, .remove-todo-button {
+    cursor: pointer;
+}
+
+.todo-app__item.mdl-list__item {
     position: relative;
-    padding: 15px;
     border-bottom-style: solid;
     border-bottom-width: 1px;
     overflow-wrap: break-word;
+    flex-flow: row nowrap;
+    align-items: center;
+
+    &.checked {
+        color: grey;
+
+        .todo-app__textfield, .remove-todo-button {
+            pointer-events: none;
+        }
+    }
+
+  .mdl-cell {
+    width: auto;
+  }
+
+  .todo-app__inputfield, .todo-app__textfield {
+    flex-grow: 1;
+  }
+
+  .todo-app__inputfield {
+    width: 100%;
+    border: none;
+    box-shadow: 0 1px 0 #3F51B5;
+    padding: 0;
+  }
 }
 
 .todo-app__textfield,

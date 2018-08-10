@@ -64,6 +64,6 @@ module.exports = function(type) {
         }
     } else {
         console.log(bs);
-        bs.updateUI();
+        // bs.updateUI();
     }
 };
