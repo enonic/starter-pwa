@@ -11,7 +11,7 @@ const storeName = {
 };
 
 let indexDB; // indexDB instance
-let firstTimeOnline = false; 
+let firstTimeOnline = false;
 
 // This is a placeholder for manifest dynamically injected from webpack.config.js
 workbox.precaching.precacheAndRoute(self.__precacheManifest || []);
@@ -71,66 +71,45 @@ self.addEventListener('sync', event => {
 
 self.addEventListener('message', event => {
     if (event.data === 'online') {
-        firstTimeOnline = true; 
+        firstTimeOnline = true;
     }
-})
+});
 
-/**
- * Interval for implementation of multiple users.
- */
-
-let interval;
-const updateInterval = () => {
-    if (interval) {
-        clearInterval(interval);
-    }
-    interval = setInterval(isChangeDoneinRepo, 5000);
-};
-
-function isChangeDoneinRepo() {
-    if (navigator.onLine) {
-        getItemsFromRepo().then(repo => {
-            if (!repo) {
-                return;
-            }
-            getItemsFromDB().then(values => {
-                const offlineStorage = values[1].reverse();
-                if (repo) {
-                    repo = repo.map(element => element.item);
-                } else {
-                    repo = [];
-                }
-                if (repo.length !== offlineStorage.length) {
-                    synchronize();
-                    return;
-                }
-                repo.map((item, i) => {
-                    const offlineItem = offlineStorage[i];
-                    if (JSON.stringify(item) !== JSON.stringify(offlineItem)) {
-                        synchronize();
-                    }
-                });
-            });
-        });
-    }
+function debounce(func, wait, immediate) {
+    var timeout;
+    return function() {
+        var context = this;
+        var args = arguments;
+        var later = function() {
+            timeout = null;
+            if (!immediate) func.apply(context, args);
+        };
+        var callNow = immediate && !timeout;
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+        if (callNow) func.apply(context, args);
+    };
 }
 
 function getItemsFromRepo() {
-    return self.clients.matchAll().then(function (clients) {
-       if (clients.every(windowClient => windowClient.url.indexOf('background-sync') == -1)) {
-           return;
+    return self.clients.matchAll().then(function(clients) {
+        if (
+            clients.every(
+                windowClient =>
+                    windowClient.url.indexOf('background-sync') == -1
+            )
+        ) {
+            return;
         }
-
 
         // fetching items from repo
         return getApiCall(serviceUrl).then(response =>
-               response.json().then(itemList => {
+            response.json().then(itemList => {
                 // item fetched from repo is an object called TodoItems, we are interested in it's values
-                    return itemList.TodoItems;
+                return itemList.TodoItems;
             })
         );
     });
-
 }
 
 function getItemsFromDB() {
@@ -159,8 +138,8 @@ function isElementInRepo(id) {
 function resolveChanges(db) {
     return Promise.all(
         db.map(item => {
-            if(!item.synced && firstTimeOnline) {
-                sendMessageToClient("showSyncMessage");
+            if (!item.synced && firstTimeOnline) {
+                sendMessageToClient('showSyncMessage');
             }
 
             if (!item.synced && item.changed) {
@@ -178,8 +157,7 @@ function resolveChanges(db) {
     );
 }
 
-const synchronize = function(type) {
-    updateInterval();
+const synchronize = debounce(function(type) {
     // read db, dbRemove and repo
     getItemsFromDB().then(values => {
         // delete in repo all from db-delete
@@ -197,26 +175,26 @@ const synchronize = function(type) {
                         Promise.resolve(
                             repo
                                 ? Promise.all(
-                                        repo.map(element =>
-                                            DBPost(
-                                                indexDbName.Todolist,
-                                                storeName.offline,
-                                                element.item
-                                            )
-                                        )
-                                    )
+                                      repo.map(element =>
+                                          DBPost(
+                                              indexDbName.Todolist,
+                                              storeName.offline,
+                                              element.item
+                                          )
+                                      )
+                                  )
                                 : null
                         ).then(() => {
                             const data = { message: 'synced' };
-                            firstTimeOnline = false; 
-                            sendMessageToClient(data); 
+                            firstTimeOnline = false;
+                            sendMessageToClient(data);
                         });
                     });
                 });
             });
         });
     });
-};
+}, 3000);
 
 /**
  * Offline DB storage
@@ -331,16 +309,14 @@ const putApiCall = (url, data) => {
     });
 };
 
-const sendMessageToClient = (message) => {
-    self.clients.matchAll().then(function (clients) {
+const sendMessageToClient = message => {
+    self.clients.matchAll().then(function(clients) {
         if (clients && clients.length > 0) {
-            clients.forEach(client =>
-                client.postMessage(message)
-            );
+            clients.forEach(client => client.postMessage(message));
         } else {
             console.error(
                 "Can't update the DOM: serviceworker can't find a client (page)"
             );
         }
     });
-}
+};

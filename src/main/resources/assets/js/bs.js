@@ -43,6 +43,43 @@ let beforeLastChange = '';
 window.addEventListener('offline', toggleOnlineStatus);
 window.addEventListener('online', toggleOnlineStatus);
 
+const wsUrl = getWebSocketUriPrefix() + '/admin/event';
+const ws = new WebSocket(wsUrl);
+
+ws.addEventListener('message', function(event) {
+    const jsonEvent = JSON.parse(event.data);
+
+    if (jsonEvent.type.indexOf('node.') !== 0) {
+        return;
+    }
+
+    if (!jsonEvent.data || !jsonEvent.data.nodes) {
+        return;
+    }
+
+    if (
+        jsonEvent.data.nodes.some(
+            node => !!node.repo && node.repo === 'com.enonic.starter.pwa'
+        )
+    ) {
+        console.log('Message from server ', jsonEvent);
+        storageManager('refresh');
+    }
+});
+
+function getWebSocketUriPrefix() {
+    const loc = window.location;
+    let newUri;
+    if (loc.protocol === 'https:') {
+        newUri = 'wss:';
+    } else {
+        newUri = 'ws:';
+    }
+    newUri += '//' + loc.host;
+
+    return newUri;
+}
+
 storage.get.offline(storeNames.offline, items => {
     // transform from indexDB-item to TodoItem
     registeredTodos = items.map(

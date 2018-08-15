@@ -19,14 +19,6 @@
 const localSync = require('./local-sync');
 const bs = require('../../bs');
 
-let interval;
-const updateInterval = () => {
-    if (interval) {
-        clearInterval(interval);
-    }
-    interval = setInterval(localSync.isChangeDoneinRepo, 5000);
-};
-
 const syncronize = type => {
     /**
      *  some web-browsers supports serviceWorkers, but not all of them supports background-sync
@@ -44,22 +36,18 @@ const syncronize = type => {
                 }
             } else if (navigator.onLine) {
                 localSync.syncronize();
-                updateInterval();
+                localSync.isChangeDoneinRepo();
             }
         });
     } else if (navigator.onLine) {
         localSync.syncronize(type);
-        updateInterval();
+        localSync.isChangeDoneinRepo();
     }
 };
 
 module.exports = function(type) {
-    // If the system notices changes in repo, it will reload gui. Not allways fun.
-    // Therefore the reload interval is cleared
     if (navigator.onLine) {
-        if (type === 'edit') {
-            clearInterval(interval);
-        } else {
+        if (type !== 'edit') {
             syncronize(type);
         }
     } else {

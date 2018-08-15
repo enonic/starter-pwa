@@ -84,33 +84,23 @@ function resolveChanges(db) {
     );
 }
 
-export function isChangeDoneinRepo() {
-    if (navigator.onLine) {
-        getItemsFromRepo().then(repo => {
-            getItemsFromDB().then(values => {
-                const offlineStorage = values[1].reverse();
-                let newRepo = repo;
-                if (newRepo) {
-                    newRepo = repo.map(element => element.item);
-                } else {
-                    newRepo = [];
-                }
-                if (repo.length !== offlineStorage.length) {
-                    syncronize();
-                    return;
-                }
-                repo.forEach((item, i) => {
-                    const offlineItem = offlineStorage[i];
-                    if (JSON.stringify(item) !== JSON.stringify(offlineItem)) {
-                        syncronize();
-                    }
-                });
-            });
-        });
-    }
+function debounce(func, wait, immediate) {
+    var timeout;
+    return function() {
+        var context = this;
+        var args = arguments;
+        var later = function() {
+            timeout = null;
+            if (!immediate) func.apply(context, args);
+        };
+        var callNow = immediate && !timeout;
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+        if (callNow) func.apply(context, args);
+    };
 }
 
-export function syncronize() {
+const sync = debounce(function() {
     // read db, dbRemove and repo
     getItemsFromDB().then(values => {
         // delete in repo all from db-delete
@@ -146,4 +136,34 @@ export function syncronize() {
             });
         });
     });
+}, 3000);
+
+export function isChangeDoneinRepo() {
+    if (navigator.onLine) {
+        getItemsFromRepo().then(repo => {
+            getItemsFromDB().then(values => {
+                const offlineStorage = values[1].reverse();
+                let newRepo = repo;
+                if (newRepo) {
+                    newRepo = repo.map(element => element.item);
+                } else {
+                    newRepo = [];
+                }
+                if (repo.length !== offlineStorage.length) {
+                    syncronize();
+                    return;
+                }
+                repo.forEach((item, i) => {
+                    const offlineItem = offlineStorage[i];
+                    if (JSON.stringify(item) !== JSON.stringify(offlineItem)) {
+                        syncronize();
+                    }
+                });
+            });
+        });
+    }
+}
+
+export function syncronize() {
+    sync();
 }
