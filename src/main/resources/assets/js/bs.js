@@ -109,7 +109,7 @@ class TodoItem {
         this.completed = completed;
         // only give new ID of old one is not supplied
         this.id = !id ? new Date().valueOf() : id; // unique id}
-        this.synced = !synced ? false : synced;
+        this.synced = !!synced;
         this.type = 'TodoItem';
         this.changed = false;
     }

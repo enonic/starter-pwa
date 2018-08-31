@@ -157,7 +157,16 @@ function resolveChanges(db) {
     );
 }
 
-const synchronize = debounce(function(type) {
+let syncInProgress = false;
+let needSync = false;
+
+const synchronize = function() {
+    if (syncInProgress) {
+        needSync = true;
+        return;
+    }
+
+    syncInProgress = true;
     // read db, dbRemove and repo
     getItemsFromDB().then(values => {
         // delete in repo all from db-delete
@@ -188,13 +197,18 @@ const synchronize = debounce(function(type) {
                             const data = { message: 'synced' };
                             firstTimeOnline = false;
                             sendMessageToClient(data);
+                            syncInProgress = false;
+                            if (needSync) {
+                                needSync = false;
+                                synchronize();
+                            }
                         });
                     });
                 });
             });
         });
     });
-}, 3000);
+};
 
 /**
  * Offline DB storage
