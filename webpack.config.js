@@ -23,7 +23,7 @@ module.exports = {
 
     output: {
         path: buildAssetsPath,
-        filename: 'bundles/[name]-bundle.js',
+        filename: 'bundles/js/[name]-bundle.js',
         libraryTarget: 'var',
         library: ['Starter', '[name]']
     },
@@ -60,7 +60,7 @@ module.exports = {
         ]
     },
     plugins: [
-        new extractTextPlugin('bundles/bundle.css'),
+        new extractTextPlugin('bundles/css/main.css'),
         new InjectManifest({
             globDirectory: buildAssetsPath,
             globPatterns: ['precache/**\/*'],

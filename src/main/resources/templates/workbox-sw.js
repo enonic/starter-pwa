@@ -1,5 +1,12 @@
 const swVersion = '{{appVersion}}';
 
+workbox.core.setCacheNameDetails({
+    prefix: 'enonic-pwa-starter',
+    suffix: swVersion,
+    precache: 'precache',
+    runtime: 'runtime'
+});
+
 workbox.clientsClaim();
 workbox.skipWaiting();
 
@@ -17,7 +24,10 @@ let firstTimeOnline = false;
 workbox.precaching.precacheAndRoute(self.__precacheManifest || []);
 
 // Here we precache custom defined Urls
-workbox.precaching.precacheAndRoute(['{{appUrl}}']);
+workbox.precaching.precacheAndRoute([{
+    "revision": "{{appVersion}}",
+    "url": "{{appUrl}}"
+}]);
 
 /**
  * Sets the caching strategy for the client: tries contacting the network first
@@ -74,22 +84,6 @@ self.addEventListener('message', event => {
         firstTimeOnline = true;
     }
 });
-
-function debounce(func, wait, immediate) {
-    var timeout;
-    return function() {
-        var context = this;
-        var args = arguments;
-        var later = function() {
-            timeout = null;
-            if (!immediate) func.apply(context, args);
-        };
-        var callNow = immediate && !timeout;
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-        if (callNow) func.apply(context, args);
-    };
-}
 
 function getItemsFromRepo() {
     return self.clients.matchAll().then(function(clients) {

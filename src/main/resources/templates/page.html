@@ -6,22 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title data-th-utext=${title}></title>
 
-    <link rel="apple-touch-icon" data-th-href="${portal.assetUrl({'_path=precache/icons/icon.png'})}">
-    <link rel="icon" data-th-href="${portal.assetUrl({'_path=precache/icons/icon.png'})}">
-    <link rel="manifest" data-th-href="${appUrl + 'manifest.json'}">
-    <link rel="mask-icon" data-th-href="${portal.assetUrl({'_path=precache/icons/safari-pinned-tab.svg'})}" color="#f53d3d">
+    <link rel="apple-touch-icon" href="precache/icons/icon.png">
+    <link rel="icon" href="precache/icons/icon.png">
+    <link rel="manifest" href="manifest.json">
+    <link rel="mask-icon" href="precache/icons/safari-pinned-tab.svg" color="#f53d3d">
 
     <meta name="theme-color" content="#FFF">
-    <meta name="msapplication-config" data-th-content="${portal.assetUrl({'_path=precache/browserconfig.xml'})}" />
+    <meta name="msapplication-config" content="precache/browserconfig.xml" />
     <meta name="msapplication-TileColor" content="#FFF">
     <meta name="Description" data-th-content="${title}">
 
-    <script type="text/javascript" data-th-src="${portal.assetUrl({'_path=precache/js/material.min.js'})}" async></script>
-    <script type="text/javascript" data-th-src="${portal.assetUrl({'_path=bundles/app-bundle.js'})}" async></script>
-    <link rel="stylesheet" type="text/css" data-th-href="${portal.assetUrl({'_path=bundles/bundle.css'})}">
+    <script type="text/javascript" src="precache/js/material.min.js" async></script>
+    <script type="text/javascript" src="bundles/js/app-bundle.js" async></script>
+    <link rel="stylesheet" type="text/css" href="bundles/css/main.css">
 
-    <link rel="stylesheet" type="text/css" data-th-href="${portal.assetUrl({'_path=precache/css/material.indigo-pink.min.css'})}">
-    <link rel="stylesheet" type="text/css" data-th-href="${portal.assetUrl({'_path=precache/css/icon.css'})}">
+    <link rel="stylesheet" type="text/css" href="precache/css/material.indigo-pink.min.css">
+    <link rel="stylesheet" type="text/css" href="precache/css/icon.css">
 
     <script type="text/javascript" data-th-if="${pageId=='main'}">
         if (!document.location.href.endsWith('/')) {

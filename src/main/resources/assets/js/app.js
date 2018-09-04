@@ -1,9 +1,5 @@
 // Stylesheets
 require('../css/styles.less');
-// require('./background-sync');
-// require('../css/background-sync.less'); // having this in background-sync.js overwrites the other styles
-
-// const storageManager = require('./libs/background-sync/storage-manager');
 
 var ToasterInstance = require('./libs/toaster').default;
 module.exports = {

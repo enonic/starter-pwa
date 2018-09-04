@@ -34,8 +34,8 @@ function renderPage(pageId, title) {
         model.startDisabled = subscriptionsCount === 0;
         model.pageContributions = {
             headEnd:
-                '<link rel="stylesheet" type="text/css" href="' + portalLib.assetUrl({path: 'precache/css/pushform.css'}) + '"/>' +
-                '<script defer type="text/javascript" src="' + portalLib.assetUrl({path: 'bundles/push-bundle.js'}) + '"></script>'
+                '<link rel="stylesheet" type="text/css" href="precache/css/pushform.css"/>' +
+                '<script defer type="text/javascript" src="bundles/js/push-bundle.js"></script>'
         };
     
     }
@@ -44,7 +44,7 @@ function renderPage(pageId, title) {
         model.pushUrl = portalLib.serviceUrl({ service: "background-sync" });
         model.pageContributions = {
             headEnd:
-                '<script defer type="text/javascript" src="' + portalLib.assetUrl({ path: 'bundles/bs-bundle.js' }) + '"></script>'
+                '<script defer type="text/javascript" src="bundles/js/bs-bundle.js"></script>'
         };
     }
     return {
@@ -65,7 +65,7 @@ function renderSW() {
             appUrl: appUrl,
             appVersion: app.version,
             appName: app.name,
-            iconUrl: portalLib.assetUrl({path: "/precache/icons/icon.png"}),
+            iconUrl: "/precache/icons/icon.png",
             serviceUrl: portalLib.serviceUrl({service: 'background-sync'})
         })
     };
