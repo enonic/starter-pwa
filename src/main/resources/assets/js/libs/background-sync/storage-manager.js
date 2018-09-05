@@ -17,7 +17,6 @@
  */
 
 const localSync = require('./local-sync');
-const bs = require('../../bs');
 
 const syncronize = type => {
     /**
@@ -46,12 +45,7 @@ const syncronize = type => {
 };
 
 module.exports = function(type) {
-    if (navigator.onLine) {
-        if (type !== 'edit') {
-            syncronize(type);
-        }
-    } else {
-        console.log(bs);
-        // bs.updateUI();
+    if (navigator.onLine && type !== 'edit') {
+        syncronize(type);
     }
 };

@@ -62,7 +62,6 @@ ws.addEventListener('message', function(event) {
             node => !!node.repo && node.repo === 'com.enonic.starter.pwa'
         )
     ) {
-        console.log('Message from server ', jsonEvent);
         storageManager('refresh');
     }
 });

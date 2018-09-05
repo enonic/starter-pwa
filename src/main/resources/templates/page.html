@@ -18,9 +18,10 @@
 
     <script type="text/javascript" src="precache/js/material.min.js" async></script>
     <script type="text/javascript" src="bundles/js/app-bundle.js" async></script>
-    <link rel="stylesheet" type="text/css" href="bundles/css/main.css">
 
     <link rel="stylesheet" type="text/css" href="precache/css/material.indigo-pink.min.css">
+
+    <link rel="stylesheet" type="text/css" href="bundles/css/main.css">
     <link rel="stylesheet" type="text/css" href="precache/css/icon.css">
 
     <script type="text/javascript" data-th-if="${pageId=='main'}">
@@ -75,28 +76,47 @@
 </div>
 
 <script type="text/javascript">
-    const registerServiceWorker = function(appUrl) {
+    const registerServiceWorker = function(appUrl, appTitle) {
 
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker
-                .register(appUrl + 'sw.js', {scope: appUrl})
-                .then(function(reg) {
-                    reg.onupdatefound = function() {
-                        Starter.app.notifyAboutNewVersion();
-                    };
-                    console.log('Service Worker registered with scope '  + reg.scope);
+            window.addEventListener('load', function() {
+                navigator.serviceWorker
+                    .register(appUrl + 'sw.js', {scope: appUrl})
+                    .then(function (registration) {
+                        // Track updates to the Service Worker.
+                        if (!navigator.serviceWorker.controller) {
+                            // The window client isn't currently controlled so it's a new service
+                            // worker that will activate immediately
+                            return;
+                        }
 
-                }, function(err) {
-                    console.log('Service Worker registration failure:');
-                    console.error(err);
+                        // When the user asks to refresh the UI, we'll need to reload the window
+                        var preventDevToolsReloadLoop;
+                        navigator.serviceWorker.addEventListener('controllerchange', function (event) {
+                            // Ensure refresh is only called once.
+                            // This works around a bug in "force update on reload".
+                            if (preventDevToolsReloadLoop) return;
+                            preventDevToolsReloadLoop = true;
+                            console.log('Controller loaded');
+                            window.location.reload();
+                        });
 
-                    document.getElementById("page-title").textContent = "Error: couldn't start the service worker."
-                });
+                        Starter.app.onNewServiceWorker(registration, function () {
+                            Starter.app.showNotification(registration, appTitle);
+                        });
+                        console.log('Service Worker registered with scope ' + registration.scope);
+                    }, function () {
+                        console.log('Service Worker registration failure:');
+                        console.error(err);
+
+                        document.getElementById("page-title").textContent = "Error: couldn't start the service worker."
+                    });
+            });
         }
     }
 </script>
 
-<script type="text/javascript" data-th-utext="'registerServiceWorker(\'' + ${appUrl} + '\');'"></script>
+<script type="text/javascript" data-th-utext="'registerServiceWorker(\'' + ${appUrl} + '\', \'' + ${title} + '\');'"></script>
 
 </body>
 </html>
