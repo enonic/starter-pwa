@@ -1,6 +1,5 @@
 import storage from './storage';
 import { updateUI } from '../../bs';
-const util = require('../../util');
 
 const repoUrl =
     '/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/background-sync';
@@ -85,7 +84,16 @@ function resolveChanges(db) {
     );
 }
 
-const sync = util.debounce(function() {
+let syncInProgress = false;
+let needSync = false;
+
+const sync = function() {
+    if (syncInProgress) {
+        needSync = true;
+        return;
+    }
+
+    syncInProgress = true;
     // read db, dbRemove and repo
     getItemsFromDB().then(values => {
         // delete in repo all from db-delete
@@ -115,25 +123,25 @@ const sync = util.debounce(function() {
                         ).then(() => {
                             firstTimeOnline = false;
                             updateUI();
+                            syncInProgress = false;
+                            if (needSync) {
+                                needSync = false;
+                                sync();
+                            }
                         });
                     });
                 });
             });
         });
     });
-}, 3000);
+};
 
 export function isChangeDoneinRepo() {
     if (navigator.onLine) {
         getItemsFromRepo().then(repo => {
             getItemsFromDB().then(values => {
                 const offlineStorage = values[1].reverse();
-                let newRepo = repo;
-                if (newRepo) {
-                    newRepo = repo.map(element => element.item);
-                } else {
-                    newRepo = [];
-                }
+
                 if (repo.length !== offlineStorage.length) {
                     syncronize();
                     return;

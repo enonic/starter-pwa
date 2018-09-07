@@ -99,7 +99,7 @@ self.addEventListener('notificationclick', function(event) {
 
 self.addEventListener('sync', event => {
     if (event.tag === 'Background-sync') {
-        event.waitUntil(synchronize());
+        event.waitUntil(sync());
     } else {
         console.error('Problem with sync listener, sync-tag not supported');
     }
@@ -179,8 +179,14 @@ function resolveChanges(db) {
 
 let syncInProgress = false;
 let needSync = false;
+const sync = function() {
+    setTimeout(() => {
+        synchronize();
+    }, 100);
+}
 
 const synchronize = function() {
+    console.log('sync');
     if (syncInProgress) {
         needSync = true;
         return;
@@ -189,6 +195,7 @@ const synchronize = function() {
     syncInProgress = true;
     // read db, dbRemove and repo
     getItemsFromDB().then(values => {
+        // console.log('items from db: ' + JSON.stringify(values));
         // delete in repo all from db-delete
         removeItemsFromRepo(values[0]).then(() => {
             // change in repo all marked with change and sync not synced items
