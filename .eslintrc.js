@@ -35,6 +35,12 @@ module.exports = {
                 'no-restricted-syntax': 'off',
                 'no-loop-func': 'off'
             }
+        },
+        {
+            'files': ['src/main/resources/assets/js/libs/background-sync/sync-helper.js'],
+            'rules': {
+                'no-undef': 'off'
+            }
         }
     ], 
     env: {

@@ -7,7 +7,13 @@ const syncEventTag = 'background-sync';
 
 module.exports = {
     storeNames: storeNames,
-    syncEventTag: syncEventTag
+    syncEventTag: syncEventTag,
+    getSyncServiceUrl: function() {
+        if (!CONFIG || !CONFIG.syncServiceUrl) {
+            throw 'Service for background syncing is not configured!'
+        }
+        return CONFIG.syncServiceUrl;
+    }
 };
 
 //  export { storeNames };

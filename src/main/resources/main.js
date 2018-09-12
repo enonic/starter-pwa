@@ -21,7 +21,8 @@ function renderPage(pageId, title) {
         appUrl: getAppUrl(),
         pageId: pageId,
         title: title || siteTitle,
-        appName: siteTitle
+        appName: siteTitle,
+        syncServiceUrl: portalLib.serviceUrl({service: 'background-sync'})
     };
 
     // Data only needed for the push-notifications page:

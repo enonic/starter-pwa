@@ -6,9 +6,7 @@ import storage from './storage';
 import { updateUI } from '../../bs';
 
 const SyncHelper = require('./sync-helper');
-
-const repoUrl =
-    '/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/background-sync';
+const repoUrl = SyncHelper.getSyncServiceUrl();
 
 const ToasterInstance = require('../toaster').default;
 let firstTimeOnline = false;
