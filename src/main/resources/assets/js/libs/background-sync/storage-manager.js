@@ -30,8 +30,18 @@ const syncronize = type => {
                 // Only chrome supports
                 registration.sync.register('Background-sync');
                 // indicate that this is going online after being offline
-                if (type === 'online') {
+                if (type !== 'online') {
+                    return;
+                }
+
+                if (navigator.serviceWorker.controller) {
                     navigator.serviceWorker.controller.postMessage(type);
+                } else {
+                    navigator.serviceWorker.addEventListener(
+                        'controllerchange',
+                        () =>
+                            navigator.serviceWorker.controller.postMessage(type)
+                    );
                 }
             } else if (navigator.onLine) {
                 localSync.syncronize();
