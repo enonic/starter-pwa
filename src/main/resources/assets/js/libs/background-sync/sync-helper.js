@@ -3,8 +3,11 @@ const storeNames = {
     deleted: 'DeletedWhileOffline'
 };
 
+const syncEventTag = 'background-sync';
+
 module.exports = {
-    storeNames: storeNames
+    storeNames: storeNames,
+    syncEventTag: syncEventTag
 };
 
 //  export { storeNames };

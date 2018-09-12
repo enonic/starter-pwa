@@ -1,7 +1,7 @@
 require('../css/styles.less');
 require('./../css/background-sync.less');
 
-const storeNames = require('./libs/background-sync/sync-helper').storeNames;
+const SyncHelper = require('./libs/background-sync/sync-helper');
 
 const storage = require('./libs/background-sync/storage').default;
 const storageManager = require('./libs/background-sync/storage-manager');
@@ -10,7 +10,7 @@ const ToasterInstance = require('./libs/toaster').default;
 let registeredTodos;
 
 export const updateUI = () => {
-    storage.get.offline(storeNames.offline, items => {
+    storage.get.offline(SyncHelper.storeNames.offline, items => {
         items.reverse();
         registeredTodos = items.map(
             item =>
@@ -50,7 +50,7 @@ function onWsMessage(event) {
     }
 }
 
-storage.get.offline(storeNames.offline, items => {
+storage.get.offline(SyncHelper.storeNames.offline, items => {
     // transform from indexDB-item to TodoItem
     registeredTodos = items.map(
         item =>
@@ -124,7 +124,7 @@ const addTodo = () => {
         const item = new TodoItem(inputfield.value, new Date(), false);
         registeredTodos.push(item);
 
-        storage.add.offline(storeNames.offline, item);
+        storage.add.offline(SyncHelper.storeNames.offline, item);
         inputfield.value = '';
         updateUI();
     } else {
@@ -148,8 +148,13 @@ const removeTodo = event => {
     const id = event.target.id;
     searchAndApply(id, todoItem => {
         storage.add
-            .offline(storeNames.deleted, todoItem, true)
-            .then(storage.delete.offline(storeNames.offline, todoItem.id));
+            .offline(SyncHelper.storeNames.deleted, todoItem, true)
+            .then(
+                storage.delete.offline(
+                    SyncHelper.storeNames.offline,
+                    todoItem.id
+                )
+            );
         updateUI();
     });
 };
@@ -218,7 +223,7 @@ const editItemText = event => {
             event.target.value !== beforeLastChange
         ) {
             changedItem.text = event.target.value;
-            registerChange(changedItem, storeNames.offline);
+            registerChange(changedItem, SyncHelper.storeNames.offline);
         } else {
             updateUI();
         }
@@ -232,14 +237,14 @@ const checkTodo = checkboxElement => {
     searchAndApply(id, item => {
         const changedItem = item;
         changedItem.completed = !item.completed;
-        registerChange(changedItem, storeNames.offline);
+        registerChange(changedItem, SyncHelper.storeNames.offline);
     });
 };
 /**
  * Should be run when an item is edited
  * updated changed, sets to not synced and replaces in storage
  * @param item the edited item
- * @param storeName storeName to replaced in (probably storeNames.offline)
+ * @param storeName storeName to replaced in (probably SyncHelper.storeNames.offline)
  */
 const registerChange = (item, storeName) => {
     const changedItem = item;

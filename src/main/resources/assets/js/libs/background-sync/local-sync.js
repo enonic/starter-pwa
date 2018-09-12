@@ -1,7 +1,11 @@
+/**
+ * Background sync local. No service worker
+ */
+
 import storage from './storage';
 import { updateUI } from '../../bs';
 
-const storeNames = require('./sync-helper').storeNames;
+const SyncHelper = require('./sync-helper');
 
 const repoUrl =
     '/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/background-sync';
@@ -13,9 +17,6 @@ window.addEventListener('online', () => {
         firstTimeOnline = true;
     }
 });
-/**
- * Background sync local. No service worker
- */
 
 function getItemsFromRepo() {
     // fetching items from repo
@@ -31,11 +32,11 @@ function getItemsFromDB() {
     return Promise.all([
         // fetching items from indexDB
         storage.get.offline(
-            storeNames.deleted,
+            SyncHelper.storeNames.deleted,
             nodes => (nodes ? nodes.map(node => node.value) : [])
         ),
         storage.get.offline(
-            storeNames.offline,
+            SyncHelper.storeNames.offline,
             nodes => (nodes ? nodes.map(node => node.value) : [])
         )
     ]);
@@ -103,8 +104,8 @@ const sync = function() {
                 getItemsFromRepo().then(repo => {
                     // flush db & dbRemove
                     Promise.all([
-                        storage.flush.offline(storeNames.offline),
-                        storage.flush.offline(storeNames.deleted)
+                        storage.flush.offline(SyncHelper.storeNames.offline),
+                        storage.flush.offline(SyncHelper.storeNames.deleted)
                     ]).then(() => {
                         // add all items from repo into db.
                         Promise.resolve(
@@ -112,7 +113,7 @@ const sync = function() {
                                 ? Promise.all(
                                       repo.map(element =>
                                           storage.add.offline(
-                                              storeNames.offline,
+                                              SyncHelper.storeNames.offline,
                                               element.item,
                                               true
                                           )

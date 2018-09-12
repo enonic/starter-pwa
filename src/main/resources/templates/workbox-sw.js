@@ -96,12 +96,12 @@ self.addEventListener('notificationclick', function(event) {
  */
 
 self.addEventListener('sync', event => {
-    console.log('Listening to sync events');
-    if (event.tag === 'Background-sync') {
+    if (event.tag === syncEventTag) {
         event.waitUntil(sync());
-    } else {
-        console.error('Problem with sync listener, sync-tag not supported');
+        return;
     }
+
+    console.error(`Sync tag ${e.tag} is not supported`);
 });
 
 self.addEventListener('message', event => {

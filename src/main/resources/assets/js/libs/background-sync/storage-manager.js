@@ -17,6 +17,7 @@
  */
 
 const localSync = require('./local-sync');
+const SyncHelper = require('./sync-helper');
 
 const syncronize = type => {
     /**
@@ -28,7 +29,7 @@ const syncronize = type => {
         navigator.serviceWorker.ready.then(function(registration) {
             if (registration.sync) {
                 // Only chrome supports
-                registration.sync.register('Background-sync');
+                registration.sync.register(SyncHelper.syncEventTag);
                 // indicate that this is going online after being offline
                 if (type !== 'online') {
                     return;
