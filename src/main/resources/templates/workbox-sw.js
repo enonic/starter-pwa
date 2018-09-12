@@ -1,3 +1,9 @@
+let module = {};
+
+importScripts('js/libs/background-sync/sync-helper.js');
+
+console.log('sw.js: ' + JSON.stringify(storeNames));
+
 const swVersion = '{{appVersion}}';
 
 workbox.core.setCacheNameDetails({
@@ -11,11 +17,13 @@ workbox.clientsClaim();
 
 const serviceUrl = '{{serviceUrl}}';
 const indexDbName = { Todolist: 'Todolist' };
-const storeName = {
+
+/*
+const storeNames = {
     offline: 'OfflineStorage',
     deleted: 'DeletedWhileOffline'
 };
-
+*/
 let indexDB; // indexDB instance
 let firstTimeOnline = false;
 
@@ -98,6 +106,7 @@ self.addEventListener('notificationclick', function(event) {
  */
 
 self.addEventListener('sync', event => {
+    console.log('Listening to sync events');
     if (event.tag === 'Background-sync') {
         event.waitUntil(sync());
     } else {
@@ -135,8 +144,8 @@ function getItemsFromRepo() {
 function getItemsFromDB() {
     return Promise.all([
         // fetching items from indexDB
-        getAllFromIndexDb(indexDbName.Todolist, storeName.deleted),
-        getAllFromIndexDb(indexDbName.Todolist, storeName.offline)
+        getAllFromIndexDb(indexDbName.Todolist, storeNames.deleted),
+        getAllFromIndexDb(indexDbName.Todolist, storeNames.offline)
     ]);
 }
 
@@ -204,8 +213,8 @@ const synchronize = function() {
                 getItemsFromRepo().then(repo => {
                     // flush db & dbRemove
                     Promise.all([
-                        flushDB(indexDbName.Todolist, storeName.offline),
-                        flushDB(indexDbName.Todolist, storeName.deleted)
+                        flushDB(indexDbName.Todolist, storeNames.offline),
+                        flushDB(indexDbName.Todolist, storeNames.deleted)
                     ]).then(() => {
                         // add all items from repo into db.
                         Promise.resolve(
@@ -214,7 +223,7 @@ const synchronize = function() {
                                       repo.map(element =>
                                           DBPost(
                                               indexDbName.Todolist,
-                                              storeName.offline,
+                                              storeNames.offline,
                                               element.item
                                           )
                                       )

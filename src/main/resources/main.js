@@ -21,6 +21,7 @@ function renderPage(pageId, title) {
         appUrl: getAppUrl(),
         pageId: pageId,
         title: title || siteTitle,
+        appName: siteTitle
     };
 
     // Data only needed for the push-notifications page:
