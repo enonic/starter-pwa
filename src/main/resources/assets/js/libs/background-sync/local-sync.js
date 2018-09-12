@@ -30,13 +30,6 @@ function getItemsFromDB() {
     ]);
 }
 
-// deleting all items in repo contained in a database
-function removeItemsFromRepo(db) {
-    return Promise.all(
-        db.map(item => storage.delete.online(syncServiceUrl, item, true))
-    );
-}
-
 function isElementInRepo(id) {
     return storage.get.online(syncServiceUrl, id).then(response => {
         return response.status < 404;
@@ -82,7 +75,7 @@ const sync = function() {
     // read db, dbRemove and repo
     getItemsFromDB().then(values => {
         // delete in repo all from db-delete
-        removeItemsFromRepo(values[0]).then(() => {
+        SyncHelper.removeItemsFromRepo(values[0], syncServiceUrl).then(() => {
             // change in repo all marked with change and sync not synced items
             resolveChanges(values[1]).then(() => {
                 // get new items from repo (synced values are changed if synced)

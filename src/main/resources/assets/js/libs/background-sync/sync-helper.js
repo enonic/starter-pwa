@@ -11,11 +11,22 @@ const getApiCall = url => {
     });
 };
 
-const getItemsFromRepo = function(url) {
+const deleteApiCall = (url, data) => {
+    return fetch(url + '?data=' + JSON.stringify(data), {
+        method: 'DELETE'
+    });
+};
+
+const getItemsFromRepo = url => {
     return getApiCall(url).then(response =>
         // item fetched from repo is an object called TodoItems, we are interested in it's values
         response.json().then(itemList => itemList.TodoItems)
     );
+};
+
+// deleting all items in repo contained in a database
+const removeItemsFromRepo = function(db, url) {
+    return Promise.all(db.map(item => deleteApiCall(url, item)));
 };
 
 module.exports = {
@@ -29,5 +40,6 @@ module.exports = {
         }
         return CONFIG.syncServiceUrl;
     },
-    getItemsFromRepo: getItemsFromRepo
+    getItemsFromRepo: getItemsFromRepo,
+    removeItemsFromRepo: removeItemsFromRepo
 };

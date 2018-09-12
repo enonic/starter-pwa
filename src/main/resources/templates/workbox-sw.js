@@ -11,7 +11,7 @@ workbox.core.setCacheNameDetails({
 
 workbox.clientsClaim();
 
-const serviceUrl = '{{serviceUrl}}';
+const syncServiceUrl = '{{syncServiceUrl}}';
 const indexDbName = { Todolist: 'Todolist' };
 
 let indexDB; // indexDB instance
@@ -118,13 +118,8 @@ function getItemsFromDB() {
     ]);
 }
 
-// deleting all items in repo contained in a database
-function removeItemsFromRepo(db) {
-    return Promise.all(db.map(item => deleteApiCall(serviceUrl, item)));
-}
-
 function isElementInRepo(id) {
-    return getItemApiCall(serviceUrl, id).then(response => {
+    return getItemApiCall(syncServiceUrl, id).then(response => {
         if (response.status === 404) {
             return false;
         }
@@ -144,12 +139,12 @@ function resolveChanges(db) {
                 return isElementInRepo(item.id).then(
                     status =>
                         status
-                            ? putApiCall(serviceUrl, item)
-                            : postApiCall(serviceUrl, item)
+                            ? putApiCall(syncServiceUrl, item)
+                            : postApiCall(syncServiceUrl, item)
                 );
             }
             if (!item.synced) {
-                return postApiCall(serviceUrl, item);
+                return postApiCall(syncServiceUrl, item);
             }
         })
     );
@@ -175,11 +170,11 @@ const synchronize = function() {
     getItemsFromDB().then(values => {
         // console.log('items from db: ' + JSON.stringify(values));
         // delete in repo all from db-delete
-        removeItemsFromRepo(values[0]).then(() => {
+        removeItemsFromRepo(values[0], syncServiceUrl).then(() => {
             // change in repo all marked with change and sync not synced items
             resolveChanges(values[1]).then(() => {
                 // get new items from repo (synced values are changed if synced)
-                getItemsFromRepo(serviceUrl).then(repo => {
+                getItemsFromRepo(syncServiceUrl).then(repo => {
                     // flush db & dbRemove
                     Promise.all([
                         flushDB(indexDbName.Todolist, storeNames.offline),
@@ -295,22 +290,10 @@ const open = function(indexDbName) {
 /**
  * Online repo storage http requests
  */
-/*
-const getApiCall = url => {
-    return fetch(url, {
-        method: 'GET'
-    });
-};
-*/
+
 const getItemApiCall = (url, data) => {
     return fetch(url + '?data=' + String(data), {
         method: 'GET'
-    });
-};
-
-const deleteApiCall = (url, data) => {
-    return fetch(url + '?data=' + JSON.stringify(data), {
-        method: 'DELETE'
     });
 };
 
