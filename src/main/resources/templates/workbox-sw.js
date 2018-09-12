@@ -110,27 +110,6 @@ self.addEventListener('message', event => {
     }
 });
 
-function getItemsFromRepo() {
-    return self.clients.matchAll().then(function(clients) {
-        if (
-            clients.every(
-                windowClient =>
-                    windowClient.url.indexOf('background-sync') == -1
-            )
-        ) {
-            return;
-        }
-
-        // fetching items from repo
-        return getApiCall(serviceUrl).then(response =>
-            response.json().then(itemList => {
-                // item fetched from repo is an object called TodoItems, we are interested in it's values
-                return itemList.TodoItems;
-            })
-        );
-    });
-}
-
 function getItemsFromDB() {
     return Promise.all([
         // fetching items from indexDB
@@ -200,7 +179,7 @@ const synchronize = function() {
             // change in repo all marked with change and sync not synced items
             resolveChanges(values[1]).then(() => {
                 // get new items from repo (synced values are changed if synced)
-                getItemsFromRepo().then(repo => {
+                getItemsFromRepo(serviceUrl).then(repo => {
                     // flush db & dbRemove
                     Promise.all([
                         flushDB(indexDbName.Todolist, storeNames.offline),
@@ -316,13 +295,13 @@ const open = function(indexDbName) {
 /**
  * Online repo storage http requests
  */
-
+/*
 const getApiCall = url => {
     return fetch(url, {
         method: 'GET'
     });
 };
-
+*/
 const getItemApiCall = (url, data) => {
     return fetch(url + '?data=' + String(data), {
         method: 'GET'

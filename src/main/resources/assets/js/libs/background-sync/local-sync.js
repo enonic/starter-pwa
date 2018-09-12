@@ -6,7 +6,7 @@ import storage from './storage';
 import { updateUI } from '../../bs';
 
 const SyncHelper = require('./sync-helper');
-const repoUrl = SyncHelper.getSyncServiceUrl();
+const syncServiceUrl = SyncHelper.getSyncServiceUrl();
 
 const ToasterInstance = require('../toaster').default;
 let firstTimeOnline = false;
@@ -15,16 +15,6 @@ window.addEventListener('online', () => {
         firstTimeOnline = true;
     }
 });
-
-function getItemsFromRepo() {
-    // fetching items from repo
-    return storage.get.online(repoUrl).then(response =>
-        response.json().then(itemList => {
-            // item fetched from repo is an object called TodoItems, we are interested in it's values
-            return itemList.TodoItems;
-        })
-    );
-}
 
 function getItemsFromDB() {
     return Promise.all([
@@ -43,16 +33,13 @@ function getItemsFromDB() {
 // deleting all items in repo contained in a database
 function removeItemsFromRepo(db) {
     return Promise.all(
-        db.map(item => storage.delete.online(repoUrl, item, true))
+        db.map(item => storage.delete.online(syncServiceUrl, item, true))
     );
 }
 
 function isElementInRepo(id) {
-    return storage.get.online(repoUrl, id).then(response => {
-        if (response.status >= 404) {
-            return false;
-        }
-        return true;
+    return storage.get.online(syncServiceUrl, id).then(response => {
+        return response.status < 404;
     });
 }
 
@@ -70,12 +57,12 @@ function resolveChanges(db) {
                 return isElementInRepo(item.id).then(
                     status =>
                         status
-                            ? storage.replace.online(repoUrl, item)
-                            : storage.add.online(repoUrl, item)
+                            ? storage.replace.online(syncServiceUrl, item)
+                            : storage.add.online(syncServiceUrl, item)
                 );
             }
             if (!item.synced) {
-                return storage.add.online(repoUrl, item);
+                return storage.add.online(syncServiceUrl, item);
             }
             return null; // linter consistent return
         })
@@ -99,7 +86,7 @@ const sync = function() {
             // change in repo all marked with change and sync not synced items
             resolveChanges(values[1]).then(() => {
                 // get new items from repo (synced values are changed if synced)
-                getItemsFromRepo().then(repo => {
+                SyncHelper.getItemsFromRepo(syncServiceUrl).then(repo => {
                     // flush db & dbRemove
                     Promise.all([
                         storage.flush.offline(SyncHelper.storeNames.offline),
@@ -136,7 +123,7 @@ const sync = function() {
 
 export function isChangeDoneinRepo() {
     if (navigator.onLine) {
-        getItemsFromRepo().then(repo => {
+        SyncHelper.getItemsFromRepo().then(repo => {
             getItemsFromDB().then(values => {
                 const offlineStorage = values[1].reverse();
 
