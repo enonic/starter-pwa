@@ -105,7 +105,7 @@
                             Starter.app.showNotification(registration, appName);
                         });
                         console.log('Service Worker registered with scope ' + registration.scope);
-                    }, function () {
+                    }, function (err) {
                         console.log('Service Worker registration failure:');
                         console.error(err);
 

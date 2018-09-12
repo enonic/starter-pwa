@@ -1,14 +1,12 @@
 require('../css/styles.less');
 require('./../css/background-sync.less');
 
+const storeNames = require('./libs/background-sync/sync-helper').storeNames;
+
 const storage = require('./libs/background-sync/storage').default;
 const storageManager = require('./libs/background-sync/storage-manager');
 const ToasterInstance = require('./libs/toaster').default;
 
-const storeNames = {
-    offline: 'OfflineStorage',
-    deletedWhileOffline: 'DeletedWhileOffline'
-};
 let registeredTodos;
 
 export const updateUI = () => {
@@ -150,7 +148,7 @@ const removeTodo = event => {
     const id = event.target.id;
     searchAndApply(id, todoItem => {
         storage.add
-            .offline(storeNames.deletedWhileOffline, todoItem, true)
+            .offline(storeNames.deleted, todoItem, true)
             .then(storage.delete.offline(storeNames.offline, todoItem.id));
         updateUI();
     });

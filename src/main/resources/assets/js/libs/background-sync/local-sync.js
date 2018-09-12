@@ -1,12 +1,11 @@
 import storage from './storage';
 import { updateUI } from '../../bs';
 
+const storeNames = require('./sync-helper').storeNames;
+
 const repoUrl =
     '/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/background-sync';
-const storeName = {
-    offline: 'OfflineStorage',
-    deleted: 'DeletedWhileOffline'
-};
+
 const ToasterInstance = require('../toaster').default;
 let firstTimeOnline = false;
 window.addEventListener('online', () => {
@@ -32,11 +31,11 @@ function getItemsFromDB() {
     return Promise.all([
         // fetching items from indexDB
         storage.get.offline(
-            storeName.deleted,
+            storeNames.deleted,
             nodes => (nodes ? nodes.map(node => node.value) : [])
         ),
         storage.get.offline(
-            storeName.offline,
+            storeNames.offline,
             nodes => (nodes ? nodes.map(node => node.value) : [])
         )
     ]);
@@ -104,8 +103,8 @@ const sync = function() {
                 getItemsFromRepo().then(repo => {
                     // flush db & dbRemove
                     Promise.all([
-                        storage.flush.offline(storeName.offline),
-                        storage.flush.offline(storeName.deleted)
+                        storage.flush.offline(storeNames.offline),
+                        storage.flush.offline(storeNames.deleted)
                     ]).then(() => {
                         // add all items from repo into db.
                         Promise.resolve(
@@ -113,7 +112,7 @@ const sync = function() {
                                 ? Promise.all(
                                       repo.map(element =>
                                           storage.add.offline(
-                                              storeName.offline,
+                                              storeNames.offline,
                                               element.item,
                                               true
                                           )

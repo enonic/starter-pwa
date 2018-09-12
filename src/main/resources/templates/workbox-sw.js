@@ -2,13 +2,9 @@ let module = {};
 
 importScripts('js/libs/background-sync/sync-helper.js');
 
-console.log('sw.js: ' + JSON.stringify(storeNames));
-
-const swVersion = '{{appVersion}}';
-
 workbox.core.setCacheNameDetails({
     prefix: 'enonic-pwa-starter',
-    suffix: swVersion,
+    suffix: '{{appVersion}}',
     precache: 'precache',
     runtime: 'runtime'
 });
@@ -18,12 +14,6 @@ workbox.clientsClaim();
 const serviceUrl = '{{serviceUrl}}';
 const indexDbName = { Todolist: 'Todolist' };
 
-/*
-const storeNames = {
-    offline: 'OfflineStorage',
-    deleted: 'DeletedWhileOffline'
-};
-*/
 let indexDB; // indexDB instance
 let firstTimeOnline = false;
 
