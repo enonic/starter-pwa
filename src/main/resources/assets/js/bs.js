@@ -370,9 +370,7 @@ if (navigator.serviceWorker) {
         if (event.data.message === 'synced') {
             updateUI('serviceworker');
         } else if (event.data === 'showSyncMessage') {
-            ToasterInstance().then(toaster =>
-                toaster.toast('Offline changes are synced')
-            );
+            SyncHelper.showToastNotification(ToasterInstance);
         }
     });
 }

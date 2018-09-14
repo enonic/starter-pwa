@@ -172,7 +172,11 @@ const synchronize = function() {
         // delete in repo all from db-delete
         removeItemsFromRepo(values[0], syncServiceUrl).then(() => {
             // change in repo all marked with change and sync not synced items
-            resolveChanges(values[1]).then(() => {
+            syncOfflineChanges(values[1], syncServiceUrl).then((syncPromises) => {
+
+                if (firstTimeOnline && syncPromises.some(promise => !!promise)) {
+                    sendMessageToClient('showSyncMessage');
+                }
                 // get new items from repo (synced values are changed if synced)
                 getItemsFromRepo(syncServiceUrl).then(repo => {
                     // flush db & dbRemove

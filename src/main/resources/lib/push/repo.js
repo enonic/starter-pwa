@@ -192,9 +192,6 @@ exports.storeSubscriptionAndGetNode = function(subscription) {
 
 exports.storeBackgroundSyncItemAndGetNode = function (item) {
     createBackgroundSyncNode(); 
-    // log.info("Add:" + new Date() + JSON.stringify(item, null, 4))
-    if(item.text == ".") item.text = "E og O 6-8/2018"
-    // item.synced = true; 
     var repoConn = getRepoConnection();
 
     var node = repoConn.create({
@@ -232,12 +229,12 @@ exports.deleteSubscription = function(subscription) {
     }
 };
 
-exports.deleteTodo = function (item) {
+exports.deleteTodo = function (itemId) {
     // log.info("DELETE:" + new Date() + JSON.stringify(item, null, 4))
     var repoConn = getRepoConnection();
     
     var hits = repoConn.query({
-        query: "item.id = " + item.id 
+        query: "item.id = " + itemId
     }).hits;
     if (!hits || hits.length < 1) {
         return "NOT_FOUND";

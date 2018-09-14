@@ -6,7 +6,6 @@ import storage from './storage';
 import { updateUI } from '../../bs';
 
 const SyncHelper = require('./sync-helper');
-const syncServiceUrl = SyncHelper.getSyncServiceUrl();
 
 const ToasterInstance = require('../toaster').default;
 let firstTimeOnline = false;
@@ -17,7 +16,7 @@ window.addEventListener('online', () => {
 });
 
 function getItemsFromDB() {
-    return Promise.all([
+    return Promise.all(
         // fetching items from indexDB
         storage.get.offline(
             SyncHelper.storeNames.deleted,
@@ -27,9 +26,9 @@ function getItemsFromDB() {
             SyncHelper.storeNames.offline,
             nodes => (nodes ? nodes.map(node => node.value) : [])
         )
-    ]);
+    );
 }
-
+/*
 function isElementInRepo(id) {
     return storage.get.online(syncServiceUrl, id).then(response => {
         return response.status < 404;
@@ -61,7 +60,7 @@ function resolveChanges(db) {
         })
     );
 }
-
+*/
 let syncInProgress = false;
 let needSync = false;
 
@@ -73,13 +72,20 @@ const sync = function() {
 
     syncInProgress = true;
     // read db, dbRemove and repo
-    getItemsFromDB().then(values => {
+    getItemsFromDB().then((deletedWhileOffline, dbItems) => {
         // delete in repo all from db-delete
-        SyncHelper.removeItemsFromRepo(values[0], syncServiceUrl).then(() => {
+        SyncHelper.removeItemsFromRepo(deletedWhileOffline).then(() => {
             // change in repo all marked with change and sync not synced items
-            resolveChanges(values[1]).then(() => {
+            SyncHelper.syncOfflineChanges(dbItems).then(syncPromises => {
+                if (
+                    firstTimeOnline &&
+                    syncPromises.some(promise => !!promise)
+                ) {
+                    SyncHelper.showToastNotification(ToasterInstance);
+                }
+
                 // get new items from repo (synced values are changed if synced)
-                SyncHelper.getItemsFromRepo(syncServiceUrl).then(repo => {
+                SyncHelper.getItemsFromRepo().then(repoItems => {
                     // flush db & dbRemove
                     Promise.all([
                         storage.flush.offline(SyncHelper.storeNames.offline),
@@ -87,9 +93,9 @@ const sync = function() {
                     ]).then(() => {
                         // add all items from repo into db.
                         Promise.resolve(
-                            repo
+                            repoItems
                                 ? Promise.all(
-                                      repo.map(element =>
+                                      repoItems.map(element =>
                                           storage.add.offline(
                                               SyncHelper.storeNames.offline,
                                               element.item,
