@@ -69,6 +69,7 @@ function renderSW() {
             appName: app.name,
             appTitle: siteTitle,
             iconUrl: appUrl + "precache/icons/icon.png",
+            serviceUrl: portalLib.serviceUrl({service: ''}),
             syncServiceUrl: portalLib.serviceUrl({service: 'background-sync'})
         })
     };

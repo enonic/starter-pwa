@@ -30,10 +30,16 @@ workbox.precaching.precacheAndRoute([{
 }]);
 
 /**
- * Sets the caching strategy for the client: tries contacting the network first
+ * Make sure SW won't precache non-GET calls to service URLs
+ */
+workbox.routing.registerRoute(new RegExp('{{serviceUrl}}/*'), workbox.strategies.networkOnly(), 'POST');
+workbox.routing.registerRoute(new RegExp('{{serviceUrl}}/*'), workbox.strategies.networkOnly(), 'PUT');
+workbox.routing.registerRoute(new RegExp('{{serviceUrl}}/*'), workbox.strategies.networkOnly(), 'DELETE');
+
+/**
+ * Sets the default caching strategy for the client: tries contacting the network first
  */
 workbox.routing.setDefaultHandler(workbox.strategies.networkFirst());
-
 /**
  * Pass a message from the outside world to SW
 */
@@ -127,29 +133,6 @@ function isElementInRepo(id) {
     });
 }
 
-// resolving offline changes on online repository
-function resolveChanges(db) {
-    return Promise.all(
-        db.map(item => {
-            if (!item.synced && firstTimeOnline) {
-                sendMessageToClient('showSyncMessage');
-            }
-
-            if (!item.synced && item.changed) {
-                return isElementInRepo(item.id).then(
-                    status =>
-                        status
-                            ? putApiCall(syncServiceUrl, item)
-                            : postApiCall(syncServiceUrl, item)
-                );
-            }
-            if (!item.synced) {
-                return postApiCall(syncServiceUrl, item);
-            }
-        })
-    );
-}
-
 let syncInProgress = false;
 let needSync = false;
 const sync = function() {
@@ -167,12 +150,12 @@ const synchronize = function() {
 
     syncInProgress = true;
     // read db, dbRemove and repo
-    getItemsFromDB().then(values => {
+    getItemsFromDB().then(([deletedWhileOffline, dbItems]) => {
         // console.log('items from db: ' + JSON.stringify(values));
         // delete in repo all from db-delete
-        removeItemsFromRepo(values[0], syncServiceUrl).then(() => {
+        removeItemsFromRepo(deletedWhileOffline, syncServiceUrl).then(() => {
             // change in repo all marked with change and sync not synced items
-            syncOfflineChanges(values[1], syncServiceUrl).then((syncPromises) => {
+            syncOfflineChanges(dbItems, syncServiceUrl).then((syncPromises) => {
 
                 if (firstTimeOnline && syncPromises.some(promise => !!promise)) {
                     sendMessageToClient('showSyncMessage');

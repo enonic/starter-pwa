@@ -16,7 +16,7 @@ window.addEventListener('online', () => {
 });
 
 function getItemsFromDB() {
-    return Promise.all(
+    return Promise.all([
         // fetching items from indexDB
         storage.get.offline(
             SyncHelper.storeNames.deleted,
@@ -26,7 +26,7 @@ function getItemsFromDB() {
             SyncHelper.storeNames.offline,
             nodes => (nodes ? nodes.map(node => node.value) : [])
         )
-    );
+    ]);
 }
 /*
 function isElementInRepo(id) {
@@ -72,7 +72,7 @@ const sync = function() {
 
     syncInProgress = true;
     // read db, dbRemove and repo
-    getItemsFromDB().then((deletedWhileOffline, dbItems) => {
+    getItemsFromDB().then(([deletedWhileOffline, dbItems]) => {
         // delete in repo all from db-delete
         SyncHelper.removeItemsFromRepo(deletedWhileOffline).then(() => {
             // change in repo all marked with change and sync not synced items
