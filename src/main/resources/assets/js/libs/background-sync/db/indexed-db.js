@@ -184,7 +184,7 @@ class OfflineDatabase {
             });
         });
     }
-
+/*
     getAll(storeName, index, order) {
         return this.open().then(db => {
             return new Promise((resolve, reject) => {
@@ -223,7 +223,7 @@ class OfflineDatabase {
             });
         });
     }
-
+*/
     delete(storeName, key) {
         return this.open().then(db => {
             return new Promise((resolve, reject) => {
@@ -280,8 +280,4 @@ export default function IndexedDBInstance() {
     window.IndexedDBInstance_ = new OfflineDatabase();
 
     return Promise.resolve(window.IndexedDBInstance_);
-}
-
-export function openPromise() {
-    return window.IndexedDBInstance_.open;
 }

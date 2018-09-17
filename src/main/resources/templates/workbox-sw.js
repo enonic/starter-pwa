@@ -12,7 +12,7 @@ workbox.core.setCacheNameDetails({
 workbox.clientsClaim();
 
 const syncServiceUrl = '{{syncServiceUrl}}';
-//const indexDbName = { Todolist: 'Todolist' };
+const indexDbName = { Todolist: 'Todolist' };
 
 let indexDB; // indexDB instance
 
@@ -147,45 +147,49 @@ const synchronize = function() {
 
     syncInProgress = true;
     // read db, dbRemove and repo
-    getItemsFromDB(openPromise).then(([deletedWhileOffline, dbItems]) => {
-        // console.log('items from db: ' + JSON.stringify(values));
-        // delete in repo all from db-delete
-        removeItemsFromRepo(deletedWhileOffline, syncServiceUrl).then(() => {
-            // change in repo all marked with change and sync not synced items
-            syncOfflineChanges(dbItems, syncServiceUrl).then((syncPromises) => {
 
-                if (firstTimeOnline && syncPromises.some(promise => !!promise)) {
-                    sendMessageToClients('showSyncMessage');
-                }
-                // get new items from repo (synced values are changed if synced)
-                getItemsFromRepo(syncServiceUrl).then(repo => {
-                    // flush db & dbRemove
-                    Promise.all([
-                        flushDB(indexDbName.Todolist, storeNames.offline),
-                        flushDB(indexDbName.Todolist, storeNames.deleted)
-                    ]).then(() => {
-                        // add all items from repo into db.
-                        Promise.resolve(
-                            repo
-                                ? Promise.all(
-                                      repo.map(element =>
-                                          DBPost(
-                                              indexDbName.Todolist,
-                                              storeNames.offline,
-                                              element.item
+    openDatabase(indexDbName).then(db => {
+
+        getItemsFromDB(db).then(([deletedWhileOffline, dbItems]) => {
+            // console.log('items from db: ' + JSON.stringify(values));
+            // delete in repo all from db-delete
+            removeItemsFromRepo(deletedWhileOffline, syncServiceUrl).then(() => {
+                // change in repo all marked with change and sync not synced items
+                syncOfflineChanges(dbItems, syncServiceUrl).then((syncPromises) => {
+
+                    if (firstTimeOnline && syncPromises.some(promise => !!promise)) {
+                        sendMessageToClients('showSyncMessage');
+                    }
+                    // get new items from repo (synced values are changed if synced)
+                    getItemsFromRepo(syncServiceUrl).then(repo => {
+                        // flush db & dbRemove
+                        Promise.all([
+                            flushDB(indexDbName.Todolist, storeNames.offline),
+                            flushDB(indexDbName.Todolist, storeNames.deleted)
+                        ]).then(() => {
+                            // add all items from repo into db.
+                            Promise.resolve(
+                                repo
+                                    ? Promise.all(
+                                          repo.map(element =>
+                                              DBPost(
+                                                  indexDbName.Todolist,
+                                                  storeNames.offline,
+                                                  element.item
+                                              )
                                           )
                                       )
-                                  )
-                                : null
-                        ).then(() => {
-                            const data = { message: 'synced' };
-                            firstTimeOnline = false;
-                            sendMessageToClients(data);
-                            syncInProgress = false;
-                            if (needSync) {
-                                needSync = false;
-                                synchronize();
-                            }
+                                    : null
+                            ).then(() => {
+                                const data = { message: 'synced' };
+                                firstTimeOnline = false;
+                                sendMessageToClients(data);
+                                syncInProgress = false;
+                                if (needSync) {
+                                    needSync = false;
+                                    synchronize();
+                                }
+                            });
                         });
                     });
                 });
@@ -200,7 +204,7 @@ const synchronize = function() {
 
 function flushDB(indexDbName, storeName) {
     return new Promise((resolve, reject) => {
-        return open(indexDbName).then(db => {
+        return openDatabase(indexDbName).then(db => {
             var dbTransaction = db.transaction(storeName, 'readwrite');
             var flushReq = dbTransaction.objectStore(storeName).clear();
             flushReq.onsuccess = event => resolve(event);
@@ -210,7 +214,7 @@ function flushDB(indexDbName, storeName) {
 }
 
 const DBPost = function(indexDbName, storeName, item) {
-    return open(indexDbName).then(db => {
+    return openDatabase(indexDbName).then( => {
         var dbTransaction = db.transaction(storeName, 'readwrite');
         var dbStore = dbTransaction.objectStore(storeName);
         dbStore.add(item);
@@ -254,7 +258,7 @@ const getAllFromIndexDb = function(indexDbName, storeName, index, order) {
     });
 };
 */
-const openPromise = function(indexDbName) {
+const openDatabase = function(indexDbName) {
     if (indexDB) {
         return Promise.resolve(indexDB);
     }

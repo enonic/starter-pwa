@@ -7,24 +7,34 @@ const storage = require('./libs/background-sync/storage').default;
 const storageManager = require('./libs/background-sync/storage-manager');
 const ToasterInstance = require('./libs/toaster').default;
 
+const IndexedDBInstance = require('./libs/background-sync/db/indexed-db')
+    .default;
+
 let registeredTodos;
 
 export const updateUI = () => {
-    storage.get.offline(SyncHelper.storeNames.offline, items => {
-        items.reverse();
-        registeredTodos = items.map(
-            item =>
-                new TodoItem(
-                    item.value.text,
-                    item.value.date,
-                    item.value.completed,
-                    item.value.id,
-                    item.value.synced
-                )
-        );
-        focusIfEmpty();
-        updateTodoView();
-        updateListenersFor.everything();
+    IndexedDBInstance().then(dbInstance => {
+        dbInstance.open().then(db => {
+            SyncHelper.getItemsFromStore(
+                db,
+                SyncHelper.storeNames.offline
+            ).then(items => {
+                items.reverse();
+                registeredTodos = items.map(
+                    item =>
+                        new TodoItem(
+                            item.value.text,
+                            item.value.date,
+                            item.value.completed,
+                            item.value.id,
+                            item.value.synced
+                        )
+                );
+                focusIfEmpty();
+                updateTodoView();
+                updateListenersFor.everything();
+            });
+        });
     });
 };
 
