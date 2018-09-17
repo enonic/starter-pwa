@@ -3,6 +3,8 @@ const storeNames = {
     deleted: 'DeletedWhileOffline'
 };
 
+const indexedDbName = { Todolist: 'Todolist' };
+
 const syncEventTag = 'background-sync';
 
 const getSyncServiceUrl = () => {
@@ -56,7 +58,86 @@ const showToastNotification = ToasterInstance =>
     ToasterInstance().then(toaster =>
         toaster.toast('Offline changes are synced')
     );
+/*
+let dbResolver;
 
+const getIndexedDbInstance = new Promise(function(resolve) {
+    console.log('DB promise ready');
+    dbResolver = resolve;
+});
+*/
+
+function getPromise() {
+    let res;
+
+    const promise = new Promise(resolve => {
+        res = resolve;
+    });
+
+    promise.resolve = res;
+
+    return promise;
+}
+
+let DBInstance;
+const getIndexedDbInstance = getPromise();
+
+const setIndexedDbInstance = instance => {
+    console.log('Resolving DB promise');
+
+    DBInstance = instance;
+    getIndexedDbInstance.resolve(instance);
+};
+/*
+const getIndexedDbInstance = () => {
+    console.log('getIndexedDbInstance');
+    return new Promise(function(resolve) {
+        (function waitForInstance() {
+            if (this.indexedDbInstance) {
+                console.log('GOT INSTANCE');
+                return resolve(this.indexedDbInstance);
+            }
+            console.log('no instance');
+            setTimeout(waitForInstance, 30);
+            return null;
+        })();
+    });
+};
+
+const setIndexedDbInstance = instance => {
+    console.log('setIndexedDbInstance');
+    this.indexedDbInstance = instance;
+};
+
+*/
+const getItemsFromStore = (dbInstance, storeName) =>
+    dbInstance
+        .getAll(storeName)
+        .then(nodes => (nodes ? nodes.map(node => node.value) : []));
+
+const getItemsFromDB = function(dbPromise) {
+    debugger;
+    return dbPromise(indexedDbName).then(function(instance) {
+        debugger;
+        return Promise.all([
+            // fetching items from indexDB
+
+            getItemsFromStore(instance, storeNames.deleted),
+            getItemsFromStore(instance, storeNames.offline)
+        ]);
+    });
+};
+/*
+const getItemsFromDB = () =>
+    getIndexedDbInstance.then(instance =>
+        Promise.all([
+            // fetching items from indexDB
+
+            getItemsFromStore(instance, storeNames.deleted),
+            getItemsFromStore(instance, storeNames.offline)
+        ])
+    );
+*/
 module.exports = {
     storeNames: storeNames,
     syncEventTag: syncEventTag,
@@ -64,5 +145,6 @@ module.exports = {
     getItemsFromRepo: getItemsFromRepo,
     removeItemsFromRepo: removeItemsFromRepo,
     syncOfflineChanges: syncOfflineChanges,
-    showToastNotification: showToastNotification
+    showToastNotification: showToastNotification,
+    getItemsFromDB: getItemsFromDB
 };

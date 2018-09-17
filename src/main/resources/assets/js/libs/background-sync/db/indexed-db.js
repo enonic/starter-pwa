@@ -17,6 +17,8 @@
 
 import ConfigManagerInstance from './Config';
 
+// const SyncHelper = require('./../sync-helper');
+
 class OfflineDatabase {
     constructor() {
         ConfigManagerInstance().then(configManager => {
@@ -278,4 +280,8 @@ export default function IndexedDBInstance() {
     window.IndexedDBInstance_ = new OfflineDatabase();
 
     return Promise.resolve(window.IndexedDBInstance_);
+}
+
+export function openPromise() {
+    return window.IndexedDBInstance_.open;
 }

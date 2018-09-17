@@ -12,9 +12,10 @@ workbox.core.setCacheNameDetails({
 workbox.clientsClaim();
 
 const syncServiceUrl = '{{syncServiceUrl}}';
-const indexDbName = { Todolist: 'Todolist' };
+//const indexDbName = { Todolist: 'Todolist' };
 
 let indexDB; // indexDB instance
+
 let firstTimeOnline = false;
 
 // This is a placeholder for manifest dynamically injected from webpack.config.js
@@ -50,12 +51,17 @@ self.addEventListener('message', (event) => {
     switch (event.data) {
         case 'skipWaiting':
             self.skipWaiting().then(() => {
-                self.registration.showNotification(
+                try {
+                    self.registration.showNotification(
                     '{{appTitle}}',
-                {
-                    body: 'Application is updated to version {{appVersion}}',
-                    icon: '{{iconUrl}}'
-                });
+                    {
+                        body: 'Application is updated to version {{appVersion}}',
+                        icon: '{{iconUrl}}'
+                    });
+                }
+                catch(e) {
+                    console.log('Notifications disabled. Application is updated to version {{appVersion}}');
+                }
             });
             break;
         default:
@@ -115,7 +121,7 @@ self.addEventListener('message', event => {
         firstTimeOnline = true;
     }
 });
-
+/*
 function getItemsFromDB() {
     return Promise.all([
         // fetching items from indexDB
@@ -123,7 +129,7 @@ function getItemsFromDB() {
         getAllFromIndexDb(indexDbName.Todolist, storeNames.offline)
     ]);
 }
-
+*/
 let syncInProgress = false;
 let needSync = false;
 const sync = function() {
@@ -141,7 +147,7 @@ const synchronize = function() {
 
     syncInProgress = true;
     // read db, dbRemove and repo
-    getItemsFromDB().then(([deletedWhileOffline, dbItems]) => {
+    getItemsFromDB(openPromise).then(([deletedWhileOffline, dbItems]) => {
         // console.log('items from db: ' + JSON.stringify(values));
         // delete in repo all from db-delete
         removeItemsFromRepo(deletedWhileOffline, syncServiceUrl).then(() => {
@@ -214,7 +220,7 @@ const DBPost = function(indexDbName, storeName, item) {
             );
     });
 };
-
+/*
 const getAllFromIndexDb = function(indexDbName, storeName, index, order) {
     return open(indexDbName).then(db => {
         return new Promise((resolve, reject) => {
@@ -247,8 +253,8 @@ const getAllFromIndexDb = function(indexDbName, storeName, index, order) {
         });
     });
 };
-
-const open = function(indexDbName) {
+*/
+const openPromise = function(indexDbName) {
     if (indexDB) {
         return Promise.resolve(indexDB);
     }
