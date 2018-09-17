@@ -8,11 +8,9 @@ import { updateUI } from '../../bs';
 const SyncHelper = require('./sync-helper');
 
 const ToasterInstance = require('../toaster').default;
-let firstTimeOnline = false;
+let wentOnline = false;
 window.addEventListener('online', () => {
-    if (navigator.onLine) {
-        firstTimeOnline = true;
-    }
+    wentOnline = navigator.onLine;
 });
 
 function getItemsFromDB() {
@@ -28,39 +26,7 @@ function getItemsFromDB() {
         )
     ]);
 }
-/*
-function isElementInRepo(id) {
-    return storage.get.online(syncServiceUrl, id).then(response => {
-        return response.status < 404;
-    });
-}
 
-// resolving offline changes on online repository
-function resolveChanges(db) {
-    return Promise.all(
-        db.map(item => {
-            if (!item.synced && firstTimeOnline) {
-                ToasterInstance().then(toaster =>
-                    toaster.toast('Offline changes are synced.')
-                );
-            }
-
-            if (!item.synced && item.changed) {
-                return isElementInRepo(item.id).then(
-                    status =>
-                        status
-                            ? storage.replace.online(syncServiceUrl, item)
-                            : storage.add.online(syncServiceUrl, item)
-                );
-            }
-            if (!item.synced) {
-                return storage.add.online(syncServiceUrl, item);
-            }
-            return null; // linter consistent return
-        })
-    );
-}
-*/
 let syncInProgress = false;
 let needSync = false;
 
@@ -78,7 +44,7 @@ const sync = function() {
             // change in repo all marked with change and sync not synced items
             SyncHelper.syncOfflineChanges(dbItems).then(syncPromises => {
                 if (
-                    firstTimeOnline &&
+                    wentOnline &&
                     syncPromises.some(promise => !!promise)
                 ) {
                     SyncHelper.showToastNotification(ToasterInstance);
@@ -105,7 +71,7 @@ const sync = function() {
                                   )
                                 : null
                         ).then(() => {
-                            firstTimeOnline = false;
+                            wentOnline = false;
                             updateUI();
                             syncInProgress = false;
                             if (needSync) {

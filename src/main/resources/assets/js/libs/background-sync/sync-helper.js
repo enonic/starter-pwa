@@ -36,7 +36,7 @@ const getItemsFromRepo = url =>
 
 // deleting all items in repo contained in a database
 const removeItemsFromRepo = (dbItems, url) =>
-    Promise.all(dbItems.map(item => apiDelete(item.id, url)));
+    Promise.all(dbItems.map(item => apiDelete(url, item.id)));
 
 // syncing offline changes with online repository
 const syncOfflineChanges = (dbItems, url) =>

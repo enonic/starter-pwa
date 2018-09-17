@@ -89,7 +89,7 @@ self.addEventListener('push', function(event) {
         var subscriberData = JSON.stringify({
             subscriberCount: data.subscriberCount
         });
-        sendMessageToClient(subscriberData);
+        sendMessageToClients(subscriberData);
     }
 });
 
@@ -124,15 +124,6 @@ function getItemsFromDB() {
     ]);
 }
 
-function isElementInRepo(id) {
-    return getItemApiCall(syncServiceUrl, id).then(response => {
-        if (response.status === 404) {
-            return false;
-        }
-        return true;
-    });
-}
-
 let syncInProgress = false;
 let needSync = false;
 const sync = function() {
@@ -158,7 +149,7 @@ const synchronize = function() {
             syncOfflineChanges(dbItems, syncServiceUrl).then((syncPromises) => {
 
                 if (firstTimeOnline && syncPromises.some(promise => !!promise)) {
-                    sendMessageToClient('showSyncMessage');
+                    sendMessageToClients('showSyncMessage');
                 }
                 // get new items from repo (synced values are changed if synced)
                 getItemsFromRepo(syncServiceUrl).then(repo => {
@@ -183,7 +174,7 @@ const synchronize = function() {
                         ).then(() => {
                             const data = { message: 'synced' };
                             firstTimeOnline = false;
-                            sendMessageToClient(data);
+                            sendMessageToClients(data);
                             syncInProgress = false;
                             if (needSync) {
                                 needSync = false;
@@ -278,27 +269,7 @@ const open = function(indexDbName) {
  * Online repo storage http requests
  */
 
-const getItemApiCall = (url, data) => {
-    return fetch(url + '?data=' + String(data), {
-        method: 'GET'
-    });
-};
-
-const postApiCall = (url, data) => {
-    return fetch(url, {
-        body: JSON.stringify(data),
-        method: 'POST'
-    });
-};
-
-const putApiCall = (url, data) => {
-    return fetch(url, {
-        body: JSON.stringify(data),
-        method: 'PUT'
-    });
-};
-
-const sendMessageToClient = message => {
+const sendMessageToClients = message => {
     self.clients.matchAll().then(function(clients) {
         if (clients && clients.length > 0) {
             clients.forEach(client => client.postMessage(message));
