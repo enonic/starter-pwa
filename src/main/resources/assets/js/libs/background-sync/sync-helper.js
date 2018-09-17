@@ -54,7 +54,7 @@ const syncOfflineChanges = (dbItems, url) =>
         })
     );
 
-const getAll = function(db, storeName) {
+const getItemsFromStore = function(db, storeName) {
     return new Promise((resolve, reject) => {
         var dbTransaction = db.transaction(storeName, 'readonly');
         var dbStore = dbTransaction.objectStore(storeName);
@@ -74,7 +74,7 @@ const getAll = function(db, storeName) {
                 });
                 cursor.continue();
             } else {
-                resolve(dbResults);
+                resolve(dbResults.map(node => node.value));
             }
         };
 
@@ -89,20 +89,13 @@ const showToastNotification = ToasterInstance =>
         toaster.toast('Offline changes are synced')
     );
 
-const getItemsFromStore = (db, storeName) =>
-    getAll(db, storeName).then(
-        nodes => (nodes ? nodes.map(node => node.value) : [])
-    );
+const getItemsFromDB = db =>
+    Promise.all([
+        // fetching items from indexDB
 
-const getItemsFromDB = dbPromise =>
-    dbPromise(indexedDbName).then(function(db) {
-        return Promise.all([
-            // fetching items from indexDB
-
-            getItemsFromStore(db, storeNames.deleted),
-            getItemsFromStore(db, storeNames.offline)
-        ]);
-    });
+        getItemsFromStore(db, storeNames.deleted),
+        getItemsFromStore(db, storeNames.offline)
+    ]);
 
 module.exports = {
     storeNames: storeNames,
@@ -112,5 +105,6 @@ module.exports = {
     removeItemsFromRepo: removeItemsFromRepo,
     syncOfflineChanges: syncOfflineChanges,
     showToastNotification: showToastNotification,
-    getItemsFromDB: getItemsFromDB
+    getItemsFromDB: getItemsFromDB,
+    getItemsFromStore: getItemsFromStore
 };

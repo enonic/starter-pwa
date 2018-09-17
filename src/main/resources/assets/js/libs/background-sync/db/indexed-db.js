@@ -184,7 +184,7 @@ class OfflineDatabase {
             });
         });
     }
-/*
+    /*
     getAll(storeName, index, order) {
         return this.open().then(db => {
             return new Promise((resolve, reject) => {
@@ -224,6 +224,7 @@ class OfflineDatabase {
         });
     }
 */
+
     delete(storeName, key) {
         return this.open().then(db => {
             return new Promise((resolve, reject) => {

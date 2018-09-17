@@ -45,52 +45,68 @@ const sync = function() {
             SyncHelper.getItemsFromDB(db).then(
                 ([deletedWhileOffline, dbItems]) => {
                     // delete in repo all from db-delete
-                    SyncHelper.removeItemsFromRepo(deletedWhileOffline).then(() => {
-                        // change in repo all marked with change and sync not synced items
-                        SyncHelper.syncOfflineChanges(dbItems).then(syncPromises => {
-                            if (
-                                switchedOnline &&
-                                syncPromises.some(promise => !!promise)
-                            ) {
-                                SyncHelper.showToastNotification(ToasterInstance);
-                            }
+                    SyncHelper.removeItemsFromRepo(deletedWhileOffline).then(
+                        () => {
+                            // change in repo all marked with change and sync not synced items
+                            SyncHelper.syncOfflineChanges(dbItems).then(
+                                syncPromises => {
+                                    if (
+                                        switchedOnline &&
+                                        syncPromises.some(promise => !!promise)
+                                    ) {
+                                        SyncHelper.showToastNotification(
+                                            ToasterInstance
+                                        );
+                                    }
 
-                            // get new items from repo (synced values are changed if synced)
-                            SyncHelper.getItemsFromRepo().then(repoItems => {
-                                // flush db & dbRemove
-                                Promise.all([
-                                    storage.flush.offline(
-                                        SyncHelper.storeNames.offline
-                                    ),
-                                    storage.flush.offline(SyncHelper.storeNames.deleted)
-                                ]).then(() => {
-                                    // add all items from repo into db.
-                                    Promise.resolve(
-                                        repoItems
-                                            ? Promise.all(
-                                                  repoItems.map(element =>
-                                                      storage.add.offline(
-                                                          SyncHelper.storeNames.offline,
-                                                          element.item,
-                                                          true
-                                                      )
-                                                  )
-                                              )
-                                            : null
-                                    ).then(() => {
-                                        switchedOnline = false;
-                                        updateUI();
-                                        syncInProgress = false;
-                                        if (needSync) {
-                                            needSync = false;
-                                            sync();
+                                    // get new items from repo (synced values are changed if synced)
+                                    SyncHelper.getItemsFromRepo().then(
+                                        repoItems => {
+                                            // flush db & dbRemove
+                                            Promise.all([
+                                                storage.flush.offline(
+                                                    SyncHelper.storeNames
+                                                        .offline
+                                                ),
+                                                storage.flush.offline(
+                                                    SyncHelper.storeNames
+                                                        .deleted
+                                                )
+                                            ]).then(() => {
+                                                // add all items from repo into db.
+                                                Promise.resolve(
+                                                    repoItems
+                                                        ? Promise.all(
+                                                              repoItems.map(
+                                                                  element =>
+                                                                      storage.add.offline(
+                                                                          SyncHelper
+                                                                              .storeNames
+                                                                              .offline,
+                                                                          element.item,
+                                                                          true
+                                                                      )
+                                                              )
+                                                          )
+                                                        : null
+                                                ).then(() => {
+                                                    switchedOnline = false;
+                                                    updateUI();
+                                                    syncInProgress = false;
+                                                    if (needSync) {
+                                                        needSync = false;
+                                                        sync();
+                                                    }
+                                                });
+                                            });
                                         }
-                                    });
-                                });
-                            });
-                        });
-                    });
-                });
+                                    );
+                                }
+                            );
+                        }
+                    );
+                }
+            );
         });
     });
 };

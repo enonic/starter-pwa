@@ -12,7 +12,7 @@ workbox.core.setCacheNameDetails({
 workbox.clientsClaim();
 
 const syncServiceUrl = '{{syncServiceUrl}}';
-const indexDbName = { Todolist: 'Todolist' };
+const indexDbName = 'Todolist';
 
 let indexDB; // indexDB instance
 
@@ -214,7 +214,7 @@ function flushDB(indexDbName, storeName) {
 }
 
 const DBPost = function(indexDbName, storeName, item) {
-    return openDatabase(indexDbName).then( => {
+    return openDatabase(indexDbName).then(db => {
         var dbTransaction = db.transaction(storeName, 'readwrite');
         var dbStore = dbTransaction.objectStore(storeName);
         dbStore.add(item);

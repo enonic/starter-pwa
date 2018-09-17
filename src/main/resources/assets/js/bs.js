@@ -60,17 +60,22 @@ function onWsMessage(event) {
     }
 }
 
-storage.get.offline(SyncHelper.storeNames.offline, items => {
-    // transform from indexDB-item to TodoItem
-    registeredTodos = items.map(
-        item =>
-            new TodoItem(
-                item.value.text,
-                item.value.date,
-                item.value.completed,
-                item.key
-            )
-    );
+IndexedDBInstance().then(dbInstance => {
+    dbInstance.open().then(db => {
+        SyncHelper.getItemsFromStore(db, SyncHelper.storeNames.offline).then(
+            items => {
+                // transform from indexDB-item to TodoItem
+                registeredTodos = items.map(
+                    item =>
+                        new TodoItem(
+                            item.value.text,
+                            item.value.date,
+                            item.value.completed,
+                            item.key
+                        )
+                );
+            });
+    });
 });
 
 /**
