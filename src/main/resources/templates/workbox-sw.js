@@ -159,21 +159,9 @@ const synchronize = function() {
                         // Fetch all items from the remote repo
                         getItemsFromRepo(syncServiceUrl).then(repoItems => {
 
-                            // Add all items from remote repo to IndexedDB
-                            Promise.resolve(
-                                repoItems
-                                    ? Promise.all(
-                                            repoItems.map(element =>
-                                            DBPost(
-                                              storeNames.offline,
-                                              element.item
-                                            )
-                                          )
-                                      )
-                                    : null
-                            ).then(() => {
-                                const data = { message: 'synced' };
-                                sendMessageToClients(data);
+                            // Add all items from the repo to IndexedDB
+                            addItemsToDatabase(db, repoItems).then(() => {
+                                sendMessageToClients({ message: 'synced' });
                                 syncInProgress = false;
                             });
                         });
@@ -181,22 +169,6 @@ const synchronize = function() {
                 });
             });
         });
-    });
-};
-
-/**
- * Offline DB storage
- */
-
-const DBPost = function(storeName, item) {
-    return openDatabase(indexedDbName).then(db => {
-        var dbTransaction = db.transaction(storeName, 'readwrite');
-        var dbStore = dbTransaction.objectStore(storeName);
-        dbStore.add(item);
-        dbStore.onerror = () =>
-            console.error(
-                'Something went wrong with your local databse. Make sure your browser supports indexDB'
-            );
     });
 };
 

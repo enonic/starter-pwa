@@ -51,28 +51,14 @@ const sync = function() {
                                     SyncHelper.clearDatabase(db).then(() =>
                                         // Fetch all items from the remote repo
                                         SyncHelper.getItemsFromRepo().then(
-                                            repoItems => {
-                                                // Add all items from remote repo to IndexedDB
-                                                Promise.resolve(
+                                            repoItems =>
+                                                SyncHelper.addItemsToDatabase(
+                                                    db,
                                                     repoItems
-                                                        ? Promise.all(
-                                                              repoItems.map(
-                                                                  element =>
-                                                                      storage.add.offline(
-                                                                          SyncHelper
-                                                                              .storeNames
-                                                                              .offline,
-                                                                          element.item,
-                                                                          true
-                                                                      )
-                                                              )
-                                                          )
-                                                        : null
                                                 ).then(() => {
                                                     updateUI();
                                                     syncInProgress = false;
-                                                });
-                                            }
+                                                })
                                         )
                                     );
                                 }

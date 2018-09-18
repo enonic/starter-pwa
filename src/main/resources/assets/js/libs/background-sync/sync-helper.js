@@ -87,13 +87,30 @@ const getItemsFromDB = db =>
         getItemsFromStore(db, storeNames.offline)
     ]);
 
+const getStore = (db, storeName) => {
+    const dbTransaction = db.transaction(storeName, 'readwrite');
+
+    return dbTransaction.objectStore(storeName);
+};
+
 const clearStore = (db, storeName) =>
     new Promise((resolve, reject) => {
-        const dbTransaction = db.transaction(storeName, 'readwrite');
-        const flushReq = dbTransaction.objectStore(storeName).clear();
-        flushReq.onsuccess = event => resolve(event);
-        flushReq.onerror = event => reject(event);
+        const dbStore = getStore(db, storeName);
+        const dbOperation = dbStore.clear();
+        dbOperation.onsuccess = event => resolve(event);
+        dbOperation.onerror = event => reject(event);
     });
+
+const addItemToDatabase = (db, item) =>
+    new Promise((resolve, reject) => {
+        const dbStore = getStore(db, storeNames.offline);
+        const dbOperation = dbStore.add(item);
+        dbOperation.onsuccess = event => resolve(event);
+        dbOperation.onerror = event => reject(event);
+    });
+
+const addItemsToDatabase = (db, items) =>
+    Promise.all(items.map(item => addItemToDatabase(db, item)));
 
 const clearDatabase = db =>
     Promise.all([
@@ -116,5 +133,6 @@ module.exports = {
     showToastNotification: showToastNotification,
     getItemsFromDB: getItemsFromDB,
     getItemsFromStore: getItemsFromStore,
-    clearDatabase: clearDatabase
+    clearDatabase: clearDatabase,
+    addItemsToDatabase: addItemsToDatabase
 };
