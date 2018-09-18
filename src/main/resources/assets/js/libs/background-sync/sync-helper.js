@@ -55,8 +55,8 @@ const syncOfflineChanges = (dbItems, url) =>
     );
 
 // Get items from specific store in the database
-const getItemsFromStore = function(db, storeName) {
-    return new Promise((resolve, reject) => {
+const getItemsFromStore = (db, storeName) =>
+    new Promise((resolve, reject) => {
         const dbTransaction = db.transaction(storeName, 'readonly');
         const dbStore = dbTransaction.objectStore(storeName);
         const dbCursor = dbStore.openCursor();
@@ -80,14 +80,25 @@ const getItemsFromStore = function(db, storeName) {
             reject(e);
         };
     });
-};
 
 const getItemsFromDB = db =>
     Promise.all([
-        // fetching items from indexedDB
-
         getItemsFromStore(db, storeNames.deleted),
         getItemsFromStore(db, storeNames.offline)
+    ]);
+
+const clearStore = (db, storeName) =>
+    new Promise((resolve, reject) => {
+        const dbTransaction = db.transaction(storeName, 'readwrite');
+        const flushReq = dbTransaction.objectStore(storeName).clear();
+        flushReq.onsuccess = event => resolve(event);
+        flushReq.onerror = event => reject(event);
+    });
+
+const clearDatabase = db =>
+    Promise.all([
+        clearStore(db, storeNames.deleted),
+        clearStore(db, storeNames.offline)
     ]);
 
 const showToastNotification = ToasterInstance =>
@@ -104,5 +115,6 @@ module.exports = {
     syncOfflineChanges: syncOfflineChanges,
     showToastNotification: showToastNotification,
     getItemsFromDB: getItemsFromDB,
-    getItemsFromStore: getItemsFromStore
+    getItemsFromStore: getItemsFromStore,
+    clearDatabase: clearDatabase
 };

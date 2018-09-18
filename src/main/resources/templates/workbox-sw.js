@@ -146,32 +146,28 @@ const synchronize = function() {
             removeItemsFromRepo(deletedWhileOffline, syncServiceUrl).then(() => {
 
                 // Sync changes in IndexedDB with remote repo
-                syncOfflineChanges(dbItems, syncServiceUrl).then((syncPromises) => {
+                syncOfflineChanges(dbItems, syncServiceUrl).then(syncPromises => {
 
                     // Notify clients that all changes are synced
                     if (firstTimeOnline && syncPromises.some(promise => !!promise)) {
                         firstTimeOnline = false;
                         sendMessageToClients('showSyncMessage');
                     }
+                    // Clear contents of IndexedDB
+                    clearDatabase(db).then(() => {
 
-                    // Fetch all items from the remote repo
-                    getItemsFromRepo(syncServiceUrl).then(repo => {
-
-                        // Clear contents of IndexedDB
-                        Promise.all([
-                            flushDB(storeNames.offline),
-                            flushDB(storeNames.deleted)
-                        ]).then(() => {
+                        // Fetch all items from the remote repo
+                        getItemsFromRepo(syncServiceUrl).then(repoItems => {
 
                             // Add all items from remote repo to IndexedDB
                             Promise.resolve(
-                                repo
+                                repoItems
                                     ? Promise.all(
-                                          repo.map(element =>
-                                              DBPost(
-                                                  storeNames.offline,
-                                                  element.item
-                                              )
+                                            repoItems.map(element =>
+                                            DBPost(
+                                              storeNames.offline,
+                                              element.item
+                                            )
                                           )
                                       )
                                     : null
@@ -191,17 +187,6 @@ const synchronize = function() {
 /**
  * Offline DB storage
  */
-
-function flushDB(storeName) {
-    return new Promise((resolve, reject) => {
-        return openDatabase(indexedDbName).then(db => {
-            var dbTransaction = db.transaction(storeName, 'readwrite');
-            var flushReq = dbTransaction.objectStore(storeName).clear();
-            flushReq.onsuccess = event => resolve(event);
-            flushDB.onerror = event => reject(event);
-        });
-    });
-}
 
 const DBPost = function(storeName, item) {
     return openDatabase(indexedDbName).then(db => {

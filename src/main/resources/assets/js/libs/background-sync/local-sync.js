@@ -46,20 +46,12 @@ const sync = function() {
                                             ToasterInstance
                                         );
                                     }
-                                    // Fetch all items from the remote repo
-                                    SyncHelper.getItemsFromRepo().then(
-                                        repoItems => {
-                                            // Clear contents of IndexedDB
-                                            Promise.all([
-                                                storage.flush.offline(
-                                                    SyncHelper.storeNames
-                                                        .offline
-                                                ),
-                                                storage.flush.offline(
-                                                    SyncHelper.storeNames
-                                                        .deleted
-                                                )
-                                            ]).then(() => {
+
+                                    // Clear contents of IndexedDB
+                                    SyncHelper.clearDatabase(db).then(() =>
+                                        // Fetch all items from the remote repo
+                                        SyncHelper.getItemsFromRepo().then(
+                                            repoItems => {
                                                 // Add all items from remote repo to IndexedDB
                                                 Promise.resolve(
                                                     repoItems
@@ -80,8 +72,8 @@ const sync = function() {
                                                     updateUI();
                                                     syncInProgress = false;
                                                 });
-                                            });
-                                        }
+                                            }
+                                        )
                                     );
                                 }
                             );
