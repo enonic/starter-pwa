@@ -14,55 +14,42 @@ let switchedOnline = false;
 window.addEventListener('online', () => {
     switchedOnline = navigator.onLine;
 });
-/*
-function getItemsFromDB() {
-    return Promise.all([
-        // fetching items from indexDB
-        storage.get.offline(
-            SyncHelper.storeNames.deleted,
-            nodes => (nodes ? nodes.map(node => node.value) : [])
-        ),
-        storage.get.offline(
-            SyncHelper.storeNames.offline,
-            nodes => (nodes ? nodes.map(node => node.value) : [])
-        )
-    ]);
-}
-*/
+
 let syncInProgress = false;
-let needSync = false;
 
 const sync = function() {
     if (syncInProgress) {
-        needSync = true;
         return;
     }
 
     syncInProgress = true;
-    // read db, dbRemove and repo
+
+    // Open IndexedDB
     IndexedDBInstance().then(dbInstance => {
         dbInstance.open().then(db => {
+            // Fetch items from IndexedDB
             SyncHelper.getItemsFromDB(db).then(
                 ([deletedWhileOffline, dbItems]) => {
-                    // delete in repo all from db-delete
+                    // Sync deletions in IndexedDB with remote repo
                     SyncHelper.removeItemsFromRepo(deletedWhileOffline).then(
                         () => {
-                            // change in repo all marked with change and sync not synced items
+                            // Sync changes in IndexedDB with remote repo
                             SyncHelper.syncOfflineChanges(dbItems).then(
                                 syncPromises => {
+                                    // Notify clients that all changes are synced
                                     if (
                                         switchedOnline &&
                                         syncPromises.some(promise => !!promise)
                                     ) {
+                                        switchedOnline = false;
                                         SyncHelper.showToastNotification(
                                             ToasterInstance
                                         );
                                     }
-
-                                    // get new items from repo (synced values are changed if synced)
+                                    // Fetch all items from the remote repo
                                     SyncHelper.getItemsFromRepo().then(
                                         repoItems => {
-                                            // flush db & dbRemove
+                                            // Clear contents of IndexedDB
                                             Promise.all([
                                                 storage.flush.offline(
                                                     SyncHelper.storeNames
@@ -73,7 +60,7 @@ const sync = function() {
                                                         .deleted
                                                 )
                                             ]).then(() => {
-                                                // add all items from repo into db.
+                                                // Add all items from remote repo to IndexedDB
                                                 Promise.resolve(
                                                     repoItems
                                                         ? Promise.all(
@@ -90,13 +77,8 @@ const sync = function() {
                                                           )
                                                         : null
                                                 ).then(() => {
-                                                    switchedOnline = false;
                                                     updateUI();
                                                     syncInProgress = false;
-                                                    if (needSync) {
-                                                        needSync = false;
-                                                        sync();
-                                                    }
                                                 });
                                             });
                                         }

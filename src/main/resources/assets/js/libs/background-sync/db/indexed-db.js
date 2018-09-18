@@ -17,8 +17,6 @@
 
 import ConfigManagerInstance from './Config';
 
-// const SyncHelper = require('./../sync-helper');
-
 class OfflineDatabase {
     constructor() {
         ConfigManagerInstance().then(configManager => {
@@ -184,46 +182,6 @@ class OfflineDatabase {
             });
         });
     }
-    /*
-    getAll(storeName, index, order) {
-        return this.open().then(db => {
-            return new Promise((resolve, reject) => {
-                var dbTransaction = db.transaction(storeName, 'readonly');
-                var dbStore = dbTransaction.objectStore(storeName);
-                var dbCursor;
-
-                let changedOrder = order;
-                if (typeof order !== 'string') changedOrder = 'next';
-
-                if (typeof index === 'string')
-                    dbCursor = dbStore
-                        .index(index)
-                        .openCursor(null, changedOrder);
-                else dbCursor = dbStore.openCursor();
-
-                var dbResults = [];
-
-                dbCursor.onsuccess = e => {
-                    var cursor = e.target.result;
-
-                    if (cursor) {
-                        dbResults.push({
-                            key: cursor.key,
-                            value: cursor.value
-                        });
-                        cursor.continue();
-                    } else {
-                        resolve(dbResults);
-                    }
-                };
-
-                dbCursor.onerror = e => {
-                    reject(e);
-                };
-            });
-        });
-    }
-*/
 
     delete(storeName, key) {
         return this.open().then(db => {

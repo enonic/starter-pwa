@@ -54,27 +54,25 @@ const syncOfflineChanges = (dbItems, url) =>
         })
     );
 
+// Get items from specific store in the database
 const getItemsFromStore = function(db, storeName) {
     return new Promise((resolve, reject) => {
-        var dbTransaction = db.transaction(storeName, 'readonly');
-        var dbStore = dbTransaction.objectStore(storeName);
-        var dbCursor;
-
-        dbCursor = dbStore.openCursor();
-
-        var dbResults = [];
+        const dbTransaction = db.transaction(storeName, 'readonly');
+        const dbStore = dbTransaction.objectStore(storeName);
+        const dbCursor = dbStore.openCursor();
+        const items = [];
 
         dbCursor.onsuccess = e => {
-            var cursor = e.target.result;
+            const cursor = e.target.result;
 
             if (cursor) {
-                dbResults.push({
+                items.push({
                     key: cursor.key,
                     value: cursor.value
                 });
                 cursor.continue();
             } else {
-                resolve(dbResults.map(node => node.value));
+                resolve(items.map(node => node.value));
             }
         };
 
@@ -84,18 +82,18 @@ const getItemsFromStore = function(db, storeName) {
     });
 };
 
-const showToastNotification = ToasterInstance =>
-    ToasterInstance().then(toaster =>
-        toaster.toast('Offline changes are synced')
-    );
-
 const getItemsFromDB = db =>
     Promise.all([
-        // fetching items from indexDB
+        // fetching items from indexedDB
 
         getItemsFromStore(db, storeNames.deleted),
         getItemsFromStore(db, storeNames.offline)
     ]);
+
+const showToastNotification = ToasterInstance =>
+    ToasterInstance().then(toaster =>
+        toaster.toast('Offline changes are synced')
+    );
 
 module.exports = {
     storeNames: storeNames,

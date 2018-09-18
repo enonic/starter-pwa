@@ -12,7 +12,6 @@ workbox.core.setCacheNameDetails({
 workbox.clientsClaim();
 
 const syncServiceUrl = '{{syncServiceUrl}}';
-const indexDbName = 'Todolist';
 
 let indexDB; // indexDB instance
 
@@ -121,17 +120,8 @@ self.addEventListener('message', event => {
         firstTimeOnline = true;
     }
 });
-/*
-function getItemsFromDB() {
-    return Promise.all([
-        // fetching items from indexDB
-        getAllFromIndexDb(indexDbName.Todolist, storeNames.deleted),
-        getAllFromIndexDb(indexDbName.Todolist, storeNames.offline)
-    ]);
-}
-*/
+
 let syncInProgress = false;
-let needSync = false;
 const sync = function() {
     setTimeout(() => {
         synchronize();
@@ -141,39 +131,44 @@ const sync = function() {
 const synchronize = function() {
     console.log('sync');
     if (syncInProgress) {
-        needSync = true;
         return;
     }
 
     syncInProgress = true;
-    // read db, dbRemove and repo
 
-    openDatabase(indexDbName).then(db => {
+    // Open IndexedDB
+    openDatabase(indexedDbName).then(db => {
 
+        // Fetch items from IndexedDB
         getItemsFromDB(db).then(([deletedWhileOffline, dbItems]) => {
-            // console.log('items from db: ' + JSON.stringify(values));
-            // delete in repo all from db-delete
+
+            // Sync deletions in IndexedDB with remote repo
             removeItemsFromRepo(deletedWhileOffline, syncServiceUrl).then(() => {
-                // change in repo all marked with change and sync not synced items
+
+                // Sync changes in IndexedDB with remote repo
                 syncOfflineChanges(dbItems, syncServiceUrl).then((syncPromises) => {
 
+                    // Notify clients that all changes are synced
                     if (firstTimeOnline && syncPromises.some(promise => !!promise)) {
+                        firstTimeOnline = false;
                         sendMessageToClients('showSyncMessage');
                     }
-                    // get new items from repo (synced values are changed if synced)
+
+                    // Fetch all items from the remote repo
                     getItemsFromRepo(syncServiceUrl).then(repo => {
-                        // flush db & dbRemove
+
+                        // Clear contents of IndexedDB
                         Promise.all([
-                            flushDB(indexDbName.Todolist, storeNames.offline),
-                            flushDB(indexDbName.Todolist, storeNames.deleted)
+                            flushDB(storeNames.offline),
+                            flushDB(storeNames.deleted)
                         ]).then(() => {
-                            // add all items from repo into db.
+
+                            // Add all items from remote repo to IndexedDB
                             Promise.resolve(
                                 repo
                                     ? Promise.all(
                                           repo.map(element =>
                                               DBPost(
-                                                  indexDbName.Todolist,
                                                   storeNames.offline,
                                                   element.item
                                               )
@@ -182,13 +177,8 @@ const synchronize = function() {
                                     : null
                             ).then(() => {
                                 const data = { message: 'synced' };
-                                firstTimeOnline = false;
                                 sendMessageToClients(data);
                                 syncInProgress = false;
-                                if (needSync) {
-                                    needSync = false;
-                                    synchronize();
-                                }
                             });
                         });
                     });
@@ -202,9 +192,9 @@ const synchronize = function() {
  * Offline DB storage
  */
 
-function flushDB(indexDbName, storeName) {
+function flushDB(storeName) {
     return new Promise((resolve, reject) => {
-        return openDatabase(indexDbName).then(db => {
+        return openDatabase(indexedDbName).then(db => {
             var dbTransaction = db.transaction(storeName, 'readwrite');
             var flushReq = dbTransaction.objectStore(storeName).clear();
             flushReq.onsuccess = event => resolve(event);
@@ -213,8 +203,8 @@ function flushDB(indexDbName, storeName) {
     });
 }
 
-const DBPost = function(indexDbName, storeName, item) {
-    return openDatabase(indexDbName).then(db => {
+const DBPost = function(storeName, item) {
+    return openDatabase(indexedDbName).then(db => {
         var dbTransaction = db.transaction(storeName, 'readwrite');
         var dbStore = dbTransaction.objectStore(storeName);
         dbStore.add(item);
@@ -224,46 +214,13 @@ const DBPost = function(indexDbName, storeName, item) {
             );
     });
 };
-/*
-const getAllFromIndexDb = function(indexDbName, storeName, index, order) {
-    return open(indexDbName).then(db => {
-        return new Promise((resolve, reject) => {
-            var dbTransaction = db.transaction(storeName, 'readonly');
-            var dbStore = dbTransaction.objectStore(storeName);
-            var dbCursor;
 
-            if (typeof order !== 'string') order = 'next';
-
-            if (typeof index === 'string')
-                dbCursor = dbStore.index(index).openCursor(null, order);
-            else dbCursor = dbStore.openCursor();
-
-            var dbResults = [];
-
-            dbCursor.onsuccess = e => {
-                var cursor = e.target.result;
-
-                if (cursor) {
-                    dbResults.push(cursor.value);
-                    cursor.continue();
-                } else {
-                    resolve(dbResults);
-                }
-            };
-
-            dbCursor.onerror = e => {
-                reject(e);
-            };
-        });
-    });
-};
-*/
-const openDatabase = function(indexDbName) {
+const openDatabase = function(indexedDbName) {
     if (indexDB) {
         return Promise.resolve(indexDB);
     }
     return new Promise((resolve, reject) => {
-        const instance = self.indexedDB.open(indexDbName);
+        const instance = self.indexedDB.open(indexedDbName);
 
         instance.onsuccess = e => {
             indexDB = e.target.result;

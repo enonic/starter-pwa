@@ -23,11 +23,11 @@ export const updateUI = () => {
                 registeredTodos = items.map(
                     item =>
                         new TodoItem(
-                            item.value.text,
-                            item.value.date,
-                            item.value.completed,
-                            item.value.id,
-                            item.value.synced
+                            item.text,
+                            item.date,
+                            item.completed,
+                            item.id,
+                            item.synced
                         )
                 );
                 focusIfEmpty();
@@ -59,25 +59,6 @@ function onWsMessage(event) {
         storageManager('refresh');
     }
 }
-
-IndexedDBInstance().then(dbInstance => {
-    dbInstance.open().then(db => {
-        SyncHelper.getItemsFromStore(db, SyncHelper.storeNames.offline).then(
-            items => {
-                // transform from indexDB-item to TodoItem
-                registeredTodos = items.map(
-                    item =>
-                        new TodoItem(
-                            item.value.text,
-                            item.value.date,
-                            item.value.completed,
-                            item.key
-                        )
-                );
-            });
-    });
-});
-
 /**
  * Model of a TodoItem
  */
