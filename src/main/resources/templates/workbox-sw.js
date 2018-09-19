@@ -108,7 +108,7 @@ self.addEventListener('notificationclick', function(event) {
 
 self.addEventListener('sync', event => {
     if (event.tag === syncEventTag) {
-        event.waitUntil(sync());
+        event.waitUntil(synchronize());
         return;
     }
 
@@ -122,32 +122,32 @@ self.addEventListener('message', event => {
 });
 
 let syncInProgress = false;
-const sync = function() {
-    setTimeout(() => {
-        synchronize();
-    }, 100);
-}
 
 const synchronize = function() {
     if (syncInProgress) {
-        return;
+        return Promise.resolve();
     }
 
-    syncInProgress = true;
+    return new Promise(resolve => {
 
-    // Open IndexedDB
-    openDatabase().then(db => {
-        // Call synchronise method in sync-helper.js
-        synchronise(db, syncServiceUrl).then(showNotification => {
-            if (firstTimeOnline && showNotification) {
-                firstTimeOnline = false;
-            }
+        syncInProgress = true;
 
-            sendMessageToClients({ message: 'sw-synced', notify: (firstTimeOnline && showNotification) });
-            syncInProgress = false;
+        // Open IndexedDB
+        openDatabase().then(db => {
+            // Call synchronise method in sync-helper.js
+            synchronise(db, syncServiceUrl).then(showNotification => {
+                if (firstTimeOnline && showNotification) {
+                    firstTimeOnline = false;
+                }
 
+                sendMessageToClients({ message: 'sw-synced', notify: (firstTimeOnline && showNotification) });
+                syncInProgress = false;
+
+                resolve();
+            });
         });
     });
+
 };
 
 const openDatabase = function() {
