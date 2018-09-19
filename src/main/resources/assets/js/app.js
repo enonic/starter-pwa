@@ -1,7 +1,7 @@
 // Stylesheets
 require('../css/styles.less');
 
-var ToasterInstance = require('./libs/toaster').default;
+var ToasterInstance = require('./toaster').default;
 
 module.exports = {
     onNewServiceWorker: function(registration, callback) {

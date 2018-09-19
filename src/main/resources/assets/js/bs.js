@@ -1,26 +1,73 @@
 require('../css/styles.less');
 require('./../css/background-sync.less');
 
-const SyncHelper = require('./libs/background-sync/sync-helper');
+const SyncHelper = require('./background-sync/sync-helper');
 
-const storage = require('./libs/background-sync/storage').default;
-const storageManager = require('./libs/background-sync/storage-manager');
-const ToasterInstance = require('./libs/toaster').default;
+const ToasterInstance = require('./toaster').default;
+const IndexedDBInstance = require('./background-sync/db/indexed-db').default;
 
-const IndexedDBInstance = require('./libs/background-sync/db/indexed-db')
-    .default;
+import TodoItem from './background-sync/db/model';
 
-let registeredTodos;
+let syncInProgress = false;
+let todoItems;
+let ws;
 
-export const updateUI = () => {
-    IndexedDBInstance().then(dbInstance => {
-        dbInstance.open().then(db => {
-            SyncHelper.getItemsFromStore(
-                db,
-                SyncHelper.storeNames.offline
-            ).then(items => {
+const syncChanges = function() {
+    if (navigator.serviceWorker) {
+        // chrome, firefox and safari supports
+        navigator.serviceWorker.ready.then(function(registration) {
+            // Browser supports service worker/background syncing
+            if (registration.sync) {
+                registration.sync.register(SyncHelper.syncEventTag);
+            } else {
+                // Browser supports service worker but not background syncing.
+                // Sync local changes and set up websocket to listen for changes on the server
+                if (!ws) {
+                    setupWebSocket();
+                }
+                syncManually();
+            }
+        });
+    } else {
+        // Browser doesn't support service worker/background syncing
+        syncManually();
+    }
+};
+
+const syncManually = function() {
+    if (syncInProgress || !navigator.onLine) {
+        return;
+    }
+
+    syncInProgress = true;
+
+    // Open IndexedDB
+    IndexedDBInstance().then(db => {
+        SyncHelper.synchronise(db, getSyncServiceUrl()).then(
+            showNotification => {
+                updateTodoItems();
+                syncInProgress = false;
+                if (switchedOnline && showNotification) {
+                    switchedOnline = false;
+                    showToastNotification(ToasterInstance);
+                }
+            }
+        );
+    });
+};
+
+const updateUI = () => {
+    focusIfEmpty();
+    updateTodoView();
+    updateListenersFor.everything();
+};
+
+const updateTodoItems = () =>
+    IndexedDBInstance().then(db =>
+        SyncHelper.getItemsFromStore(db, SyncHelper.storeNames.offline).then(
+            items => {
                 items.reverse();
-                registeredTodos = items.map(
+                todoItems = items.map(
                     item =>
                         new TodoItem(
                             item.text,
@@ -30,82 +77,46 @@ export const updateUI = () => {
                             item.synced
                         )
                 );
-                focusIfEmpty();
-                updateTodoView();
-                updateListenersFor.everything();
-            });
-        });
-    });
+                updateUI();
+            }
+        )
+    );
+
+const getSyncServiceUrl = () => {
+    if (CONFIG && CONFIG.syncServiceUrl) {
+        return CONFIG.syncServiceUrl;
+    }
+
+    throw new Error('Service for background syncing is not configured!');
 };
 
-// Speparating from the similar listener in app.js
-const toggleOnlineStatus = function() {
-    updateUI();
-    if (navigator.onLine) {
-        storageManager('online');
-    }
-};
-toggleOnlineStatus();
+IndexedDBInstance().then(() => syncChanges());
+
 let beforeLastChange = '';
 
-window.addEventListener('offline', toggleOnlineStatus);
-window.addEventListener('online', toggleOnlineStatus);
+// window.addEventListener('offline', () => syncChanges());
+window.addEventListener('online', () => syncChanges());
 
-const ws = new WebSocket(sync_data.wsUrl, ['sync_data']);
-ws.onmessage = onWsMessage;
+const setupWebSocket = () => {
+    ws = new WebSocket(sync_data.wsUrl, ['sync_data']);
+    ws.onmessage = onWsMessage;
 
-function onWsMessage(event) {
-    if (event.data === 'refresh') {
-        storageManager('refresh');
+    function onWsMessage(event) {
+        if (event.data === 'refresh') {
+            syncChanges();
+        }
     }
-}
-/**
- * Model of a TodoItem
- */
-class TodoItem {
-    /**
-     *
-     * @param {string} text
-     * @param {string} date
-     * @param {boolean} completed
-     */
-    constructor(text, date, completed, id, synced) {
-        this.text = text;
-        this.date = typeof date === 'string' ? new Date(date) : date;
-        this.completed = completed;
-        // only give new ID of old one is not supplied
-        this.id = !id ? new Date().valueOf() : id; // unique id}
-        this.synced = !!synced;
-        this.type = 'TodoItem';
-        this.changed = false;
-    }
-
-    getFormattedDate() {
-        return (
-            '' +
-            this.date.getDate() +
-            '/' +
-            (this.date.getMonth() + 1) +
-            '/' +
-            this.date.getFullYear() +
-            ' ' +
-            (this.date.getHours() < 10 ? '0' : '') +
-            this.date.getHours() +
-            ':' +
-            (this.date.getMinutes() < 10 ? '0' : '') +
-            this.date.getMinutes()
-        );
-    }
-}
+};
 
 /**
  * Search for TodoItem based on ID and use callback
  * @param {string} id item identifier
  */
 const searchAndApply = (id, callback) => {
-    for (const todo of registeredTodos) {
-        if (todo.id === parseInt(id, 10)) {
-            callback(todo);
+    for (const item of todoItems) {
+        if (item.id === parseInt(id, 10)) {
+            callback(item);
+            break;
         }
     }
 };
@@ -116,13 +127,12 @@ const searchAndApply = (id, callback) => {
 const addTodo = () => {
     const inputfield = document.getElementById('add-todo-text');
     // Only add if user actually entered something
-    if (inputfield.value !== '') {
+    if (inputfield.value.trim() !== '') {
         const item = new TodoItem(inputfield.value, new Date(), false);
-        registeredTodos.push(item);
-
-        storage.add.offline(SyncHelper.storeNames.offline, item);
+        //  todoItems.push(item);
+        IndexedDBInstance().then(db => SyncHelper.addToStorage(db, item));
         inputfield.value = '';
-        updateUI();
+        syncChanges();
     } else {
         // let user know something was wrong
         inputfield.style.borderColor = '#f44336';
@@ -137,21 +147,11 @@ const addTodo = () => {
  * @param event may be event or TodoItem
  */
 const removeTodo = event => {
-    /* Find the element data with DOM api 
-    Loop through register and remove from local 
-    Update view */
-    // const id = parseInt(event.target.parentNode.children[1].id);
     const id = event.target.id;
     searchAndApply(id, todoItem => {
-        storage.add
-            .offline(SyncHelper.storeNames.deleted, todoItem, true)
-            .then(
-                storage.delete.offline(
-                    SyncHelper.storeNames.offline,
-                    todoItem.id
-                )
-            );
-        updateUI();
+        IndexedDBInstance().then(db =>
+            SyncHelper.markAsDeleted(db, todoItem).then(() => syncChanges())
+        );
     });
 };
 
@@ -161,7 +161,7 @@ const removeTodo = event => {
 const updateTodoView = () => {
     const outputArea = document.getElementById('todo-app__item-area');
     outputArea.innerHTML = '';
-    for (const todo of registeredTodos) {
+    for (const todo of todoItems) {
         /**
          * Legg på grid
          * mdl-grid
@@ -221,7 +221,7 @@ const editItemText = event => {
             changedItem.text = event.target.value;
             registerChange(changedItem, SyncHelper.storeNames.offline);
         } else {
-            updateUI();
+            syncChanges();
         }
     });
 };
@@ -246,8 +246,11 @@ const registerChange = (item, storeName) => {
     const changedItem = item;
     changedItem.changed = true;
     changedItem.synced = false;
-    storage.replace.offline(storeName, changedItem);
-    updateUI();
+    IndexedDBInstance().then(db =>
+        SyncHelper.replaceInStorage(db, storeName, changedItem).then(() =>
+            syncChanges()
+        )
+    );
 };
 const changeLabelToInput = textfield => {
     const label = textfield.innerHTML;
@@ -255,7 +258,7 @@ const changeLabelToInput = textfield => {
     const parent = textfield.parentNode;
     const id = parent.children[2].id;
     const input = document.createElement('input');
-    storageManager('edit');
+    // storageManager('edit');
     input.className =
         'todo-app__inputfield mdl-textfield__input mdl-cell mdl-cell--7-col';
     input.id = id;
@@ -267,11 +270,6 @@ const changeLabelToInput = textfield => {
     updateListenersFor.inputfields();
 };
 
-// Listeners
-// const addButton = document.getElementById('add-todo-button');
-// if (addButton) {
-//     addButton.onclick = addTodo;
-// }
 document.getElementById('add-todo-button').onclick = addTodo;
 document.getElementById('add-todo-text').addEventListener('keydown', event => {
     // actions on enter
@@ -353,20 +351,27 @@ const updateListenersFor = {
 
 const focusIfEmpty = () => {
     const inputfield = document.getElementById('add-todo-text');
-    if (inputfield && registeredTodos.length <= 0) {
+    if (inputfield && todoItems.length <= 0) {
         inputfield.focus();
     }
 };
 
+const showToastNotification = () =>
+    ToasterInstance().then(toaster =>
+        toaster.toast('Offline changes are synced')
+    );
+
 /**
  * Listen to serviceworker
  */
+
 if (navigator.serviceWorker) {
     navigator.serviceWorker.addEventListener('message', event => {
-        if (event.data.message === 'synced') {
-            updateUI('serviceworker');
-        } else if (event.data === 'showSyncMessage') {
-            SyncHelper.showToastNotification(ToasterInstance);
+        if (event.data.message === 'sw-synced') {
+            updateTodoItems();
+            if (event.data.notify) {
+                SyncHelper.showToastNotification(ToasterInstance);
+            }
         }
     });
 }

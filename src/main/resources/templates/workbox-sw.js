@@ -1,6 +1,6 @@
 let module = {};
 
-importScripts('js/libs/background-sync/sync-helper.js');
+importScripts('js/background-sync/sync-helper.js');
 
 workbox.core.setCacheNameDetails({
     prefix: 'enonic-pwa-starter',
@@ -129,7 +129,6 @@ const sync = function() {
 }
 
 const synchronize = function() {
-    console.log('sync');
     if (syncInProgress) {
         return;
     }
@@ -137,47 +136,26 @@ const synchronize = function() {
     syncInProgress = true;
 
     // Open IndexedDB
-    openDatabase(indexedDbName).then(db => {
+    openDatabase().then(db => {
+        // Call synchronise method in sync-helper.js
+        synchronise(db, syncServiceUrl).then(showNotification => {
+            if (firstTimeOnline && showNotification) {
+                firstTimeOnline = false;
+            }
 
-        // Fetch items from IndexedDB
-        getItemsFromDB(db).then(([deletedWhileOffline, dbItems]) => {
+            sendMessageToClients({ message: 'sw-synced', notify: (firstTimeOnline && showNotification) });
+            syncInProgress = false;
 
-            // Sync deletions in IndexedDB with remote repo
-            removeItemsFromRepo(deletedWhileOffline, syncServiceUrl).then(() => {
-
-                // Sync changes in IndexedDB with remote repo
-                syncOfflineChanges(dbItems, syncServiceUrl).then(syncPromises => {
-
-                    // Notify clients that all changes are synced
-                    if (firstTimeOnline && syncPromises.some(promise => !!promise)) {
-                        firstTimeOnline = false;
-                        sendMessageToClients('showSyncMessage');
-                    }
-                    // Clear contents of IndexedDB
-                    clearDatabase(db).then(() => {
-
-                        // Fetch all items from the remote repo
-                        getItemsFromRepo(syncServiceUrl).then(repoItems => {
-
-                            // Add all items from the repo to IndexedDB
-                            addItemsToDatabase(db, repoItems).then(() => {
-                                sendMessageToClients({ message: 'synced' });
-                                syncInProgress = false;
-                            });
-                        });
-                    });
-                });
-            });
         });
     });
 };
 
-const openDatabase = function(indexedDbName) {
+const openDatabase = function() {
     if (indexDB) {
         return Promise.resolve(indexDB);
     }
     return new Promise((resolve, reject) => {
-        const instance = self.indexedDB.open(indexedDbName);
+        const instance = self.indexedDB.open(indexedDbName); //indexedDbName is defined in sync-helper
 
         instance.onsuccess = e => {
             indexDB = e.target.result;
