@@ -33,7 +33,11 @@ const apiPost = (method, url, item) =>
 const getItemsFromRepo = url =>
     apiGet(url).then(response =>
         // item fetched from repo is an object called TodoItems, we are interested in it's values
-        response.json().then(itemList => itemList.TodoItems)
+        response
+            .json()
+            .then(responseObj =>
+                responseObj.TodoItems.map(todoItem => todoItem.item)
+            )
     );
 
 // deleting all items in repo contained in a database
@@ -134,5 +138,6 @@ module.exports = {
     getItemsFromDB: getItemsFromDB,
     getItemsFromStore: getItemsFromStore,
     clearDatabase: clearDatabase,
-    addItemsToDatabase: addItemsToDatabase
+    addItemsToDatabase: addItemsToDatabase,
+    addItemToDatabase: addItemToDatabase
 };
