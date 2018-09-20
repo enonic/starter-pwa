@@ -10,7 +10,7 @@ const IndexedDBInstance = require('./background-sync/db/indexed-db').default;
 import TodoItem from './background-sync/db/model';
 
 let pushInProgress = false;
-let switchedOnline = false;
+let hasOfflineChanges = false;
 let todoItems;
 let lastItemName = '';
 let backgroundSyncSupported = false;
@@ -30,6 +30,9 @@ const fetchItemsFromServerAndRender = debounce(
 );
 
 const pushChanges = function() {
+    if (!navigator.onLine) {
+        hasOfflineChanges = true;
+    }
     if (navigator.serviceWorker) {
         // Browser supports service worker
         navigator.serviceWorker.ready.then(function(registration) {
@@ -58,13 +61,12 @@ const pushManually = function() {
     IndexedDBInstance().then(db => {
         SyncHelper.pushLocalChanges(db, getSyncServiceUrl()).then(
             changesMade => {
-                // renderTodoItems();
                 pushInProgress = false;
                 if (changesMade) {
                     fetchItemsFromServerAndRender();
-                    if (switchedOnline) {
-                        switchedOnline = false;
+                    if (hasOfflineChanges) {
                         showToastNotification();
+                        hasOfflineChanges = false;
                     }
                 }
             }
@@ -370,9 +372,14 @@ ws.onmessage = e => {
 fetchItemsFromServerAndRender();
 
 window.addEventListener('online', () => {
-    switchedOnline = true;
-    if (!backgroundSyncSupported) {
-        // If Service Worker can't background sync
+    if (!hasOfflineChanges) {
+        // If there were no changes made offline we still need to fetch
+        // new data from server in case it was changed while we were offline
+        fetchItemsFromServerAndRender();
+        hasOfflineChanges = false;
+    } else if (!backgroundSyncSupported) {
+        // If background sync is not supported and some
+        // changes were made offline, push them manually
         pushManually();
     }
 });
@@ -397,8 +404,8 @@ if (navigator.serviceWorker) {
         if (event.data.message === 'sw-sync-end') {
             fetchItemsFromServerAndRender();
             pushInProgress = false;
-            if (event.data.notify && switchedOnline) {
-                switchedOnline = false;
+            if (event.data.notify && hasOfflineChanges) {
+                hasOfflineChanges = false;
                 showToastNotification();
             }
         }

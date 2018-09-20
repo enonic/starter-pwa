@@ -173,7 +173,8 @@ const pushLocalChanges = (db, syncServiceUrl) =>
                 updateItemsInRepo(dbItems, syncServiceUrl).then(syncPromises =>
                     resolve(
                         // Checks whether any changes were pushed
-                        syncPromises.some(promise => !!promise)
+                        deletedWhileOffline.length > 0 ||
+                            syncPromises.some(promise => !!promise)
                     )
                 )
             )
