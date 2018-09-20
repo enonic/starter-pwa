@@ -4,6 +4,7 @@ require('./../css/background-sync.less');
 const SyncHelper = require('./background-sync/sync-helper');
 
 const ToasterInstance = require('./toaster').default;
+const debounce = require('./util').debounce;
 const IndexedDBInstance = require('./background-sync/db/indexed-db').default;
 
 import TodoItem from './background-sync/db/model';
@@ -14,13 +15,19 @@ let todoItems;
 let lastItemName = '';
 let backgroundSyncSupported = false;
 
-const fetchItemsFromServerAndRender = () =>
-    IndexedDBInstance().then(db =>
-        SyncHelper.pullServerChanges(db, getSyncServiceUrl()).then(items => {
-            createTodoItems(items);
-            renderTodoItems();
-        })
-    );
+const fetchItemsFromServerAndRender = debounce(
+    () =>
+        IndexedDBInstance().then(db =>
+            SyncHelper.pullServerChanges(db, getSyncServiceUrl()).then(
+                items => {
+                    createTodoItems(items);
+                    renderTodoItems();
+                }
+            )
+        ),
+    10,
+    false
+);
 
 const pushChanges = function() {
     if (navigator.serviceWorker) {
@@ -57,7 +64,7 @@ const pushManually = function() {
                     fetchItemsFromServerAndRender();
                     if (switchedOnline) {
                         switchedOnline = false;
-                        showToastNotification(ToasterInstance);
+                        showToastNotification();
                     }
                 }
             }
@@ -102,8 +109,9 @@ const getSyncServiceUrl = () => {
  * @param {string} id item identifier
  */
 const searchAndApply = (id, callback) => {
+    const i = parseInt(id, 10);
     for (const item of todoItems) {
-        if (item.id === parseInt(id, 10)) {
+        if (item.id === i) {
             callback(item);
             break;
         }
@@ -140,16 +148,15 @@ const addTodo = () => {
  * @param event may be event or TodoItem
  */
 const removeTodo = event => {
-    const id = event.target.id;
-    searchAndApply(id, todoItem => {
-        const removeIndex = todoItems.findIndex(item => item.id === id);
+    searchAndApply(event.target.id, todoItem => {
+        const removeIndex = todoItems.findIndex(
+            item => item.id === todoItem.id
+        );
         todoItems.splice(removeIndex, 1);
         renderTodoItems();
 
         IndexedDBInstance().then(db =>
-            SyncHelper.markAsDeleted(db, todoItem).then(() => {
-                pushChanges();
-            })
+            SyncHelper.markAsDeleted(db, todoItem).then(() => pushChanges())
         );
     });
 };
@@ -355,14 +362,20 @@ const showToastNotification = () =>
 // all clients so that they could fetch it and update UI
 const ws = new WebSocket(sync_data.wsUrl, ['sync_data']);
 ws.onmessage = e => {
-    if (e.data === 'refresh') {
-        setTimeout(() => fetchItemsFromServerAndRender(), 100);
+    if (e.data === 'refresh' && !pushInProgress) {
+        fetchItemsFromServerAndRender();
     }
 };
 
 fetchItemsFromServerAndRender();
 
-window.addEventListener('online', () => pushChanges());
+window.addEventListener('online', () => {
+    switchedOnline = true;
+    if (!backgroundSyncSupported) {
+        // If Service Worker can't background sync
+        pushManually();
+    }
+});
 
 document.getElementById('add-todo-button').onclick = addTodo;
 document.getElementById('add-todo-text').addEventListener('keydown', event => {
@@ -378,9 +391,15 @@ document.getElementById('add-todo-text').addEventListener('keydown', event => {
 
 if (navigator.serviceWorker) {
     navigator.serviceWorker.addEventListener('message', event => {
-        if (event.data.message === 'sw-synced') {
-            if (event.data.notify) {
-                SyncHelper.showToastNotification(ToasterInstance);
+        if (event.data.message === 'sw-sync-start') {
+            pushInProgress = true;
+        }
+        if (event.data.message === 'sw-sync-end') {
+            fetchItemsFromServerAndRender();
+            pushInProgress = false;
+            if (event.data.notify && switchedOnline) {
+                switchedOnline = false;
+                showToastNotification();
             }
         }
     });

@@ -3,8 +3,6 @@ const storeNames = {
     deleted: 'DeletedWhileOffline'
 };
 
-const indexedDbName = 'Todolist';
-
 const syncEventTag = 'background-sync';
 
 const apiCall = (method, url, id) =>
@@ -99,13 +97,15 @@ const clearStore = (db, storeName) =>
 
 const addToStorage = (db, item, storeName) =>
     new Promise((resolve, reject) => {
-        const dbStore = getStore(db, storeName || storeNames.offline);
-        const dbOperation = dbStore.add(item);
-        dbOperation.onsuccess = e => resolve(e);
-        dbOperation.onerror = e => {
-            debugger;
-            reject(e);
-        };
+        const store = storeName || storeNames.offline;
+        const dbTransaction = db.transaction(store, 'readwrite');
+
+        dbTransaction.oncomplete = e => resolve(e);
+        dbTransaction.onabort = e => reject(e);
+        dbTransaction.onerror = e => reject(e);
+
+        const dbStore = dbTransaction.objectStore(store);
+        dbStore.add(item);
     });
 
 const addItemsToStorage = (db, items) =>
@@ -123,7 +123,7 @@ const deleteFromStorage = (db, key) =>
         const dbStore = dbTransaction.objectStore(storeName);
         const dbOperation = dbStore.get(key);
 
-        dbOperation.onsuccess = e => {
+        dbOperation.onsuccess = () => {
             dbStore.delete(key);
         };
     });
@@ -164,7 +164,7 @@ const pullServerChanges = (db, syncServiceUrl) =>
     );
 
 const pushLocalChanges = (db, syncServiceUrl) =>
-    new Promise((resolve, reject) =>
+    new Promise(resolve =>
         // Fetch items from the local storage
         getItemsFromStorage(db).then(([deletedWhileOffline, dbItems]) =>
             // Sync deletions in the local storage with remote repo
@@ -180,41 +180,6 @@ const pushLocalChanges = (db, syncServiceUrl) =>
         )
     );
 
-const synchronise = (db, syncServiceUrl) =>
-    // Fetch items from IndexedDB
-    new Promise((resolve, reject) => {
-        getItemsFromStorage(db).then(([deletedWhileOffline, dbItems]) => {
-            // Sync deletions in IndexedDB with remote repo
-            removeItemsFromRepo(deletedWhileOffline, syncServiceUrl).then(
-                () => {
-                    // Sync changes in IndexedDB with remote repo
-                    updateItemsInRepo(dbItems, syncServiceUrl).then(
-                        syncPromises => {
-                            // Clear contents of IndexedDB
-                            clearStorage(db).then(() => {
-                                // Fetch all items from the remote repo
-                                getItemsFromRepo(syncServiceUrl).then(
-                                    repoItems => {
-                                        // Add all items from the repo to IndexedDB
-                                        addItemsToStorage(db, repoItems).then(
-                                            () => {
-                                                resolve(
-                                                    syncPromises.some(
-                                                        promise => !!promise
-                                                    )
-                                                );
-                                            }
-                                        );
-                                    }
-                                );
-                            });
-                        }
-                    );
-                }
-            );
-        });
-    });
-
 module.exports = {
     storeNames: storeNames,
     syncEventTag: syncEventTag,
@@ -222,7 +187,6 @@ module.exports = {
     markAsDeleted: markAsDeleted,
     getItemsFromStore: getItemsFromStore,
     replaceInStorage: replaceInStorage,
-    synchronise: synchronise,
     pullServerChanges: pullServerChanges,
     pushLocalChanges: pushLocalChanges
 };

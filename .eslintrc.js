@@ -2,9 +2,6 @@ module.exports = {
     extends: ['airbnb-base/legacy', 'prettier'],
     plugins: ['prettier'],
     rules: {
-        'no-console': 'off',
-        'no-debugger': 'off',
-        'no-unused-vars': 'off',
         'prefer-const': ['error'],
         'comma-dangle': ['error', 'never'],
         'no-underscore-dangle': ['off'],

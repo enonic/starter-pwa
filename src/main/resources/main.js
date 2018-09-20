@@ -2,6 +2,7 @@ var thymeleaf = require('/lib/xp/thymeleaf');
 var router = require('/lib/router')();
 var portalLib = require('/lib/xp/portal');
 var siteTitle = 'PWA Starter';
+var localStorageName = 'Todolist';
 var mustache = require('/lib/xp/mustache');
 var pushRepo = require('/lib/push/repo');
 
@@ -22,7 +23,8 @@ function renderPage(pageId, title) {
         pageId: pageId,
         title: title || siteTitle,
         appName: siteTitle,
-        syncServiceUrl: portalLib.serviceUrl({service: 'background-sync'})
+        syncServiceUrl: portalLib.serviceUrl({service: 'background-sync'}),
+        localStorageName: localStorageName
     };
 
     // Data only needed for the push-notifications page:
@@ -70,7 +72,8 @@ function renderSW() {
             appTitle: siteTitle,
             iconUrl: appUrl + "precache/icons/icon.png",
             serviceUrl: portalLib.serviceUrl({service: ''}),
-            syncServiceUrl: portalLib.serviceUrl({service: 'background-sync'})
+            syncServiceUrl: portalLib.serviceUrl({service: 'background-sync'}),
+            localStorageName: localStorageName
         })
     };
 }

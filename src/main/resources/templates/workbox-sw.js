@@ -12,10 +12,9 @@ workbox.core.setCacheNameDetails({
 workbox.clientsClaim();
 
 const syncServiceUrl = '{{syncServiceUrl}}';
+const indexedDbName = '{{localStorageName}}';
 
 let indexDB; // indexDB instance
-
-let firstTimeOnline = false;
 
 // This is a placeholder for manifest dynamically injected from webpack.config.js
 workbox.precaching.precacheAndRoute(self.__precacheManifest || []);
@@ -64,7 +63,6 @@ self.addEventListener('message', (event) => {
             });
             break;
         default:
-            // NOOP
             break;
     }
 });
@@ -115,34 +113,16 @@ self.addEventListener('sync', event => {
     console.error(`Sync tag ${e.tag} is not supported`);
 });
 
-self.addEventListener('message', event => {
-    if (event.data === 'online') {
-        firstTimeOnline = true;
-    }
-});
-
-let syncInProgress = false;
-
 const synchronize = function() {
-    if (syncInProgress) {
-        return Promise.resolve();
-    }
-
     return new Promise(resolve => {
 
-        syncInProgress = true;
-    console.log('SW: starting syncing');
+        sendMessageToClients({ message: 'sw-sync-start' });
 
         // Open IndexedDB
         openDatabase().then(db => {
             // Call synchronise method in sync-helper.js
-            pushLocalChanges(db, syncServiceUrl).then(showNotification => {
-                if (firstTimeOnline && showNotification) {
-                    firstTimeOnline = false;
-                }
-    console.log('SW: changes synced');
-                sendMessageToClients({ message: 'sw-synced', notify: (firstTimeOnline && showNotification) });
-                syncInProgress = false;
+            pushLocalChanges(db, syncServiceUrl).then(changesMade => {
+                sendMessageToClients({ message: 'sw-sync-end', notify: changesMade });
 
                 resolve();
             });
@@ -156,7 +136,7 @@ const openDatabase = function() {
         return Promise.resolve(indexDB);
     }
     return new Promise((resolve, reject) => {
-        const instance = self.indexedDB.open(indexedDbName); //indexedDbName is defined in sync-helper
+        const instance = self.indexedDB.open(indexedDbName); //indexedDbName is defined in main.js
 
         instance.onsuccess = e => {
             indexDB = e.target.result;

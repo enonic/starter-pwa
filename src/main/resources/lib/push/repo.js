@@ -344,9 +344,7 @@ exports.getAllTodos = function() {
         start: 0,
         query: "item.type = 'TodoItem'"
     }).hits;
-    if (!hits/*  || hits.length < 1 */) {
-        return "NOT_FOUND";
-    }
+
      /**
      * The query does not fetch items inline with order they were added.
      */
@@ -354,12 +352,5 @@ exports.getAllTodos = function() {
         return repoConn.get(hit.id);
     });
 
-    todoItems.sort(function(a,b){return a.item.id - b.item.id})
-
-    if (todoItems) {
-        return todoItems ;
-    } else {
-        return "NOT_FOUND";
-    }
-
+    return todoItems;
 }
