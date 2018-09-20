@@ -39,6 +39,7 @@ workbox.routing.registerRoute(new RegExp('{{serviceUrl}}/*'), workbox.strategies
  * Sets the default caching strategy for the client: tries contacting the network first
  */
 workbox.routing.setDefaultHandler(workbox.strategies.networkFirst());
+
 /**
  * Pass a message from the outside world to SW
 */

@@ -84,67 +84,10 @@ As you can see, the Starter can track its online/offline status and change conte
 
 == Webpack Config
 
-The Starter is using Webpack to build all LESS files into one CSS bundle (``bundle.css``) and all Javascript assets into one JS bundle
-(``bundle.js``). The Workbox plugin is used by Webpack to automatically generate a template for the Service Worker (``sw.js``) based
+The Starter is using Webpack to build all LESS files into one CSS bundle ``main.css`` and all Javascript assets into one main JS bundle
+``app-bundle.js`` (some pages are using their own JS bundles in addition to the main one). The Workbox plugin is used by Webpack to automatically generate a template for the Service Worker (``sw.js``) based
 on a predefined file (``workbox-sw.js``). Final Service Worker file will be rendered on-the-fly by https://github.com/enonic/lib-router[Enonic Router] lib by intercepting
 a call to ``/sw.js`` file in the site root.
-
-.webpack.config.js:
-
-[source,javascript]
-----
-const path = require('path');
-const extractTextPlugin = require('extract-text-webpack-plugin');
-const workboxPlugin = require('workbox-webpack-plugin');
-
-const paths = {
-    templates: 'src/main/resources/templates/',
-    assets: 'src/main/resources/assets/',
-    buildAssets: 'build/resources/main/assets/',
-    buildTemplates: 'build/resources/main/templates/'
-};
-
-const templatesPath = path.join(__dirname, paths.templates);
-const assetsPath = path.join(__dirname, paths.assets);
-const buildAssetsPath = path.join(__dirname, paths.buildAssets);
-const buildTemplatesPath = path.join(__dirname, paths.buildTemplates);
-
-module.exports = {
-
-    entry: path.join(assetsPath, 'js/main.js'),
-
-    output: {
-        path: buildAssetsPath,
-        filename: 'precache/bundle.js'
-    },
-
-    resolve: {
-        extensions: ['.js', '.less']
-    },
-
-    module: {
-        rules: [
-            {
-                test: /.less$/,
-                loader: extractTextPlugin.extract({
-                    fallback: 'style-loader',
-                    use: "css-loader!less-loader"
-                })
-            }
-        ]
-    },
-    plugins: [
-        new extractTextPlugin('precache/bundle.css'),
-        new workboxPlugin({
-            globDirectory: buildAssetsPath,
-            globPatterns: ['precache/**\/*'],
-            swSrc: path.join(templatesPath, 'workbox-sw.js'),
-            swDest: path.join(buildTemplatesPath, 'sw.js')
-        })
-    ]
-
-};
-----
 
 == Dependencies
 
@@ -211,25 +154,31 @@ workboxSW.precache([
 == Precaching custom assets
 
 Sometimes you may need to cache assets outside of the ``precache`` folder. In this case you have to explicitly specify the assets that you
-need to be cached (this can be a local asset or an external URL). Add a new line with a call to ``workboxSW.precache`` after the one with empty placeholder:
+need to be cached (this can be a local asset or an external URL).
+Add a new asset with ``revision`` and ``url`` properties in the call to ``precacheAndRoute`` method as shown below:
 
-.sw-dev.js:
+.workbox-sw.js:
 [source,javascript]
 ----
-importScripts('https://unpkg.com/workbox-sw@2.0.1/build/importScripts/workbox-sw.prod.v2.0.1.js');
-
-const workboxSW = new self.WorkboxSW({
-    skipWaiting: true,
-    clientsClaim: true
+workbox.core.setCacheNameDetails({
+    prefix: 'enonic-pwa-starter',
+    suffix: '{{appVersion}}',
+    precache: 'precache',
+    runtime: 'runtime'
 });
 
-workboxSW.precache([]);
+workbox.clientsClaim();
 
-workboxSW.precache([
-    '{{baseUrl}}/manifest.json',
-    'https://fonts.googleapis.com/icon?family=Material+Icons',
-    'https://code.jquery.com/jquery-1.10.2.min.js'
-]);
+workbox.precaching.precacheAndRoute(self.__precacheManifest || []);
+
+// Here we precache custom defined Urls
+workbox.precaching.precacheAndRoute([{
+    "revision": "{{appVersion}}",
+    "url": "{{appUrl}}"
+},{
+    "revision": "{{appVersion}}",
+    "url": "{{appUrl}}manifest.json"
+}]);
 ----
 
 
@@ -423,26 +372,28 @@ When you're building a PWA you typically want a user to be able to open previous
 In this Starter we are using Workbox to dynamically cache URL requests for future use. Note that we are using ``networkFirst` as a default
 strategy but you can specify a different strategy for specific pages.
 
-.sw-dev.js:
+.workbox-sw.js:
 [source,javascript]
 ----
-importScripts('https://unpkg.com/workbox-sw@2.0.1/build/importScripts/workbox-sw.prod.v2.0.1.js');
 
-const workboxSW = new self.WorkboxSW({
-    skipWaiting: true,
-    clientsClaim: true
-});
+/**
+ * Make sure SW won't precache non-GET calls to service URLs
+ */
+workbox.routing.registerRoute(new RegExp('{{serviceUrl}}/*'), workbox.strategies.networkOnly(), 'POST');
+workbox.routing.registerRoute(new RegExp('{{serviceUrl}}/*'), workbox.strategies.networkOnly(), 'PUT');
+workbox.routing.registerRoute(new RegExp('{{serviceUrl}}/*'), workbox.strategies.networkOnly(), 'DELETE');
 
-workboxSW.router.setDefaultHandler({
-    handler: workboxSW.strategies.networkFirst()
-});
+/**
+ * Sets the default caching strategy for the client: tries contacting the network first
+ */
+workbox.routing.setDefaultHandler(workbox.strategies.networkFirst());
 
-workboxSW.router.registerRoute(
+workboxSW.routing.registerRoute(
     '{{baseUrl}}/about',
     workboxSW.strategies.cacheFirst()
 );
 
-workboxSW.router.registerRoute(
+workboxSW.routing.registerRoute(
     '//fonts.gstatic.com/s/materialicons/*',
     workboxSW.strategies.cacheFirst()
 );

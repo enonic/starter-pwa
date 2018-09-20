@@ -64,7 +64,6 @@ module.exports = {
         new InjectManifest({
             globDirectory: buildAssetsPath,
             globPatterns: ['precache/**\/*'],
-            //importWorkboxFrom: 'local',
             swSrc: path.join(templatesPath, 'workbox-sw.js'),
             swDest: path.join(buildTemplatesPath, 'sw.js')
         })
