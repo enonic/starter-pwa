@@ -76,7 +76,7 @@
 </div>
 
 <script type="text/javascript">
-    const registerServiceWorker = function(appUrl, appTitle) {
+    const registerServiceWorker = function(appUrl, appName) {
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
@@ -102,10 +102,10 @@
                         });
 
                         Starter.app.onNewServiceWorker(registration, function () {
-                            Starter.app.showNotification(registration, appTitle);
+                            Starter.app.showNotification(registration, appName);
                         });
                         console.log('Service Worker registered with scope ' + registration.scope);
-                    }, function () {
+                    }, function (err) {
                         console.log('Service Worker registration failure:');
                         console.error(err);
 
@@ -116,7 +116,8 @@
     }
 </script>
 
-<script type="text/javascript" data-th-utext="'registerServiceWorker(\'' + ${appUrl} + '\', \'' + ${title} + '\');'"></script>
+<script type="text/javascript" data-th-utext="'registerServiceWorker(\'' + ${appUrl} + '\', \'' + ${appName} + '\');'"></script>
 
+<script type="text/javascript" data-th-utext="'var CONFIG = {syncServiceUrl: \'' + ${syncServiceUrl} + '\', localStorageName: \'' + ${localStorageName} + '\'};'"></script>
 </body>
 </html>

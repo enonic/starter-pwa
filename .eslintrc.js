@@ -2,7 +2,7 @@ module.exports = {
     extends: ['airbnb-base/legacy', 'prettier'],
     plugins: ['prettier'],
     rules: {
-        'prefer-const': ['error'], 
+        'prefer-const': ['error'],
         'comma-dangle': ['error', 'never'],
         'no-underscore-dangle': ['off'],
         'func-names': ['off'],
@@ -34,6 +34,12 @@ module.exports = {
                 'no-undef': 'off', 
                 'no-restricted-syntax': 'off',
                 'no-loop-func': 'off'
+            }
+        },
+        {
+            'files': ['src/main/resources/assets/js/libs/background-sync/sync-helper.js'],
+            'rules': {
+                'no-undef': 'off'
             }
         }
     ], 

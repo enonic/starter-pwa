@@ -1,144 +1,119 @@
 require('../css/styles.less');
 require('./../css/background-sync.less');
 
-const storage = require('./libs/background-sync/storage').default;
-const storageManager = require('./libs/background-sync/storage-manager');
-const ToasterInstance = require('./libs/toaster').default;
+const SyncHelper = require('./background-sync/sync-helper');
 
-const storeNames = {
-    offline: 'OfflineStorage',
-    deletedWhileOffline: 'DeletedWhileOffline'
+const ToasterInstance = require('./toaster').default;
+const debounce = require('./util').debounce;
+const IndexedDBInstance = require('./background-sync/db/indexed-db').default;
+
+import TodoItem from './background-sync/db/model';
+
+let pushInProgress = false;
+let switchedOnline = false;
+let todoItems;
+let lastItemName = '';
+let backgroundSyncSupported = false;
+
+const fetchItemsFromServerAndRender = debounce(
+    () =>
+        IndexedDBInstance().then(db =>
+            SyncHelper.pullServerChanges(db, getSyncServiceUrl()).then(
+                items => {
+                    createTodoItems(items);
+                    renderTodoItems();
+                }
+            )
+        ),
+    10,
+    false
+);
+
+const pushChanges = function() {
+    if (navigator.serviceWorker) {
+        // Browser supports service worker
+        navigator.serviceWorker.ready.then(function(registration) {
+            if (registration.sync) {
+                // Browser supports background syncing
+                backgroundSyncSupported = true;
+                registration.sync.register(SyncHelper.syncEventTag);
+            } else {
+                // Browser supports service worker but not background syncing.
+                pushManually();
+            }
+        });
+    } else {
+        // Browser doesn't support service worker/background syncing
+        pushManually();
+    }
 };
-let registeredTodos;
 
-export const updateUI = () => {
-    storage.get.offline(storeNames.offline, items => {
-        items.reverse();
-        registeredTodos = items.map(
-            item =>
-                new TodoItem(
-                    item.value.text,
-                    item.value.date,
-                    item.value.completed,
-                    item.value.id,
-                    item.value.synced
-                )
+const pushManually = function() {
+    if (pushInProgress || !navigator.onLine) {
+        return;
+    }
+
+    pushInProgress = true;
+
+    IndexedDBInstance().then(db => {
+        SyncHelper.pushLocalChanges(db, getSyncServiceUrl()).then(
+            changesMade => {
+                // renderTodoItems();
+                pushInProgress = false;
+                if (changesMade) {
+                    fetchItemsFromServerAndRender();
+                    if (switchedOnline) {
+                        switchedOnline = false;
+                        showToastNotification();
+                    }
+                }
+            }
         );
-        focusIfEmpty();
-        updateTodoView();
-        updateListenersFor.everything();
     });
 };
 
-// Speparating from the similar listener in app.js
-const toggleOnlineStatus = function() {
-    updateUI();
-    if (navigator.onLine) {
-        storageManager('online');
-    }
+const updateUI = () => {
+    focusNewTodoField();
+    updateTodoView();
+    updateListenersFor.everything();
 };
-toggleOnlineStatus();
-let beforeLastChange = '';
 
-window.addEventListener('offline', toggleOnlineStatus);
-window.addEventListener('online', toggleOnlineStatus);
-
-const wsUrl = getWebSocketUriPrefix() + '/admin/event';
-const ws = new WebSocket(wsUrl);
-
-ws.addEventListener('message', function(event) {
-    const jsonEvent = JSON.parse(event.data);
-
-    if (jsonEvent.type.indexOf('node.') !== 0) {
-        return;
-    }
-
-    if (!jsonEvent.data || !jsonEvent.data.nodes) {
-        return;
-    }
-
-    if (
-        jsonEvent.data.nodes.some(
-            node => !!node.repo && node.repo === 'com.enonic.starter.pwa'
-        )
-    ) {
-        storageManager('refresh');
-    }
-});
-
-function getWebSocketUriPrefix() {
-    const loc = window.location;
-    let newUri;
-    if (loc.protocol === 'https:') {
-        newUri = 'wss:';
-    } else {
-        newUri = 'ws:';
-    }
-    newUri += '//' + loc.host;
-
-    return newUri;
-}
-
-storage.get.offline(storeNames.offline, items => {
-    // transform from indexDB-item to TodoItem
-    registeredTodos = items.map(
+const createTodoItems = items => {
+    todoItems = items.map(
         item =>
             new TodoItem(
-                item.value.text,
-                item.value.date,
-                item.value.completed,
-                item.key
+                item.text,
+                item.date,
+                item.completed,
+                item.id,
+                item.synced
             )
     );
-});
+};
 
-/**
- * Model of a TodoItem
- */
-class TodoItem {
-    /**
-     *
-     * @param {string} text
-     * @param {string} date
-     * @param {boolean} completed
-     */
-    constructor(text, date, completed, id, synced) {
-        this.text = text;
-        this.date = typeof date === 'string' ? new Date(date) : date;
-        this.completed = completed;
-        // only give new ID of old one is not supplied
-        this.id = !id ? new Date().valueOf() : id; // unique id}
-        this.synced = !!synced;
-        this.type = 'TodoItem';
-        this.changed = false;
+const renderTodoItems = () => {
+    todoItems.sort((a1, a2) => (a1.date < a2.date ? 1 : -1));
+    updateUI();
+};
+
+const getSyncServiceUrl = () => {
+    if (CONFIG && CONFIG.syncServiceUrl) {
+        return CONFIG.syncServiceUrl;
     }
 
-    getFormattedDate() {
-        return (
-            '' +
-            this.date.getDate() +
-            '/' +
-            (this.date.getMonth() + 1) +
-            '/' +
-            this.date.getFullYear() +
-            ' ' +
-            (this.date.getHours() < 10 ? '0' : '') +
-            this.date.getHours() +
-            ':' +
-            (this.date.getMinutes() < 10 ? '0' : '') +
-            this.date.getMinutes()
-        );
-    }
-}
+    throw new Error('Service for background syncing is not configured!');
+};
 
 /**
  * Search for TodoItem based on ID and use callback
  * @param {string} id item identifier
  */
 const searchAndApply = (id, callback) => {
-    for (const todo of registeredTodos) {
-        if (todo.id === parseInt(id, 10)) {
-            callback(todo);
+    const i = parseInt(id, 10);
+    for (const item of todoItems) {
+        if (item.id === i) {
+            callback(item);
+            break;
         }
     }
 };
@@ -149,13 +124,15 @@ const searchAndApply = (id, callback) => {
 const addTodo = () => {
     const inputfield = document.getElementById('add-todo-text');
     // Only add if user actually entered something
-    if (inputfield.value !== '') {
+    if (inputfield.value.trim() !== '') {
         const item = new TodoItem(inputfield.value, new Date(), false);
-        registeredTodos.push(item);
-
-        storage.add.offline(storeNames.offline, item);
-        inputfield.value = '';
-        updateUI();
+        todoItems.push(item);
+        renderTodoItems();
+        IndexedDBInstance().then(db =>
+            SyncHelper.addToStorage(db, item).then(() => {
+                pushChanges();
+            })
+        );
     } else {
         // let user know something was wrong
         inputfield.style.borderColor = '#f44336';
@@ -163,6 +140,7 @@ const addTodo = () => {
             inputfield.style.border = '';
         }, 500);
     }
+    inputfield.value = '';
 };
 
 /**
@@ -170,16 +148,16 @@ const addTodo = () => {
  * @param event may be event or TodoItem
  */
 const removeTodo = event => {
-    /* Find the element data with DOM api 
-    Loop through register and remove from local 
-    Update view */
-    // const id = parseInt(event.target.parentNode.children[1].id);
-    const id = event.target.id;
-    searchAndApply(id, todoItem => {
-        storage.add
-            .offline(storeNames.deletedWhileOffline, todoItem, true)
-            .then(storage.delete.offline(storeNames.offline, todoItem.id));
-        updateUI();
+    searchAndApply(event.target.id, todoItem => {
+        const removeIndex = todoItems.findIndex(
+            item => item.id === todoItem.id
+        );
+        todoItems.splice(removeIndex, 1);
+        renderTodoItems();
+
+        IndexedDBInstance().then(db =>
+            SyncHelper.markAsDeleted(db, todoItem).then(() => pushChanges())
+        );
     });
 };
 
@@ -189,7 +167,7 @@ const removeTodo = event => {
 const updateTodoView = () => {
     const outputArea = document.getElementById('todo-app__item-area');
     outputArea.innerHTML = '';
-    for (const todo of registeredTodos) {
+    for (const todo of todoItems) {
         /**
          * Legg på grid
          * mdl-grid
@@ -243,13 +221,11 @@ const editItemText = event => {
     searchAndApply(id, item => {
         const changedItem = item;
         if (
-            !(event.target.value === '') &&
-            event.target.value !== beforeLastChange
+            event.target.value.trim() !== '' &&
+            event.target.value.trim() !== lastItemName
         ) {
             changedItem.text = event.target.value;
-            registerChange(changedItem, storeNames.offline);
-        } else {
-            updateUI();
+            registerChange(changedItem, SyncHelper.storeNames.offline);
         }
     });
 };
@@ -261,29 +237,33 @@ const checkTodo = checkboxElement => {
     searchAndApply(id, item => {
         const changedItem = item;
         changedItem.completed = !item.completed;
-        registerChange(changedItem, storeNames.offline);
+        registerChange(changedItem, SyncHelper.storeNames.offline);
     });
 };
 /**
  * Should be run when an item is edited
  * updated changed, sets to not synced and replaces in storage
  * @param item the edited item
- * @param storeName storeName to replaced in (probably storeNames.offline)
+ * @param storeName storeName to replaced in (probably SyncHelper.storeNames.offline)
  */
 const registerChange = (item, storeName) => {
     const changedItem = item;
     changedItem.changed = true;
     changedItem.synced = false;
-    storage.replace.offline(storeName, changedItem);
-    updateUI();
+    IndexedDBInstance().then(db =>
+        SyncHelper.replaceInStorage(db, storeName, changedItem).then(() => {
+            pushChanges();
+            renderTodoItems();
+        })
+    );
 };
 const changeLabelToInput = textfield => {
     const label = textfield.innerHTML;
-    beforeLastChange = label;
+    lastItemName = label;
     const parent = textfield.parentNode;
     const id = parent.children[2].id;
     const input = document.createElement('input');
-    storageManager('edit');
+    // storageManager('edit');
     input.className =
         'todo-app__inputfield mdl-textfield__input mdl-cell mdl-cell--7-col';
     input.id = id;
@@ -294,19 +274,6 @@ const changeLabelToInput = textfield => {
 
     updateListenersFor.inputfields();
 };
-
-// Listeners
-// const addButton = document.getElementById('add-todo-button');
-// if (addButton) {
-//     addButton.onclick = addTodo;
-// }
-document.getElementById('add-todo-button').onclick = addTodo;
-document.getElementById('add-todo-text').addEventListener('keydown', event => {
-    // actions on enter
-    if (event.keyCode === 13) {
-        addTodo();
-    }
-});
 
 /**
  * Methods for updating listeners
@@ -350,7 +317,7 @@ const updateListenersFor = {
             'todo-app__textfield'
         )) {
             textfield.onclick = () => {
-                beforeLastChange = textfield.innerHTML;
+                lastItemName = textfield.innerHTML;
                 changeLabelToInput(textfield);
             };
         }
@@ -364,7 +331,7 @@ const updateListenersFor = {
                     inputfield.blur();
                 } else if (event.keyCode === 27) {
                     // cancel the change
-                    document.activeElement.value = beforeLastChange;
+                    document.activeElement.value = lastItemName;
                     document.activeElement.blur();
                 }
             });
@@ -379,24 +346,61 @@ const updateListenersFor = {
     }
 };
 
-const focusIfEmpty = () => {
+const focusNewTodoField = () => {
     const inputfield = document.getElementById('add-todo-text');
-    if (inputfield && registeredTodos.length <= 0) {
+    if (inputfield && todoItems.length <= 0) {
         inputfield.focus();
     }
 };
 
+const showToastNotification = () =>
+    ToasterInstance().then(toaster =>
+        toaster.toast('Offline changes are synced')
+    );
+
+// Whenever data is updated on the server, websocket will notify
+// all clients so that they could fetch it and update UI
+const ws = new WebSocket(sync_data.wsUrl, ['sync_data']);
+ws.onmessage = e => {
+    if (e.data === 'refresh' && !pushInProgress) {
+        fetchItemsFromServerAndRender();
+    }
+};
+
+fetchItemsFromServerAndRender();
+
+window.addEventListener('online', () => {
+    switchedOnline = true;
+    if (!backgroundSyncSupported) {
+        // If Service Worker can't background sync
+        pushManually();
+    }
+});
+
+document.getElementById('add-todo-button').onclick = addTodo;
+document.getElementById('add-todo-text').addEventListener('keydown', event => {
+    // actions on enter
+    if (event.keyCode === 13) {
+        addTodo();
+    }
+});
+
 /**
  * Listen to serviceworker
  */
+
 if (navigator.serviceWorker) {
     navigator.serviceWorker.addEventListener('message', event => {
-        if (event.data.message === 'synced') {
-            updateUI('serviceworker');
-        } else if (event.data === 'showSyncMessage') {
-            ToasterInstance().then(toaster =>
-                toaster.toast('Offline changes are synced')
-            );
+        if (event.data.message === 'sw-sync-start') {
+            pushInProgress = true;
+        }
+        if (event.data.message === 'sw-sync-end') {
+            fetchItemsFromServerAndRender();
+            pushInProgress = false;
+            if (event.data.notify && switchedOnline) {
+                switchedOnline = false;
+                showToastNotification();
+            }
         }
     });
 }

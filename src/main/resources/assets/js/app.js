@@ -1,7 +1,7 @@
 // Stylesheets
 require('../css/styles.less');
 
-var ToasterInstance = require('./libs/toaster').default;
+var ToasterInstance = require('./toaster').default;
 
 module.exports = {
     onNewServiceWorker: function(registration, callback) {
@@ -34,7 +34,7 @@ module.exports = {
         );
     },
 
-    showNotification: function(registration, appTitle) {
+    showNotification: function(registration, appName) {
         const snackbarContainer = document.querySelector('#notification-bar');
         const handler = function() {
             if (!registration.waiting) {
@@ -48,7 +48,7 @@ module.exports = {
 
         if (snackbarContainer.MaterialSnackbar) {
             const data = {
-                message: `New version of ${appTitle} is available`,
+                message: `New version of ${appName} is available`,
                 actionHandler: handler,
                 actionText: 'Update',
                 timeout: 100000

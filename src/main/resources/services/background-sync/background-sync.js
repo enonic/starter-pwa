@@ -53,9 +53,9 @@ exports.post = function (req) {
 };
 
 exports.delete = function (req){
-    
-    var todoItem = JSON.parse(req.params.data);
-    if (!todoItem) {
+
+    var itemId = req.params.id;
+    if (!itemId) {
         var message = "Missing/invalid item data in request";
         log.warning(message);
         return { 
@@ -64,7 +64,7 @@ exports.delete = function (req){
         };
     }
 
-    var result = deleteTodoNode(todoItem);
+    var result = deleteTodoNode(itemId);
 
     if (result.status && Number(result.status) >= 400) {
         return result;
@@ -108,15 +108,15 @@ exports.put = function (req) {
 }
 
 exports.get = function(req) {
-    var data = req.params.data
+    var itemId = req.params.id;
     // log.info("DATA:" + data)
     var result;
-    if (data === undefined) {
+    if (!itemId) {
         // log.info("GET:" + new Date())
         result = getAllTodoItems();
     } else {
         // log.info("GET:" + data + new Date())
-        result = getItem(data)
+        result = getItem(itemId)
     }
 
     if (result.status && Number(result.status) >= 400) {
@@ -225,10 +225,10 @@ var createTodoNode = function (todoItem) {
     }
 };
 
-var deleteTodoNode = function (todoItem) {
+var deleteTodoNode = function (itemId) {
     try {
         
-        var result = pushRepo.deleteTodo(todoItem);
+        var result = pushRepo.deleteTodo(itemId);
         
         if (result === "NOT_FOUND") {
             return {
@@ -236,20 +236,23 @@ var deleteTodoNode = function (todoItem) {
                 message: "todoItem not found",
             }
 
-        } else if (result === "SUCCESS") { 
+        }
+
+        if (result === "SUCCESS") {
             return { success: true };
 
-        } else if (typeof result === 'string') {
+        }
+
+        if (typeof result === 'string') {
             return {
                 status: 500,
                 message: "Some nodes were not deleted",
-                nodeIds: result,
+                nodeIds: result
             }
 
         } 
-        else {
-            throw Error("Weird result from pushRepo.deleteSubscription:\n" + JSON.stringify({ result: result }, null, 2) + "\n");
-        }
+
+        throw Error("Weird result from pushRepo.deleteSubscription:\n" + JSON.stringify({ result: result }, null, 2) + "\n");
 
     } catch (e) {
         // log.error(e);
@@ -263,17 +266,21 @@ var deleteTodoNode = function (todoItem) {
 var changeTodoNode = function (todoItem) {
     try {
         var result = pushRepo.replaceTodo(todoItem);
-        return {result : result}; 
+
         if (result === "NOT_FOUND") {
             return {
                 status: 404,
                 message: "todoItem not found",
             }
 
-        } else if (result === "SUCCESS") {
+        }
+
+        if (result === "SUCCESS") {
             return { success: true };
 
-        } else if (typeof result === 'string') {
+        }
+
+        if (typeof result === 'string') {
             return {
                 status: 500,
                 message: "Some nodes were not deleted",
@@ -281,9 +288,8 @@ var changeTodoNode = function (todoItem) {
             }
 
         }
-        else {
-            throw Error("Weird result from pushRepo.deleteSubscription:\n" + JSON.stringify({ result: result }, null, 2) + "\n");
-        }
+
+        throw Error("Weird result from pushRepo.deleteSubscription:\n" + JSON.stringify({ result: result }, null, 2) + "\n");
 
     } catch (e) {
         // log.error(e);
