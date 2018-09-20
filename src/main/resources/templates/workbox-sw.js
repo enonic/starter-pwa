@@ -131,15 +131,16 @@ const synchronize = function() {
     return new Promise(resolve => {
 
         syncInProgress = true;
+    console.log('SW: starting syncing');
 
         // Open IndexedDB
         openDatabase().then(db => {
             // Call synchronise method in sync-helper.js
-            synchronise(db, syncServiceUrl).then(showNotification => {
+            pushLocalChanges(db, syncServiceUrl).then(showNotification => {
                 if (firstTimeOnline && showNotification) {
                     firstTimeOnline = false;
                 }
-
+    console.log('SW: changes synced');
                 sendMessageToClients({ message: 'sw-synced', notify: (firstTimeOnline && showNotification) });
                 syncInProgress = false;
 

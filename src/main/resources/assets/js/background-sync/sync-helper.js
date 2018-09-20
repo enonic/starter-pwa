@@ -16,7 +16,7 @@ const apiGet = (url, id) => apiCall('GET', url, id);
 
 const apiDelete = (url, id) => apiCall('DELETE', url, id);
 
-const apiPost = (method, url, item) =>
+const apiPost = (url, item, method) =>
     fetch(url, {
         body: JSON.stringify(item),
         method: method
@@ -32,12 +32,12 @@ const getItemsFromRepo = url =>
             )
     );
 
-// deleting all items in repo contained in a database
+// Delete from the online repository items that were deleted from the local storage
 const removeItemsFromRepo = (dbItems, url) =>
     Promise.all(dbItems.map(item => apiDelete(url, item.id)));
 
-// syncing offline changes with online repository
-const syncOfflineChanges = (dbItems, url) =>
+// Update the online repository according to changes in the local storage
+const updateItemsInRepo = (dbItems, url) =>
     Promise.all(
         dbItems.map(item => {
             if (item.synced) {
@@ -45,12 +45,12 @@ const syncOfflineChanges = (dbItems, url) =>
             }
 
             return apiGet(url, item.id).then(response =>
-                apiPost(response.status === 404 ? 'POST' : 'PUT', url, item)
+                apiPost(url, item, response.status === 404 ? 'POST' : 'PUT')
             );
         })
     );
 
-// Get items from specific store in the database
+// Get items from specific store in the local storage
 const getItemsFromStore = (db, storeName) =>
     new Promise((resolve, reject) => {
         const dbTransaction = db.transaction(storeName, 'readonly');
@@ -101,8 +101,11 @@ const addToStorage = (db, item, storeName) =>
     new Promise((resolve, reject) => {
         const dbStore = getStore(db, storeName || storeNames.offline);
         const dbOperation = dbStore.add(item);
-        dbOperation.onsuccess = event => resolve(event);
-        dbOperation.onerror = event => reject(event);
+        dbOperation.onsuccess = e => resolve(e);
+        dbOperation.onerror = e => {
+            debugger;
+            reject(e);
+        };
     });
 
 const addItemsToStorage = (db, items) =>
@@ -148,6 +151,35 @@ const replaceInStorage = (db, storeName, item) =>
         dbTransaction.onerror = e => reject(e);
     });
 
+const pullServerChanges = (db, syncServiceUrl) =>
+    new Promise(resolve =>
+        // Clear contents of the local storage
+        clearStorage(db).then(() =>
+            // Fetch all items from the remote repo
+            getItemsFromRepo(syncServiceUrl).then(repoItems =>
+                // Add all items from the repo to the local storage
+                addItemsToStorage(db, repoItems).then(() => resolve(repoItems))
+            )
+        )
+    );
+
+const pushLocalChanges = (db, syncServiceUrl) =>
+    new Promise((resolve, reject) =>
+        // Fetch items from the local storage
+        getItemsFromStorage(db).then(([deletedWhileOffline, dbItems]) =>
+            // Sync deletions in the local storage with remote repo
+            removeItemsFromRepo(deletedWhileOffline, syncServiceUrl).then(() =>
+                // Sync changes in the local storage with remote repo
+                updateItemsInRepo(dbItems, syncServiceUrl).then(syncPromises =>
+                    resolve(
+                        // Checks whether any changes were pushed
+                        syncPromises.some(promise => !!promise)
+                    )
+                )
+            )
+        )
+    );
+
 const synchronise = (db, syncServiceUrl) =>
     // Fetch items from IndexedDB
     new Promise((resolve, reject) => {
@@ -156,7 +188,7 @@ const synchronise = (db, syncServiceUrl) =>
             removeItemsFromRepo(deletedWhileOffline, syncServiceUrl).then(
                 () => {
                     // Sync changes in IndexedDB with remote repo
-                    syncOfflineChanges(dbItems, syncServiceUrl).then(
+                    updateItemsInRepo(dbItems, syncServiceUrl).then(
                         syncPromises => {
                             // Clear contents of IndexedDB
                             clearStorage(db).then(() => {
@@ -190,5 +222,7 @@ module.exports = {
     markAsDeleted: markAsDeleted,
     getItemsFromStore: getItemsFromStore,
     replaceInStorage: replaceInStorage,
-    synchronise: synchronise
+    synchronise: synchronise,
+    pullServerChanges: pullServerChanges,
+    pushLocalChanges: pushLocalChanges
 };
