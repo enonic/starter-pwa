@@ -66,7 +66,7 @@ var getSubscriptionObj = function(params) {
 
 var createSubscriptionNode = function (subscription) {
     try {
-        var node = pushRepo.storeSubscriptionAndGetNode(subscription);
+        var node = pushRepo.createSubscription(subscription);
         if (!node)  {
             // log.error("Tried creating subscripton node, but something seems wrong: " + JSON.stringify(
             //     {
