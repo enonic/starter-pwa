@@ -16,7 +16,7 @@ function isPWARepoNodeEvent(event) {
         return false;
     }
 
-    if (event.data.nodes[0].repo === 'com.enonic.starter.pwa') {
+    if (event.data.nodes[0].repo === app.name) {
         return true;
     }
 
