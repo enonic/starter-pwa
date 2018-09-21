@@ -25,7 +25,7 @@ const fetchItemsFromServerAndRender = debounce(
                 }
             )
         ),
-    10,
+    100,
     false
 );
 

@@ -71,7 +71,7 @@ var createRepo = function () {
 
 // ------------------------------------------------------------------------- Exports
 
-//exports.sudo = sudo;
+exports.sudo = sudo;
 
 exports.modifyNode = function(key, editor) {
     var repoConn = exports.getConnection();

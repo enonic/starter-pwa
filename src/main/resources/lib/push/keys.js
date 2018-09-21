@@ -5,7 +5,7 @@
 
 var notifications = require('/lib/notifications');
 var pushRepo = require('/lib/push/repo');
-
+var repoHelper = require('/lib/repo-helper');
 
 // --------------------------------------------------------------------------------  Initialization: key setup
 
@@ -25,12 +25,12 @@ var pushRepo = require('/lib/push/repo');
  * @returns {Keypair}
  */
 exports.getKeyPair = function () {
-    var keyPair = pushRepo.sudo(function () {
+    var keyPair = repoHelper.sudo(function () {
         return pushRepo.loadKeyPair();
     });
     if (!keyPair) {
         keyPair = notifications.generateKeyPair();
-        pushRepo.sudo(function () {
+        repoHelper.sudo(function () {
             pushRepo.storeKeyPair(keyPair);
         });
     }

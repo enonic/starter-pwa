@@ -3,7 +3,7 @@
  * Exposes a POST endpoint at <domain:port>/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/subscribe
  */
 
-
+var repoHelper = require('/lib/repo-helper');
 var pushRepo = require('/lib/push/repo');
 
 
@@ -36,8 +36,8 @@ exports.post = function (req) {
     }
 
     var result = (req.params.cancelSubscription) ?
-        pushRepo.sudo(function(){ return deleteSubscriptionNode(subscription); }) :
-        pushRepo.sudo(function(){ return createSubscriptionNode(subscription); });
+         repoHelper.sudo(function(){ return deleteSubscriptionNode(subscription); }) :
+         repoHelper.sudo(function(){ return createSubscriptionNode(subscription); });
 
     if (result.status && Number(result.status) >= 400) {
         return result;
