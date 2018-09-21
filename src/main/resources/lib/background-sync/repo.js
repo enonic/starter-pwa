@@ -41,14 +41,12 @@ exports.getItemById = function(id) {
 
 exports.createItem = function (item) {
     createBackgroundSyncNode(); 
-    var repoConn = repoHelper.getConnection();
 
-    var node = repoConn.create({
+    repoHelper.createNode({
         _parentPath: BACKGROUND_SYNC_PATH,
         item: item
-    })
+    });
 
-    repoConn.refresh();
     return node;
 };
 
@@ -70,7 +68,7 @@ exports.deleteItem = function (itemId) {
 
 exports.updateItem = function (item) {
 
-    var nodeId = findNodeByItemd(itemId);
+    var nodeId = findNodeByItemd(item.id);
 
     if (!nodeId) {
         return false;
@@ -82,26 +80,23 @@ exports.updateItem = function (item) {
         return node;
     };
 
-    var repoConn = repoHelper.getConnection();
-    var result = repoConn.modify({
-        key: nodeId,
-        editor: editor
-    });
+    var result = repoHelper.modifyNode(nodeId, editor);
 
+    var repoConn = repoHelper.getConnection();
     repoConn.refresh();
 
     return result;
 };
 
 exports.getItems = function(itemId) {
-
     createBackgroundSyncNode();
 
     var repoConn = repoHelper.getConnection();
     var query = "_parentPath = '" + BACKGROUND_SYNC_PATH + "'";
-    if (id) {
+    if (itemId) {
         query += "AND item.id = " + itemId;
     }
+
     var hits = repoConn.query({
         count: 1000,
         start: 0,
@@ -109,7 +104,7 @@ exports.getItems = function(itemId) {
     }).hits;
 
     if (!hits || hits.length < 1) {
-        return [];
+        return null;
     }
 
     return hits.map(function(hit) {

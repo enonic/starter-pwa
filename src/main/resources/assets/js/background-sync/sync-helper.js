@@ -23,11 +23,7 @@ const apiPost = (url, item, method) =>
 const getItemsFromRepo = url =>
     apiGet(url).then(response =>
         // item fetched from repo is an object called TodoItems, we are interested in it's values
-        response
-            .json()
-            .then(responseObj =>
-                responseObj.TodoItems.map(todoItem => todoItem.item)
-            )
+        response.json().then(responseObj => responseObj.TodoItems || [])
     );
 
 // Delete from the online repository items that were deleted from the local storage

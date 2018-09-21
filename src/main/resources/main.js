@@ -4,10 +4,11 @@ var portalLib = require('/lib/xp/portal');
 var siteTitle = 'PWA Starter';
 var localStorageName = 'Todolist';
 var mustache = require('/lib/xp/mustache');
+var repo = require('/lib/repo-helper');
 var pushRepo = require('/lib/push/repo');
 
 // Initialize repo on application initialization 
-pushRepo.initialize();
+repo.initialize();
 
 var pushKeys = require('/lib/push/keys');
 

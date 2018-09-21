@@ -83,13 +83,19 @@ exports.put = function (req) {
 
         var result = bsLib.updateItem(item);
 
+        if (!result) {
+            return {
+                status: 404,
+                body: 'NOT_FOUND'
+            }
+        }
+
         return {
             body: result,
             headers: {
                 "Content-Type": "application/json"
             }
         };
-
     } catch (e) {
 
         return {
@@ -102,21 +108,22 @@ exports.put = function (req) {
 exports.get = function(req) {
     try {
         var itemId = req.params.id;
-        // log.info("DATA:" + data)
         var result = bsLib.getItems(itemId);
 
-        log.info(JSON.stringify(result, null, 2));
+        if (itemId && !result) {
+            return {
+                status: 404,
+                body: 'NOT_FOUND'
+            }
+        }
 
         return {
-            body: {
-                TodoItems: result
-            },
+            body: { TodoItems: result || [] },
             headers: {
                 "Content-Type": "application/json"
             }
         };
     } catch (e) {
-        // log.error(e);
         return {
             status: 500,
             message: JSON.stringify(e),

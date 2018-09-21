@@ -71,6 +71,16 @@ var createRepo = function () {
 
 // ------------------------------------------------------------------------- Exports
 
+//exports.sudo = sudo;
+
+exports.modifyNode = function(key, editor) {
+    var repoConn = exports.getConnection();
+    return repoConn.modify({
+        key: key,
+        editor: editor
+    });
+};
+
 exports.initialize = function () {
     sudo(initRepo);
 };
@@ -109,7 +119,9 @@ exports.createNode = function(node) {
     var nodeObj = node;
 
     nodeObj._permissions = nodeObj._permissions || ROOT_PERMISSIONS;
-    exports.getConnection().create(node);
+    var conn = exports.getConnection();
+    conn.create(node);
+    conn.refresh();
 }
 
 var nodeWithPathExists = function (path) {
