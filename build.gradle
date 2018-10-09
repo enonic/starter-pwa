@@ -39,15 +39,15 @@ repositories {
     xp.enonicRepo()
 }
 
-task webpack(type: NodeTask) {
+task webpack(
+    dependsOn: npmInstall,
+    type: NodeTask
+) {
     script = file('node_modules/webpack/bin/webpack.js')
 }
 
-// processes your package.json before running webpack
-webpack.dependsOn 'npmInstall'
-webpack.dependsOn 'processResources'
+processResources.dependsOn webpack
 
-jar.dependsOn webpack
 task wrapper(type: Wrapper) {
     gradleVersion = '4.10.2'
 }
