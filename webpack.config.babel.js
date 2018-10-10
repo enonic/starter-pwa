@@ -1,6 +1,7 @@
 import path from 'path';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import { InjectManifest } from 'workbox-webpack-plugin';
+const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 // const ENV = process.env.NODE_ENV || 'development'; // console.log(env);
 const ENV = 'production';
@@ -52,6 +53,7 @@ module.exports = {
         library: ['Starter', '[name]']
     },
     plugins: [
+        new CleanWebpackPlugin(['build']),
         new MiniCssExtractPlugin({
             filename: 'bundles/css/main.css'
         }),
