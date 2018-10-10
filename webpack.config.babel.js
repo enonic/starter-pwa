@@ -53,7 +53,7 @@ module.exports = {
         library: ['Starter', '[name]']
     },
     plugins: [
-        new CleanWebpackPlugin(['build']),
+        new CleanWebpackPlugin([path.join(DST_ASSETS_DIR, 'precache-manifest*.*')]),
         new MiniCssExtractPlugin({
             filename: 'bundles/css/main.css'
         }),
