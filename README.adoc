@@ -255,7 +255,7 @@ First, let's change the default page to render a proper template instead of a si
 .main.js:
 [source,javascript]
 ----
-var thymeleaf = require('/lib/xp/thymeleaf');
+var thymeleaf = require('/lib/thymeleaf');
 var router = require('/lib/router');
 var portalLib = require('/lib/portal');
 
@@ -311,7 +311,7 @@ Now let's expand this to enable routing to other pages. Let's say, we need a new
 .main.js:
 [source,javascript]
 ----
-var thymeleaf = require('/lib/xp/thymeleaf');
+var thymeleaf = require('/lib/thymeleaf');
 var router = require('/lib/router')();
 
 router.get('/', function (req) {

@@ -1,9 +1,9 @@
-var thymeleaf = require('/lib/xp/thymeleaf');
+var thymeleaf = require('/lib/thymeleaf');
 var router = require('/lib/router')();
 var portalLib = require('/lib/xp/portal');
 var siteTitle = 'PWA Starter';
 var localStorageName = 'Todolist';
-var mustache = require('/lib/xp/mustache');
+var mustache = require('/lib/mustache');
 var repo = require('/lib/repo-helper');
 var pushRepo = require('/lib/push/repo');
 
