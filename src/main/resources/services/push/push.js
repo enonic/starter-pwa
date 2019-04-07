@@ -1,6 +1,6 @@
 /**
  * Server-side service for pushing notifications to all registered subscriptions.
- * Exposes a POST endpoint at <domain:port>/app/<appname>/_/service/<appname>/push
+ * Exposes a POST endpoint at <domain:port>/webapp/<appname>/_/service/<appname>/push
  */
 
 
