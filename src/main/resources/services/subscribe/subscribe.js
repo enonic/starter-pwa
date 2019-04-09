@@ -1,6 +1,6 @@
 /**
  * Server-side service for adding or removing subscriptions.
- * Exposes a POST endpoint at <domain:port>/app/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/subscribe
+ * Exposes a POST endpoint at <domain:port>/webapp/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/subscribe
  */
 
 var repoHelper = require('/lib/repo-helper');

@@ -1,6 +1,6 @@
 /**
  * Server-side service for handling background sync.
- * Exposes a POST endpoint at <domain:port>/app/<appname>/_/service/<appname>/background-sync
+ * Exposes a POST endpoint at <domain:port>/webapp/<appname>/_/service/<appname>/background-sync
  */
 
 

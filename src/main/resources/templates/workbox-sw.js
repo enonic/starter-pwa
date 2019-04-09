@@ -9,7 +9,7 @@ workbox.core.setCacheNameDetails({
     runtime: 'runtime'
 });
 
-workbox.clientsClaim();
+workbox.core.clientsClaim();
 
 const syncServiceUrl = '{{syncServiceUrl}}';
 const indexedDbName = '{{localStorageName}}';
@@ -31,14 +31,14 @@ workbox.precaching.precacheAndRoute([{
 /**
  * Make sure SW won't precache non-GET calls to service URLs
  */
-workbox.routing.registerRoute(new RegExp('{{serviceUrl}}/*'), workbox.strategies.networkOnly(), 'POST');
-workbox.routing.registerRoute(new RegExp('{{serviceUrl}}/*'), workbox.strategies.networkOnly(), 'PUT');
-workbox.routing.registerRoute(new RegExp('{{serviceUrl}}/*'), workbox.strategies.networkOnly(), 'DELETE');
+workbox.routing.registerRoute(new RegExp('{{serviceUrl}}/*'), new workbox.strategies.NetworkOnly(), 'POST');
+workbox.routing.registerRoute(new RegExp('{{serviceUrl}}/*'), new workbox.strategies.NetworkOnly(), 'PUT');
+workbox.routing.registerRoute(new RegExp('{{serviceUrl}}/*'), new workbox.strategies.NetworkOnly(), 'DELETE');
 
 /**
  * Sets the default caching strategy for the client: tries contacting the network first
  */
-workbox.routing.setDefaultHandler(workbox.strategies.networkFirst());
+workbox.routing.setDefaultHandler(new workbox.strategies.NetworkFirst());
 
 /**
  * Pass a message from the outside world to SW

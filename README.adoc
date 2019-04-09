@@ -10,47 +10,26 @@ powered by link:https://github.com/enonic/lib-router[Enonic Router library^].
 
 == Installation
 
-1.Make sure you have Enonic XP of version 6.12 or later installed locally. If not, http://xp.readthedocs.io/en/stable/getstarted/other.html#download-enonic-xp[read how to install it here]
+1.Make sure you have Enonic XP of version 7.0.0 or later installed locally. If not, https://developer.enonic.com/start[read here about how to get started]
 
-2.Set up environment variable XP_INSTALL that points to the XP installation folder:
+2.While using Enonic CLI to create a new project, choose **PWA starter** when asked what type of started you want to base your new project on.
 
-=== OSX/Linux
-
-`export XP_INSTALL=/Users/ase/Downloads/enonic-xp-6.13.0-SNAPSHOT`
-
-=== Windows
-
-`set XP_INSTALL=/Users/ase/Downloads/enonic-xp-6.13.0-SNAPSHOT`
-
-3.Create a new folder for your application
-
-4.Initialize the app based on this Starter kit by running the following command (for more info on project initialisation,
-read http://xp.readthedocs.org/en/stable/reference/toolbox/init-project.html[the documentation for init-project])
-
-=== OSX/Linux
-
-`$XP_INSTALL/toolbox/toolbox.sh init-project -n com.company.myapp -r starter-pwa`
-
-=== Windows
-
-`$XP_INSTALL/toolbox/toolbox.bat init-project -n com.company.myapp -r starter-pwa`
-
-TIP: Replace ``com.company.myapp`` with a unique name of your app.
-
-5.You can now build the app by running the following from inside the app's folder:
+3.Once CLI has set up your new project based on PWA Starter, go to the newly created project folder, build and deploy the application:
 [source,groovy]
 ----
-gradlew build deploy
+$ cd mytest
+$ enonic project deploy
 ----
 
-6.If the build completed without errors you will have a new jar file in the `<$XP_INSTALL>/home/deploy` folder.
+4.If the build completed without errors, you can now open your app in the browser via ``http://localhost:8080/webapp/com.company.myapp``
+(replace ``com.company.myapp`` with whatever name you picked for your app when creating the project with CLI)
 
 
 == Usage and Testing of PWA
 
 We assume that XP service is running on ``localhost:8000`` and your app is called ``com.company.myapp`` as in the example above.
 
-1. Open http://localhost:8080/app/com.company.myapp in your browser. You should see this:
+1. Open ``http://localhost:8080/webapp/com.company.myapp`` in your browser. You should see this:
 
 image::main-page.png[]
 
@@ -91,15 +70,15 @@ a call to ``/sw.js`` file in the site root.
 
 == Dependencies
 
-``js/main.js`` is used as entry point for the Webpack builder, so make sure you add the first level of dependencies to this file (using ``require``).
-For example, if ``js/main.js`` is using a LESS file called ``styles.less``, add the following line to the ``main.js``:
+``assets/js/app.js`` is used as entry point for the Webpack builder, so make sure you add the first level of dependencies to this file (using ``require``).
+For example, if ``assets/js/app.js`` is using a LESS file called ``styles.less``, add the following line to the ``app.js``:
 
 [source,javascript]
 ----
 require('../css/styles.less');
 ----
 
-Same with JS-dependencies. For example, to include a file called ``new.js`` from the same ``js`` folder add this line to ``main.js``:
+Same with JS-dependencies. For example, to include a file called ``new.js`` from the same ``js`` folder add this line to ``app.js``:
 
 [source,javascript]
 ----
@@ -108,7 +87,7 @@ require('../js/new.js');
 
 You can then require other LESS or JS files directly from ``new.js`` effectively building a chain of dependencies that Webpack will resolve during the build.
 
-As mentioned before, the build process will bundle all LESS and JS assets into bundle.css and bundle.js files in the ``precache`` folder which can then
+As mentioned before, the build process will bundle all LESS and JS assets into ``bundle.css`` and ``bundle.js`` files in the ``precache`` folder which can then
 be referenced directly from the ``main.html`` page.
 
 
@@ -123,32 +102,46 @@ considered *static* to current version of the application.
 .workbox-sw.js:
 [source,javascript]
 ----
-importScripts('https://unpkg.com/workbox-sw@2.0.1/build/importScripts/workbox-sw.prod.v2.0.1.js');
-
-const workboxSW = new self.WorkboxSW({
-    skipWaiting: true,
-    clientsClaim: true
+workbox.core.setCacheNameDetails({
+    prefix: 'enonic-pwa-starter',
+    suffix: '{{appVersion}}',
+    precache: 'precache',
+    runtime: 'runtime'
 });
 
-workboxSW.precache([]);
+workbox.core.clientsClaim();
+
+workbox.precaching.precacheAndRoute(self.__precacheManifest || []);
 ----
 
-Empty square brackets in the last line is the placeholder which after the build will be filled with paths to actual assets from the
-``precache`` folder, something like this:
+The last line above injects generated manifest of assets that are supposed to be precached upon application startup.
+The manifest itself is generated during the app build based on settings in the webpack config file.
 
 [source,javascript]
 ----
-
-workboxSW.precache([
+self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "url": "precache/bundle.css",
-    "revision": "1b451da7e8b3ac2ba02b18e9bfa41fd3"
+    "revision": "9af72b212f21ac3c25ef",
+    "url": "bundles/css/main.css"
   },
   {
-    "url": "precache/bundle.js",
-    "revision": "610b07928b24eaf801d3d37b43256471"
-  }
-]);
+    "revision": "532cfce048fb3cbb252e",
+    "url": "bundles/js/app-bundle.js"
+  }]
+);
+----
+
+By default, the manifest will contain all of the files processed by Webpack (ie bundled assets), so if you want to precache additional resources you will
+have to specify them via ``globDirectory`` and ``globPatterns`` properties of the Workbox plugin config.
+
+[source,javascript]
+----
+new InjectManifest({
+    globDirectory: DST_ASSETS_DIR,
+    globPatterns: ['precache/**/*.*'],
+    swSrc: path.join(__dirname, SRC_DIR, 'templates/workbox-sw.js'),
+    swDest: path.join(__dirname, DST_DIR, 'templates/sw.js')
+})
 ----
 
 == Precaching custom assets
@@ -160,16 +153,7 @@ Add a new asset with ``revision`` and ``url`` properties in the call to ``precac
 .workbox-sw.js:
 [source,javascript]
 ----
-workbox.core.setCacheNameDetails({
-    prefix: 'enonic-pwa-starter',
-    suffix: '{{appVersion}}',
-    precache: 'precache',
-    runtime: 'runtime'
-});
-
-workbox.clientsClaim();
-
-workbox.precaching.precacheAndRoute(self.__precacheManifest || []);
+...
 
 // Here we precache custom defined Urls
 workbox.precaching.precacheAndRoute([{
@@ -211,7 +195,7 @@ title, color scheme, display settings and favicon. Feel free to change the prede
 
 Default favicon used by the Starter is called ``icon.png`` and located in ``precache/icons/`` folder, so you can simply replace this icon with
 your own of the same name. If you want to use a different icon file, add it to the same location and change ``page.html`` to point to the new icon. Don't
-forget to make same changes in ``manifest.json``.
+forget to make the same changes in ``manifest.json``.
 
 .main.html:
 [source,html]
@@ -223,11 +207,11 @@ forget to make same changes in ``manifest.json``.
 == main.js
 
 This Starter is not a traditional site with plain HTML pages - everything is driven by a controller.
-Just like ``resources/assets/js/main.js`` is an entry point of the Starter's client-side bundle, ``resources/main.js`` is an entry point
-and the main controller for the server-side execution. Setting it up is simple - just add handler of the GET request to ``main.js`` file and
+Just like ``resources/assets/js/app.js`` is an entry point of the Starter's client-side bundle, ``resources/webapp/webapp.js`` is an entry point
+and the main controller for the server-side execution. Setting it up is simple - just add handler of the GET request to ``webapp.js`` file and
 return response in form of rendered template or a simple string:
 
-.main.js:
+.webapp.js:
 [source,html]
 ----
 exports.get = function (req) {
@@ -238,7 +222,7 @@ exports.get = function (req) {
 ----
 
 If your application name is ``com.enonic.starter.pwa`` and Enonic web server is launched on ``localhost:8000`` then
-``http://localhost:8080/app/com.enonic.starter.pwa/`` will open the main page of your app.
+``http://localhost:8080/webapp/com.enonic.starter.pwa/`` will open the main page of your app.
 
 == Page rendering
 
@@ -255,9 +239,9 @@ First, let's change the default page to render a proper template instead of a si
 .main.js:
 [source,javascript]
 ----
-var thymeleaf = require('/lib/xp/thymeleaf');
+var thymeleaf = require('/lib/thymeleaf');
 var router = require('/lib/router');
-var portalLib = require('/lib/portal');
+var portalLib = require('/lib/xp/portal');
 
 router.get('/', function (req) {
     return {
@@ -311,7 +295,7 @@ Now let's expand this to enable routing to other pages. Let's say, we need a new
 .main.js:
 [source,javascript]
 ----
-var thymeleaf = require('/lib/xp/thymeleaf');
+var thymeleaf = require('/lib/thymeleaf');
 var router = require('/lib/router')();
 
 router.get('/', function (req) {
@@ -379,23 +363,23 @@ strategy but you can specify a different strategy for specific pages.
 /**
  * Make sure SW won't precache non-GET calls to service URLs
  */
-workbox.routing.registerRoute(new RegExp('{{serviceUrl}}/*'), workbox.strategies.networkOnly(), 'POST');
-workbox.routing.registerRoute(new RegExp('{{serviceUrl}}/*'), workbox.strategies.networkOnly(), 'PUT');
-workbox.routing.registerRoute(new RegExp('{{serviceUrl}}/*'), workbox.strategies.networkOnly(), 'DELETE');
+workbox.routing.registerRoute(new RegExp('{{serviceUrl}}/*'), new workbox.strategies.NetworkOnly(), 'POST');
+workbox.routing.registerRoute(new RegExp('{{serviceUrl}}/*'), new workbox.strategies.NetworkOnly(), 'PUT');
+workbox.routing.registerRoute(new RegExp('{{serviceUrl}}/*'), new workbox.strategies.NetworkOnly(), 'DELETE');
 
 /**
  * Sets the default caching strategy for the client: tries contacting the network first
  */
-workbox.routing.setDefaultHandler(workbox.strategies.networkFirst());
+workbox.routing.setDefaultHandler(new workbox.strategies.NetworkFirst());
 
 workboxSW.routing.registerRoute(
     '{{baseUrl}}/about',
-    workboxSW.strategies.cacheFirst()
+    new workboxSW.strategies.CacheFirst()
 );
 
 workboxSW.routing.registerRoute(
     '//fonts.gstatic.com/s/materialicons/*',
-    workboxSW.strategies.cacheFirst()
+    new workboxSW.strategies.CacheFirst()
 );
 
 ----
@@ -404,5 +388,5 @@ Here we specify default caching strategy for the entire app and then specific ca
 requests to the 3rd-party font file on an external URL.
 
 TIP: Note that we by default are using _networkFirst_ strategy which means that Service Worker will first check for the fresh
-version from the network and fall back to the cached version if the network is down.
+version from the network and fall back to the cached version only if the network is down.
 Read more about possible caching strategies https://workboxjs.org/reference-docs/latest/module-workbox-runtime-caching.html[here].
