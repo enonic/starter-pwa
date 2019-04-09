@@ -112,8 +112,10 @@ exports.get = function(req) {
 
         if (itemId && !result) {
             return {
-                status: 404,
-                body: 'NOT_FOUND'
+                body: { TodoItems: [] },
+                headers: {
+                    "Content-Type": "application/json"
+                }
             }
         }
 

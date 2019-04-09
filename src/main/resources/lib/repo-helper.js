@@ -115,13 +115,15 @@ exports.createNodeWithPath = function (nodePath) {
     });
 };
 
-exports.createNode = function(node) {
-    var nodeObj = node;
+exports.createNode = function(nodeData) {
+    var nodeObj = nodeData;
 
     nodeObj._permissions = nodeObj._permissions || ROOT_PERMISSIONS;
     var conn = exports.getConnection();
-    conn.create(node);
+    var node = conn.create(nodeData);
     conn.refresh();
+
+    return node;
 }
 
 var nodeWithPathExists = function (path) {

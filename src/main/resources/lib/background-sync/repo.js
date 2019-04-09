@@ -42,12 +42,10 @@ exports.getItemById = function(id) {
 exports.createItem = function (item) {
     createBackgroundSyncNode(); 
 
-    repoHelper.createNode({
+    return repoHelper.createNode({
         _parentPath: BACKGROUND_SYNC_PATH,
         item: item
     });
-
-    return node;
 };
 
 exports.deleteItem = function (itemId) {

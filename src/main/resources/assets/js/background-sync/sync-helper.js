@@ -39,7 +39,15 @@ const updateItemsInRepo = (dbItems, url) =>
             }
 
             return apiGet(url, item.id).then(response =>
-                apiPost(url, item, response.status === 404 ? 'POST' : 'PUT')
+                response
+                    .json()
+                    .then(responseObj =>
+                        apiPost(
+                            url,
+                            item,
+                            responseObj.TodoItems.length ? 'PUT' : 'POST'
+                        )
+                    )
             );
         })
     );
