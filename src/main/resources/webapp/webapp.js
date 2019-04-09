@@ -48,7 +48,7 @@ function renderPage(pageId, title) {
         };
     }
     return {
-        body: thymeleaf.render(resolve('../templates/page.html'), model),
+        body: thymeleaf.render(resolve('/templates/page.html'), model),
     };
 }
 
@@ -61,7 +61,7 @@ function renderSW() {
         },
         contentType: 'application/javascript',
         // sw.js will be generated during build by Workbox from webpack.config.js
-        body: mustache.render(resolve('../templates/sw.js'), {
+        body: mustache.render(resolve('/templates/sw.js'), {
             appUrl: appUrl,
             appVersion: app.version,
             appName: app.name,
@@ -78,7 +78,7 @@ function renderManifest() {
 
     return {
         contentType: 'application/json',
-        body: mustache.render(resolve('../templates/manifest.json'), {
+        body: mustache.render(resolve('/templates/manifest.json'), {
             startUrl: getAppUrl() + '?source=web_app_manifest'
         })
     };
