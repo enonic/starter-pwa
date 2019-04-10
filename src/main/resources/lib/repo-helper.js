@@ -103,7 +103,7 @@ exports.getConnection = function() {
  */
 exports.createNodeWithPath = function (nodePath) {
     // create node if it des not already exist
-    var nodeExists = nodeWithPathExists(nodePath);
+    var nodeExists = exports.nodeWithPathExists(nodePath);
     if (nodeExists) {
         // Node exists
         return;
@@ -126,7 +126,7 @@ exports.createNode = function(nodeData) {
     return node;
 }
 
-var nodeWithPathExists = function (path) {
+exports.nodeWithPathExists = function (path) {
     var result = exports.getConnection().query({
         start: 0,
         count: 0,

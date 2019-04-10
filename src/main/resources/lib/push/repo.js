@@ -93,6 +93,9 @@ exports.storeKeyPair = function (keyPair) {
 };
 
 exports.deleteAllSubscriptions = function() {
+    if (!repoHelper.nodeWithPathExists(PUSH_SUBSCRIPTIONS_PATH)) {
+        return;
+    }
     var subscriptionNodes = exports.getSubscriptions();
     for (var i = 0; i < subscriptionNodes.hits.length; i++) {
         var node = exports.getSubscriptionById(subscriptionNodes.hits[i].id);
