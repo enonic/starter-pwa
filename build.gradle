@@ -46,5 +46,4 @@ task webpack(
     script = file('node_modules/webpack/bin/webpack.js')
 }
 
-processResources.dependsOn webpack
-jar.dependsOn processResources
+jar.dependsOn webpack
