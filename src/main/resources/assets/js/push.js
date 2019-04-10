@@ -99,6 +99,8 @@ function updateGUI() {
         elemSubscribeStatus.classList.remove('blocked');
         elemSubscribeButton.textContent = 'Unsubscribe';
         elemSubscribeButton.classList.add('subscribing');
+        elemPushField.disabled = false;
+        elemPushButton.disabled = false;
     } else {
         elemSubscribeStatus.textContent = 'Unsubscribed from notifications';
         elemSubscribeStatus.classList.remove('subscribing');

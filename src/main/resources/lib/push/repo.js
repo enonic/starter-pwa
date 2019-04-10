@@ -91,3 +91,11 @@ exports.storeKeyPair = function (keyPair) {
         }
     });
 };
+
+exports.deleteAllSubscriptions = function() {
+    var subscriptionNodes = exports.getSubscriptions();
+    for (var i = 0; i < subscriptionNodes.hits.length; i++) {
+        var node = exports.getSubscriptionById(subscriptionNodes.hits[i].id);
+        exports.deleteSubscription(node.subscription);
+    }
+};

@@ -47,3 +47,4 @@ task webpack(
 }
 
 processResources.dependsOn webpack
+jar.dependsOn processResources
