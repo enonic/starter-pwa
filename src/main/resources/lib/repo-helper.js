@@ -12,7 +12,7 @@ var REPO_NAME = app.name;
 var REPO_BRANCH = 'master';
 var REPO_USER = {
     login: 'su',
-    userStore: 'system'
+    idProvider: 'system'
 };
 var REPO_PRINCIPAL = ["role:system.admin"];
 
