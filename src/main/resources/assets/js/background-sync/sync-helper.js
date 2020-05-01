@@ -20,28 +20,28 @@ const apiPost = (url, item, method) =>
         method: method
     });
 
-const getItemsFromRepo = url =>
-    apiGet(url).then(response =>
+const getItemsFromRepo = (url) =>
+    apiGet(url).then((response) =>
         // item fetched from repo is an object called TodoItems, we are interested in it's values
-        response.json().then(responseObj => responseObj.TodoItems || [])
+        response.json().then((responseObj) => responseObj.TodoItems || [])
     );
 
 // Delete from the online repository items that were deleted from the local storage
 const removeItemsFromRepo = (dbItems, url) =>
-    Promise.all(dbItems.map(item => apiDelete(url, item.id)));
+    Promise.all(dbItems.map((item) => apiDelete(url, item.id)));
 
 // Update the online repository according to changes in the local storage
 const updateItemsInRepo = (dbItems, url) =>
     Promise.all(
-        dbItems.map(item => {
+        dbItems.map((item) => {
             if (item.synced) {
                 return null;
             }
 
-            return apiGet(url, item.id).then(response =>
+            return apiGet(url, item.id).then((response) =>
                 response
                     .json()
-                    .then(responseObj =>
+                    .then((responseObj) =>
                         apiPost(
                             url,
                             item,
@@ -60,7 +60,7 @@ const getItemsFromStore = (db, storeName) =>
         const dbCursor = dbStore.openCursor();
         const items = [];
 
-        dbCursor.onsuccess = e => {
+        dbCursor.onsuccess = (e) => {
             const cursor = e.target.result;
 
             if (cursor) {
@@ -70,16 +70,16 @@ const getItemsFromStore = (db, storeName) =>
                 });
                 cursor.continue();
             } else {
-                resolve(items.map(node => node.value));
+                resolve(items.map((node) => node.value));
             }
         };
 
-        dbCursor.onerror = e => {
+        dbCursor.onerror = (e) => {
             reject(e);
         };
     });
 
-const getItemsFromStorage = db =>
+const getItemsFromStorage = (db) =>
     Promise.all([
         getItemsFromStore(db, storeNames.deleted),
         getItemsFromStore(db, storeNames.offline)
@@ -95,8 +95,8 @@ const clearStore = (db, storeName) =>
     new Promise((resolve, reject) => {
         const dbStore = getStore(db, storeName);
         const dbOperation = dbStore.clear();
-        dbOperation.onsuccess = event => resolve(event);
-        dbOperation.onerror = event => reject(event);
+        dbOperation.onsuccess = (event) => resolve(event);
+        dbOperation.onerror = (event) => reject(event);
     });
 
 const addToStorage = (db, item, storeName) =>
@@ -104,25 +104,25 @@ const addToStorage = (db, item, storeName) =>
         const store = storeName || storeNames.offline;
         const dbTransaction = db.transaction(store, 'readwrite');
 
-        dbTransaction.oncomplete = e => resolve(e);
-        dbTransaction.onabort = e => reject(e);
-        dbTransaction.onerror = e => reject(e);
+        dbTransaction.oncomplete = (e) => resolve(e);
+        dbTransaction.onabort = (e) => reject(e);
+        dbTransaction.onerror = (e) => reject(e);
 
         const dbStore = dbTransaction.objectStore(store);
         dbStore.add(item);
     });
 
 const addItemsToStorage = (db, items) =>
-    Promise.all(items.map(item => addToStorage(db, item)));
+    Promise.all(items.map((item) => addToStorage(db, item)));
 
 const deleteFromStorage = (db, key) =>
     new Promise((resolve, reject) => {
         const storeName = storeNames.offline;
         const dbTransaction = db.transaction(storeName, 'readwrite');
 
-        dbTransaction.oncomplete = e => resolve(e);
-        dbTransaction.onabort = e => reject(e);
-        dbTransaction.onerror = e => reject(e);
+        dbTransaction.oncomplete = (e) => resolve(e);
+        dbTransaction.onabort = (e) => reject(e);
+        dbTransaction.onerror = (e) => reject(e);
 
         const dbStore = dbTransaction.objectStore(storeName);
         const dbOperation = dbStore.get(key);
@@ -137,7 +137,7 @@ const markAsDeleted = (db, item) =>
         deleteFromStorage(db, item.id)
     );
 
-const clearStorage = db =>
+const clearStorage = (db) =>
     Promise.all([
         clearStore(db, storeNames.deleted),
         clearStore(db, storeNames.offline)
@@ -151,16 +151,16 @@ const replaceInStorage = (db, storeName, item) =>
 
         dbTransaction.oncomplete = () => resolve(dbRequest.result);
 
-        dbTransaction.onabort = e => reject(e);
-        dbTransaction.onerror = e => reject(e);
+        dbTransaction.onabort = (e) => reject(e);
+        dbTransaction.onerror = (e) => reject(e);
     });
 
 const pullServerChanges = (db, syncServiceUrl) =>
-    new Promise(resolve =>
+    new Promise((resolve) =>
         // Clear contents of the local storage
         clearStorage(db).then(() =>
             // Fetch all items from the remote repo
-            getItemsFromRepo(syncServiceUrl).then(repoItems =>
+            getItemsFromRepo(syncServiceUrl).then((repoItems) =>
                 // Add all items from the repo to the local storage
                 addItemsToStorage(db, repoItems).then(() => resolve(repoItems))
             )
@@ -168,18 +168,19 @@ const pullServerChanges = (db, syncServiceUrl) =>
     );
 
 const pushLocalChanges = (db, syncServiceUrl) =>
-    new Promise(resolve =>
+    new Promise((resolve) =>
         // Fetch items from the local storage
         getItemsFromStorage(db).then(([deletedWhileOffline, dbItems]) =>
             // Sync deletions in the local storage with remote repo
             removeItemsFromRepo(deletedWhileOffline, syncServiceUrl).then(() =>
                 // Sync changes in the local storage with remote repo
-                updateItemsInRepo(dbItems, syncServiceUrl).then(syncPromises =>
-                    resolve(
-                        // Checks whether any changes were pushed
-                        deletedWhileOffline.length > 0 ||
-                            syncPromises.some(promise => !!promise)
-                    )
+                updateItemsInRepo(dbItems, syncServiceUrl).then(
+                    (syncPromises) =>
+                        resolve(
+                            // Checks whether any changes were pushed
+                            deletedWhileOffline.length > 0 ||
+                                syncPromises.some((promise) => !!promise)
+                        )
                 )
             )
         )

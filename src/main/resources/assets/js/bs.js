@@ -16,9 +16,9 @@ let backgroundSyncSupported = false;
 
 const fetchItemsFromServerAndRender = debounce(
     () =>
-        IndexedDBInstance().then(db =>
+        IndexedDBInstance().then((db) =>
             SyncHelper.pullServerChanges(db, getSyncServiceUrl()).then(
-                items => {
+                (items) => {
                     createTodoItems(items);
                     renderTodoItems();
                 }
@@ -28,13 +28,13 @@ const fetchItemsFromServerAndRender = debounce(
     false
 );
 
-const pushChanges = function() {
+const pushChanges = function () {
     if (!navigator.onLine) {
         hasOfflineChanges = true;
     }
     if (navigator.serviceWorker) {
         // Browser supports service worker
-        navigator.serviceWorker.ready.then(function(registration) {
+        navigator.serviceWorker.ready.then(function (registration) {
             if (registration.sync) {
                 // Browser supports background syncing
                 backgroundSyncSupported = true;
@@ -50,16 +50,16 @@ const pushChanges = function() {
     }
 };
 
-const pushManually = function() {
+const pushManually = function () {
     if (pushInProgress || !navigator.onLine) {
         return;
     }
 
     pushInProgress = true;
 
-    IndexedDBInstance().then(db => {
+    IndexedDBInstance().then((db) => {
         SyncHelper.pushLocalChanges(db, getSyncServiceUrl()).then(
-            changesMade => {
+            (changesMade) => {
                 pushInProgress = false;
                 if (changesMade) {
                     fetchItemsFromServerAndRender();
@@ -79,9 +79,9 @@ const updateUI = () => {
     updateListenersFor.everything();
 };
 
-const createTodoItems = items => {
+const createTodoItems = (items) => {
     todoItems = items.map(
-        item =>
+        (item) =>
             new TodoItem(
                 item.text,
                 item.date,
@@ -129,7 +129,7 @@ const addTodo = () => {
         const item = new TodoItem(inputfield.value, new Date(), false);
         todoItems.push(item);
         renderTodoItems();
-        IndexedDBInstance().then(db =>
+        IndexedDBInstance().then((db) =>
             SyncHelper.addToStorage(db, item).then(() => {
                 pushChanges();
             })
@@ -148,15 +148,15 @@ const addTodo = () => {
  * Removes the item associated with the clicked button
  * @param event may be event or TodoItem
  */
-const removeTodo = event => {
-    searchAndApply(event.target.id, todoItem => {
+const removeTodo = (event) => {
+    searchAndApply(event.target.id, (todoItem) => {
         const removeIndex = todoItems.findIndex(
-            item => item.id === todoItem.id
+            (item) => item.id === todoItem.id
         );
         todoItems.splice(removeIndex, 1);
         renderTodoItems();
 
-        IndexedDBInstance().then(db =>
+        IndexedDBInstance().then((db) =>
             SyncHelper.markAsDeleted(db, todoItem).then(() => pushChanges())
         );
     });
@@ -217,9 +217,9 @@ const updateTodoView = () => {
  * edits an item based on onclick
  * updates storage
  */
-const editItemText = event => {
+const editItemText = (event) => {
     const id = event.target.id;
-    searchAndApply(id, item => {
+    searchAndApply(id, (item) => {
         const changedItem = item;
         if (
             event.target.value.trim() !== '' &&
@@ -233,9 +233,9 @@ const editItemText = event => {
 /**
  * Takes the DOM element and makes it TodoItem counterpart checked/unchecked
  */
-const checkTodo = checkboxElement => {
+const checkTodo = (checkboxElement) => {
     const id = checkboxElement.id;
-    searchAndApply(id, item => {
+    searchAndApply(id, (item) => {
         const changedItem = item;
         changedItem.completed = !item.completed;
         registerChange(changedItem, SyncHelper.storeNames.offline);
@@ -251,14 +251,14 @@ const registerChange = (item, storeName) => {
     const changedItem = item;
     changedItem.changed = true;
     changedItem.synced = false;
-    IndexedDBInstance().then(db =>
+    IndexedDBInstance().then((db) =>
         SyncHelper.replaceInStorage(db, storeName, changedItem).then(() => {
             pushChanges();
             renderTodoItems();
         })
     );
 };
-const changeLabelToInput = textfield => {
+const changeLabelToInput = (textfield) => {
     const label = textfield.innerHTML;
     lastItemName = label;
     const parent = textfield.parentNode;
@@ -327,7 +327,7 @@ const updateListenersFor = {
         for (const inputfield of document.getElementsByClassName(
             'todo-app__inputfield'
         )) {
-            inputfield.addEventListener('keydown', event => {
+            inputfield.addEventListener('keydown', (event) => {
                 if (event.keyCode === 13) {
                     inputfield.blur();
                 } else if (event.keyCode === 27) {
@@ -355,14 +355,14 @@ const focusNewTodoField = () => {
 };
 
 const showToastNotification = () =>
-    ToasterInstance().then(toaster =>
+    ToasterInstance().then((toaster) =>
         toaster.toast('Offline changes are synced')
     );
 
 // Whenever data is updated on the server, websocket will notify
 // all clients so that they could fetch it and update UI
 const ws = new WebSocket(sync_data.wsUrl, ['sync_data']);
-ws.onmessage = e => {
+ws.onmessage = (e) => {
     if (e.data === 'refresh' && !pushInProgress) {
         fetchItemsFromServerAndRender();
     }
@@ -384,19 +384,21 @@ window.addEventListener('online', () => {
 });
 
 document.getElementById('add-todo-button').onclick = addTodo;
-document.getElementById('add-todo-text').addEventListener('keydown', event => {
-    // actions on enter
-    if (event.keyCode === 13) {
-        addTodo();
-    }
-});
+document
+    .getElementById('add-todo-text')
+    .addEventListener('keydown', (event) => {
+        // actions on enter
+        if (event.keyCode === 13) {
+            addTodo();
+        }
+    });
 
 /**
  * Listen to serviceworker
  */
 
 if (navigator.serviceWorker) {
-    navigator.serviceWorker.addEventListener('message', event => {
+    navigator.serviceWorker.addEventListener('message', (event) => {
         if (event.data.message === 'sw-sync-start') {
             pushInProgress = true;
         }

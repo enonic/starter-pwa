@@ -4,7 +4,7 @@ require('../css/styles.less');
 var ToasterInstance = require('./toaster').default;
 
 module.exports = {
-    onNewServiceWorker: function(registration, callback) {
+    onNewServiceWorker: function (registration, callback) {
         if (registration.waiting) {
             // SW is waiting to activate. Can occur if multiple clients open and
             // one of the clients is refreshed.
@@ -12,7 +12,7 @@ module.exports = {
         }
 
         function listenInstalledStateChange() {
-            registration.installing.addEventListener('statechange', function(
+            registration.installing.addEventListener('statechange', function (
                 event
             ) {
                 if (event.target.state === 'installed') {
@@ -34,9 +34,9 @@ module.exports = {
         );
     },
 
-    showNotification: function(registration, appName) {
+    showNotification: function (registration, appName) {
         const snackbarContainer = document.querySelector('#notification-bar');
-        const handler = function() {
+        const handler = function () {
             if (!registration.waiting) {
                 // Just to ensure registration.waiting is available before
                 // calling postMessage()
@@ -61,17 +61,17 @@ module.exports = {
     }
 };
 
-(function() {
-    window.onload = function() {
+(function () {
+    window.onload = function () {
         const mainContainer = document.getElementById('main-container');
 
         if (!mainContainer) {
             return;
         }
 
-        const toggleOnlineStatus = function() {
+        const toggleOnlineStatus = function () {
             if (!navigator.onLine) {
-                ToasterInstance().then(toaster => {
+                ToasterInstance().then((toaster) => {
                     toaster.toast('Connection is off.');
                 });
             }

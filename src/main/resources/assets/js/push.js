@@ -35,12 +35,12 @@ var displayingError = false;
 if ('serviceWorker' in navigator && 'PushManager' in window) {
     // Service Worker and Push is supported
     navigator.serviceWorker.ready.then(
-        function(reg) {
+        function (reg) {
             // Service Worker is ready
             swRegistration = reg;
             initializeUI();
         },
-        function(err) {
+        function (err) {
             displayErrorStatus('Service Worker is not ready.', false, err);
         }
     );
@@ -57,7 +57,7 @@ function initializeUI() {
     elemPushButton.addEventListener('click', clickPushButton);
 
     // Get the initial subscription state and store it
-    swRegistration.pushManager.getSubscription().then(function(subscr) {
+    swRegistration.pushManager.getSubscription().then(function (subscr) {
         var subscription = JSON.parse(JSON.stringify(subscr || {}));
         var keys = subscription.keys || {};
 
@@ -179,7 +179,7 @@ function clickSubscriptionButton(event) {
         unsubscribeUser();
     } else {
         requestPermissionIfNeeded()
-            .then(function(permission) {
+            .then(function (permission) {
                 // Setting new notification permission
                 if (permission === 'granted') {
                     subscribeUser();
@@ -187,12 +187,12 @@ function clickSubscriptionButton(event) {
                     updateGUI();
                 }
             })
-            .catch(function(err) {
+            .catch(function (err) {
                 displayErrorStatus('Failed to subscribe the user', false, err);
                 if (!isSubscribed) {
                     swRegistration.pushManager
                         .getSubscription()
-                        .then(function(subscription) {
+                        .then(function (subscription) {
                             if (subscription) {
                                 return subscription.unsubscribe();
                             }
@@ -250,7 +250,7 @@ function subscribeUser() {
             applicationServerKey: applicationServerKey
         })
         .then(updateSubscriptionOnServer)
-        .catch(function(err) {
+        .catch(function (err) {
             displayErrorStatus('Failed to subscribe the user', false, err);
             cancelSubscriptionLocally();
         });
@@ -269,7 +269,6 @@ function updateSubscriptionOnServer(subscription) {
     }
 
     var url = $subscribeForm.attr('action');
-    console.log('url', url);
     const subObj = JSON.parse(JSON.stringify(subscription));
 
     const params = {
@@ -281,7 +280,7 @@ function updateSubscriptionOnServer(subscription) {
     postApiCall(
         url,
         params,
-        function(data) {
+        function (data) {
             if ((data || {}).success === true) {
                 // Successfully subscribed to push notification
                 subscriptionEndpoint = params.endpoint;
@@ -304,7 +303,7 @@ function updateSubscriptionOnServer(subscription) {
             broadcastSubscriberCountChange();
         },
 
-        function(error) {
+        function (error) {
             isSubscribed = false;
             displayErrorStatus(
                 'Failed to subscribe to push notifications',
@@ -318,7 +317,7 @@ function updateSubscriptionOnServer(subscription) {
 }
 
 function cancelSubscriptionLocally() {
-    swRegistration.pushManager.getSubscription().then(function(subscription) {
+    swRegistration.pushManager.getSubscription().then(function (subscription) {
         if (subscription) {
             return subscription.unsubscribe();
         }
@@ -334,14 +333,14 @@ function cancelSubscriptionLocally() {
 function unsubscribeUser() {
     swRegistration.pushManager
         .getSubscription()
-        .then(function(subscription) {
+        .then(function (subscription) {
             if (subscription) {
                 return subscription.unsubscribe();
             }
             return null; // eslint consistent return
         })
         .then(removeSubscriptionOnServer)
-        .catch(function(err) {
+        .catch(function (err) {
             displayErrorStatus('Failed to unsubscribe', false, err);
         });
 }
@@ -368,7 +367,7 @@ function removeSubscriptionOnServer() {
             url,
             params,
 
-            function(data) {
+            function (data) {
                 if ((data || {}).success === true) {
                     // Successfully unsubscribed from push notification
                     isSubscribed = false;
@@ -391,7 +390,7 @@ function removeSubscriptionOnServer() {
                 broadcastSubscriberCountChange();
             },
 
-            function(err) {
+            function (err) {
                 displayErrorStatus(
                     'Failed to unsubscribe from push notifications',
                     true,
@@ -420,7 +419,7 @@ function clickPushButton(event) {
             $pushForm.attr('action'),
             { message: elemPushField.value },
 
-            function(data) {
+            function (data) {
                 console.log('url', $pushForm.attr('action'));
                 // Log server messages/data deviations
                 if ((data || {}).success === true) {
@@ -437,7 +436,7 @@ function clickPushButton(event) {
                 elemPushField.value = '';
             },
 
-            function(error) {
+            function (error) {
                 displayErrorStatus('Push failed.', true, error);
             }
         );
@@ -459,12 +458,12 @@ function broadcastSubscriberCountChange() {
     postApiCall(
         getSubscriberCountUrl(),
         null,
-        function(response) {
+        function (response) {
             if (response.subscriberCount != null) {
                 updateSubscriberCountInGUI(response.subscriberCount, false);
             }
         },
-        function(err) {
+        function (err) {
             displayErrorStatus(
                 'Failed to broadcast subscriber change',
                 false,
@@ -476,7 +475,7 @@ function broadcastSubscriberCountChange() {
 
 // Receiving broadcast data from the service worker, triggering a GUI update
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.addEventListener('message', function(event) {
+    navigator.serviceWorker.addEventListener('message', function (event) {
         if (event.data != null) {
             // Page received data message
             var data = JSON.parse(event.data);

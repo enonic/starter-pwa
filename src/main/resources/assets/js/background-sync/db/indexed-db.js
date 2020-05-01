@@ -19,7 +19,7 @@ import ConfigManagerInstance from './Config';
 
 class OfflineDatabase {
     constructor() {
-        ConfigManagerInstance().then(configManager => {
+        ConfigManagerInstance().then((configManager) => {
             const config = configManager.config;
 
             this.db_ = null;
@@ -35,7 +35,7 @@ class OfflineDatabase {
         return new Promise((resolve, reject) => {
             var dbOpen = indexedDB.open(this.name_, this.version_);
 
-            dbOpen.onupgradeneeded = e => {
+            dbOpen.onupgradeneeded = (e) => {
                 this.db_ = e.target.result;
 
                 var storeNames = Object.keys(this.stores_);
@@ -73,12 +73,12 @@ class OfflineDatabase {
                 }
             };
 
-            dbOpen.onsuccess = e => {
+            dbOpen.onsuccess = (e) => {
                 this.db_ = e.target.result;
                 resolve(this.db_);
             };
 
-            dbOpen.onerror = e => {
+            dbOpen.onerror = (e) => {
                 reject(e);
             };
         });
@@ -99,5 +99,5 @@ export default function IndexedDBInstance() {
         window.IndexedDBInstance_ = Promise.resolve(new OfflineDatabase());
     }
 
-    return window.IndexedDBInstance_.then(dbInstance => dbInstance.open());
+    return window.IndexedDBInstance_.then((dbInstance) => dbInstance.open());
 }
