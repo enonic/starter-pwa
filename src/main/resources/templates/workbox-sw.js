@@ -17,7 +17,7 @@ const indexedDbName = '{{localStorageName}}';
 let indexDB; // indexDB instance
 
 // This is a placeholder for manifest dynamically injected from webpack.config.js
-workbox.precaching.precacheAndRoute(self.__precacheManifest || []);
+workbox.precaching.precacheAndRoute(self.__WB_MANIFEST);
 
 // Here we precache custom defined Urls
 workbox.precaching.precacheAndRoute([{

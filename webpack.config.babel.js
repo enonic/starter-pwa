@@ -60,8 +60,6 @@ module.exports = {
             filename: 'bundles/css/main.css'
         }),
         new InjectManifest({
-            globDirectory: DST_ASSETS_DIR,
-            globPatterns: ['precache/**/*.*'],
             swSrc: path.join(__dirname, SRC_DIR, 'templates/workbox-sw.js'),
             swDest: path.join(__dirname, DST_DIR, 'templates/sw.js')
         })
