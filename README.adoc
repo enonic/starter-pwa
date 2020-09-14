@@ -71,7 +71,7 @@ a call to ``/sw.js`` file in the site root.
 == Dependencies
 
 ``assets/js/app.js`` is used as entry point for the Webpack builder, so make sure you add the first level of dependencies to this file (using ``require``).
-For example, if ``assets/js/app.js`` is using a LESS file called ``styles.less``, add the following line to the ``app.js``:
+For example, if ``assets/js/app.js`` is using a LESS file called ``app.less``, add the following line to the ``app.js``:
 
 [source,javascript]
 ----

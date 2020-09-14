@@ -31,12 +31,12 @@ function renderPage(pageId, title) {
         model.publicKey = pushKeys.getKeyPair().publicKey;
         var subscriptionsCount = pushRepo.getSubscriptionsCount();
         model.subscriberCount = subscriptionsCount + " subscriber" + (subscriptionsCount === 1 ? "" : "s");
-        model.startDisabled = subscriptionsCount === 0;/*
+        model.startDisabled = subscriptionsCount === 0;
         model.pageContributions = {
             headEnd:
-                '<link rel="stylesheet" type="text/css" href="precache/css/pushform.css"/>' +
-                '<script defer type="text/javascript" src="bundles/js/push-bundle.js"></script>'
-        };*/
+                '<link rel="stylesheet" type="text/css" href="' + portalLib.assetUrl({path: 'bundles/css/push.css'}) + '"/>' +
+                '<script defer type="text/javascript" src="' + portalLib.assetUrl({path: 'bundles/js/push.js'}) + '"></script>'
+        };
     
     }
     // Data only needed for the background-sync page:
@@ -44,7 +44,8 @@ function renderPage(pageId, title) {
         model.pushUrl = portalLib.serviceUrl({ service: "background-sync" });
         model.pageContributions = {
             headEnd:
-                '<script defer type="text/javascript" src="bundles/js/bs-bundle.js"></script>'
+                '<link rel="stylesheet" type="text/css" href="' + portalLib.assetUrl({path: 'bundles/css/bs.css'}) + '"/>' +
+                '<script defer type="text/javascript" src="' + portalLib.assetUrl({path: 'bundles/js/bs.js'}) + '"></script>'
         };
     }
     return {

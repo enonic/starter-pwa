@@ -16,14 +16,10 @@
     <meta name="msapplication-TileColor" content="#FFF">
     <meta name="Description" data-th-content="${title}">
 
-    <script type="text/javascript" data-th-src="${portal.assetUrl({'_path=bundles/js/app-bundle.js'})}" src="../assets/bundles/js/app-bundle.js" async></script>
+    <script type="text/javascript" data-th-src="${portal.assetUrl({'_path=bundles/js/main.js'})}" src="../assets/bundles/js/main.js" async></script>
     <script type="text/javascript" data-th-src="${portal.assetUrl({'_path=js/material.min.js'})}" src="../assets/js/material.min.js" async></script>
 
     <link rel="stylesheet" type="text/css" data-th-href="${portal.assetUrl({'_path=bundles/css/main.css'})}" href="../assets/bundles/css/main.css">
-<!--
-    <link rel="stylesheet" type="text/css" href="precache/css/icon.css">
-    <link rel="stylesheet" type="text/css" href="precache/css/material.indigo-pink.min.css">
--->
 
     <script type="text/javascript" data-th-if="${pageId=='main'}">
         if (!document.location.href.endsWith('/')) {

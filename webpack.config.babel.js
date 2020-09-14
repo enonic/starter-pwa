@@ -3,6 +3,7 @@ import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import { InjectManifest } from 'workbox-webpack-plugin';
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const IgnoreEmitPlugin = require('ignore-emit-webpack-plugin');
 
 // const ENV = process.env.NODE_ENV || 'development'; // console.log(env);
 //const ENV = 'production';
@@ -16,9 +17,12 @@ const isProd = (ENV === 'production');
 module.exports = {
     context: path.resolve(__dirname, SRC_DIR, 'assets'),
     entry: {
-        'js/app': './js/app.js',
+        'js/main': './js/app.js',
         'js/push': './js/push.js',
-        'js/bs': './js/bs.js'
+        'js/bs': './js/bs.js',
+        'css/main': './css/app.less',
+        'css/bs': './css/bs.less',
+        'css/push': './css/push.less'
     },
     mode: ENV,
     module: {
@@ -67,7 +71,7 @@ module.exports = {
     },
     output: {
         path: DST_ASSETS_DIR,
-        filename: 'bundles/[name]-bundle.js',
+        filename: 'bundles/[name].js',
         libraryTarget: 'var',
         library: ['Starter', '[name]']
     },
@@ -76,7 +80,7 @@ module.exports = {
             cleanOnceBeforeBuildPatterns: path.join(DST_ASSETS_DIR, 'precache-manifest*.*')
         }),
         new MiniCssExtractPlugin({
-            filename: 'bundles/css/main.css'
+            filename: 'bundles/[name].css'
         }),
         new InjectManifest({
             swSrc: path.join(__dirname, SRC_DIR, 'templates/workbox-sw.js'),
@@ -87,7 +91,8 @@ module.exports = {
                 {from: 'images/**/*', to: '[path]/[name].[ext]'},
                 {from: 'js/material.min.js', to: 'js/'},
             ]
-        })
+        }),
+        new IgnoreEmitPlugin(/\/css\/.*?\.js/)
     ],
     resolve: {
         extensions: ['.js', '.less', '.css']
