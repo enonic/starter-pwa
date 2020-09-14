@@ -1,1 +1,0 @@
-## Logo i popup

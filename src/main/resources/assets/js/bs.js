@@ -1,4 +1,4 @@
-require('../css/styles.less');
+// require('../css/background-sync.less');
 
 const SyncHelper = require('./background-sync/sync-helper');
 

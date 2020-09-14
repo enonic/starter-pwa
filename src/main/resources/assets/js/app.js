@@ -1,4 +1,3 @@
-// Stylesheets
 require('../css/styles.less');
 
 var ToasterInstance = require('./toaster').default;

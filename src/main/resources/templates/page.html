@@ -6,23 +6,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title data-th-utext=${title}></title>
 
-    <link rel="apple-touch-icon" href="precache/icons/icon.png">
-    <link rel="icon" href="precache/icons/icon.png">
+    <link rel="apple-touch-icon" data-th-href="${portal.assetUrl({'_path=images/icons/icon.png'})}" href="../assets/images/icons/icon.png">
+    <link rel="icon" data-th-href="${portal.assetUrl({'_path=images/icons/icon.png'})}" href="../assets/images/icons/icon.png">
     <link rel="manifest" href="manifest.json">
-    <link rel="mask-icon" href="precache/icons/safari-pinned-tab.svg" color="#f53d3d">
+    <link rel="mask-icon" data-th-href="${portal.assetUrl({'_path=images/icons/safari-pinned-tab.svg'})}" href="../assets/images/icons/safari-pinned-tab.svg" color="#f53d3d">
 
     <meta name="theme-color" content="#FFF">
-    <meta name="msapplication-config" content="precache/browserconfig.xml" />
+    <meta name="msapplication-config" content="browserconfig.xml" />
     <meta name="msapplication-TileColor" content="#FFF">
     <meta name="Description" data-th-content="${title}">
 
-    <script type="text/javascript" src="precache/js/material.min.js" async></script>
-    <script type="text/javascript" src="bundles/js/app-bundle.js" async></script>
+    <script type="text/javascript" data-th-src="${portal.assetUrl({'_path=bundles/js/app-bundle.js'})}" src="../assets/bundles/js/app-bundle.js" async></script>
+    <script type="text/javascript" data-th-src="${portal.assetUrl({'_path=js/material.min.js'})}" src="../assets/js/material.min.js" async></script>
 
-    <link rel="stylesheet" type="text/css" href="precache/css/material.indigo-pink.min.css">
-
-    <link rel="stylesheet" type="text/css" href="bundles/css/main.css">
+    <link rel="stylesheet" type="text/css" data-th-href="${portal.assetUrl({'_path=bundles/css/main.css'})}" href="../assets/bundles/css/main.css">
+<!--
     <link rel="stylesheet" type="text/css" href="precache/css/icon.css">
+    <link rel="stylesheet" type="text/css" href="precache/css/material.indigo-pink.min.css">
+-->
 
     <script type="text/javascript" data-th-if="${pageId=='main'}">
         if (!document.location.href.endsWith('/')) {
@@ -78,7 +79,7 @@
 <script type="text/javascript">
     const registerServiceWorker = function(appUrl, appName) {
 
-        if ('serviceWorker' in navigator) {
+        if (false && 'serviceWorker' in navigator) {
             window.addEventListener('load', function() {
                 navigator.serviceWorker
                     .register(appUrl + 'sw.js', {scope: appUrl})

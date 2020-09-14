@@ -31,12 +31,12 @@ function renderPage(pageId, title) {
         model.publicKey = pushKeys.getKeyPair().publicKey;
         var subscriptionsCount = pushRepo.getSubscriptionsCount();
         model.subscriberCount = subscriptionsCount + " subscriber" + (subscriptionsCount === 1 ? "" : "s");
-        model.startDisabled = subscriptionsCount === 0;
+        model.startDisabled = subscriptionsCount === 0;/*
         model.pageContributions = {
             headEnd:
                 '<link rel="stylesheet" type="text/css" href="precache/css/pushform.css"/>' +
                 '<script defer type="text/javascript" src="bundles/js/push-bundle.js"></script>'
-        };
+        };*/
     
     }
     // Data only needed for the background-sync page:
@@ -66,7 +66,7 @@ function renderSW() {
             appVersion: app.version,
             appName: app.name,
             appTitle: siteTitle,
-            iconUrl: appUrl + "precache/icons/icon.png",
+            iconUrl: portalLib.assetUrl({path: 'images/icons/icon.png'}),
             serviceUrl: portalLib.serviceUrl({service: ''}),
             syncServiceUrl: portalLib.serviceUrl({service: 'background-sync'}),
             localStorageName: localStorageName
@@ -79,7 +79,18 @@ function renderManifest() {
     return {
         contentType: 'application/json',
         body: mustache.render(resolve('/templates/manifest.json'), {
-            startUrl: getAppUrl() + '?source=web_app_manifest'
+            startUrl: getAppUrl() + '?source=web_app_manifest',
+            iconPath: portalLib.assetUrl({path: 'images/icons/icon.png'})
+        })
+    };
+}
+
+function renderBrowserConfig() {
+
+    return {
+        contentType: 'application/xml',
+        body: mustache.render(resolve('/templates/browserconfig.xml'), {
+            iconPath: portalLib.assetUrl({path: 'images/icons/icon.png'})
         })
     };
 }
@@ -95,6 +106,7 @@ router.get('/video', function() { return renderPage('video', 'Video capabilities
 router.get('/webrtc', function() { return renderPage('webrtc', 'WebRTC functionality'); });
 router.get('/sw.js', renderSW);
 router.get('/manifest.json', renderManifest);
+router.get('/browserconfig.xml', renderBrowserConfig);
 
 exports.get = function (req) {
     return router.dispatch(req);
