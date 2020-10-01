@@ -44,7 +44,7 @@
     "mini-css-extract-plugin": "^0.11.0",
     "prettier": "^2.1.1",
     "style-loader": "^1.2.1",
-    "webpack": "^4.44.1",
+    "webpack": "^4.44.2",
     "webpack-cli": "^3.3.12",
     "workbox-webpack-plugin": "^4.3.1"
   },
