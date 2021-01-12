@@ -1,10 +1,16 @@
-// require('../css/background-sync.less');
+import {
+    storeNames,
+    syncEventTag,
+    addToStorage,
+    markAsDeleted,
+    replaceInStorage,
+    pullServerChanges,
+    pushLocalChanges
+} from './background-sync/sync-helper';
 
-const SyncHelper = require('./background-sync/sync-helper');
-
-const ToasterInstance = require('./toaster').default;
-const debounce = require('./util').debounce;
-const IndexedDBInstance = require('./background-sync/db/indexed-db').default;
+import ToasterInstance from './toaster';
+import { debounce } from './util';
+import IndexedDBInstance from './background-sync/db/indexed-db';
 
 import TodoItem from './background-sync/db/model';
 
@@ -17,12 +23,10 @@ let backgroundSyncSupported = false;
 const fetchItemsFromServerAndRender = debounce(
     () =>
         IndexedDBInstance().then((db) =>
-            SyncHelper.pullServerChanges(db, getSyncServiceUrl()).then(
-                (items) => {
-                    createTodoItems(items);
-                    renderTodoItems();
-                }
-            )
+            pullServerChanges(db, getSyncServiceUrl()).then((items) => {
+                createTodoItems(items);
+                renderTodoItems();
+            })
         ),
     100,
     false
@@ -38,7 +42,7 @@ const pushChanges = function () {
             if (registration.sync) {
                 // Browser supports background syncing
                 backgroundSyncSupported = true;
-                registration.sync.register(SyncHelper.syncEventTag);
+                registration.sync.register(syncEventTag);
             } else {
                 // Browser supports service worker but not background syncing.
                 pushManually();
@@ -58,18 +62,16 @@ const pushManually = function () {
     pushInProgress = true;
 
     IndexedDBInstance().then((db) => {
-        SyncHelper.pushLocalChanges(db, getSyncServiceUrl()).then(
-            (changesMade) => {
-                pushInProgress = false;
-                if (changesMade) {
-                    fetchItemsFromServerAndRender();
-                    if (hasOfflineChanges) {
-                        showToastNotification();
-                        hasOfflineChanges = false;
-                    }
+        pushLocalChanges(db, getSyncServiceUrl()).then((changesMade) => {
+            pushInProgress = false;
+            if (changesMade) {
+                fetchItemsFromServerAndRender();
+                if (hasOfflineChanges) {
+                    showToastNotification();
+                    hasOfflineChanges = false;
                 }
             }
-        );
+        });
     });
 };
 
@@ -130,7 +132,7 @@ const addTodo = () => {
         todoItems.push(item);
         renderTodoItems();
         IndexedDBInstance().then((db) =>
-            SyncHelper.addToStorage(db, item).then(() => {
+            addToStorage(db, item).then(() => {
                 pushChanges();
             })
         );
@@ -157,7 +159,7 @@ const removeTodo = (event) => {
         renderTodoItems();
 
         IndexedDBInstance().then((db) =>
-            SyncHelper.markAsDeleted(db, todoItem).then(() => pushChanges())
+            markAsDeleted(db, todoItem).then(() => pushChanges())
         );
     });
 };
@@ -226,7 +228,7 @@ const editItemText = (event) => {
             event.target.value.trim() !== lastItemName
         ) {
             changedItem.text = event.target.value;
-            registerChange(changedItem, SyncHelper.storeNames.offline);
+            registerChange(changedItem, storeNames.offline);
         }
     });
 };
@@ -238,21 +240,21 @@ const checkTodo = (checkboxElement) => {
     searchAndApply(id, (item) => {
         const changedItem = item;
         changedItem.completed = !item.completed;
-        registerChange(changedItem, SyncHelper.storeNames.offline);
+        registerChange(changedItem, storeNames.offline);
     });
 };
 /**
  * Should be run when an item is edited
  * updated changed, sets to not synced and replaces in storage
  * @param item the edited item
- * @param storeName storeName to replaced in (probably SyncHelper.storeNames.offline)
+ * @param storeName storeName to replaced in (probably storeNames.offline)
  */
 const registerChange = (item, storeName) => {
     const changedItem = item;
     changedItem.changed = true;
     changedItem.synced = false;
     IndexedDBInstance().then((db) =>
-        SyncHelper.replaceInStorage(db, storeName, changedItem).then(() => {
+        replaceInStorage(db, storeName, changedItem).then(() => {
             pushChanges();
             renderTodoItems();
         })

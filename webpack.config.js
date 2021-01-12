@@ -1,6 +1,6 @@
-import path from 'path';
-import MiniCssExtractPlugin from 'mini-css-extract-plugin';
-import { InjectManifest } from 'workbox-webpack-plugin';
+const path = require('path');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const { InjectManifest } = require('workbox-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const IgnoreEmitPlugin = require('ignore-emit-webpack-plugin');
@@ -25,6 +25,7 @@ module.exports = {
         'css/push': './css/push.less'
     },
     mode: ENV,
+    devtool: isProd ? false : 'source-map',
     module: {
         rules: [
             {
@@ -37,11 +38,11 @@ module.exports = {
                     failOnError: true
                 }
             },
-            {
+/*            {
                 test: /\.js$/,
                 exclude: /node_modules/,
-                loader: 'babel-loader'
-            },
+                loader: 'babel-loader',
+            },*/
             {
                 test: /.less$/,
                 use: [
@@ -73,7 +74,7 @@ module.exports = {
         path: DST_ASSETS_DIR,
         filename: 'bundles/[name].js',
         libraryTarget: 'var',
-        library: ['Starter', '[name]']
+        library: 'Starter'
     },
     plugins: [
         new CleanWebpackPlugin({
@@ -91,8 +92,7 @@ module.exports = {
                 {from: 'images/**/*', to: '[path]/[name].[ext]'},
                 {from: 'js/material.min.js', to: 'js/'},
             ]
-        }),
-        new IgnoreEmitPlugin(/\/css\/.*?\.js/)
+        })
     ],
     resolve: {
         extensions: ['.js', '.less', '.css']

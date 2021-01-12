@@ -75,7 +75,7 @@
 <script type="text/javascript">
     const registerServiceWorker = function(appUrl, appName) {
 
-        if (false && 'serviceWorker' in navigator) {
+        if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
                 navigator.serviceWorker
                     .register(appUrl + 'sw.js', {scope: appUrl})
@@ -98,8 +98,8 @@
                             window.location.reload();
                         });
 
-                        Starter.app.onNewServiceWorker(registration, function () {
-                            Starter.app.showNotification(registration, appName);
+                        Starter.onNewServiceWorker(registration, function () {
+                            Starter.showNotification(registration, appName);
                         });
                         console.log('Service Worker registered with scope ' + registration.scope);
                     }, function (err) {

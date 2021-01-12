@@ -1,15 +1,21 @@
-let module = {};
+//importScripts('js/background-sync/sync-helper.js');
 
-importScripts('js/background-sync/sync-helper.js');
+import {pushLocalChanges, syncEventTag} from '../assets/js/background-sync/sync-helper';
 
-workbox.core.setCacheNameDetails({
+import {setCacheNameDetails, clientsClaim, skipWaiting} from 'workbox-core';
+import {precacheAndRoute} from 'workbox-precaching';
+import {registerRoute, setDefaultHandler} from 'workbox-routing';
+import {NetworkOnly, NetworkFirst} from 'workbox-strategies';
+
+setCacheNameDetails({
     prefix: 'enonic-pwa-starter',
     suffix: '{{appVersion}}',
     precache: 'precache',
     runtime: 'runtime'
 });
 
-workbox.core.clientsClaim();
+skipWaiting();
+clientsClaim();
 
 const syncServiceUrl = '{{syncServiceUrl}}';
 const indexedDbName = '{{localStorageName}}';
@@ -17,10 +23,10 @@ const indexedDbName = '{{localStorageName}}';
 let indexDB; // indexDB instance
 
 // This is a placeholder for manifest dynamically injected from webpack.config.js
-workbox.precaching.precacheAndRoute(self.__WB_MANIFEST);
+precacheAndRoute(self.__WB_MANIFEST);
 
 // Here we precache custom defined Urls
-workbox.precaching.precacheAndRoute([{
+precacheAndRoute([{
     "revision": "{{appVersion}}",
     "url": "{{appUrl}}"
 },{
@@ -31,14 +37,15 @@ workbox.precaching.precacheAndRoute([{
 /**
  * Make sure SW won't precache non-GET calls to service URLs
  */
-workbox.routing.registerRoute(new RegExp('{{serviceUrl}}/*'), new workbox.strategies.NetworkOnly(), 'POST');
-workbox.routing.registerRoute(new RegExp('{{serviceUrl}}/*'), new workbox.strategies.NetworkOnly(), 'PUT');
-workbox.routing.registerRoute(new RegExp('{{serviceUrl}}/*'), new workbox.strategies.NetworkOnly(), 'DELETE');
+const routePath = new RegExp('{{serviceUrl}}/*');
+registerRoute(routePath, new NetworkOnly(), 'POST');
+registerRoute(routePath, new NetworkOnly(), 'PUT');
+registerRoute(routePath, new NetworkOnly(), 'DELETE');
 
 /**
  * Sets the default caching strategy for the client: tries contacting the network first
  */
-workbox.routing.setDefaultHandler(new workbox.strategies.NetworkFirst());
+setDefaultHandler(new NetworkFirst());
 
 /**
  * Pass a message from the outside world to SW
@@ -137,7 +144,7 @@ const openDatabase = function() {
         return Promise.resolve(indexDB);
     }
     return new Promise((resolve, reject) => {
-        const instance = self.indexedDB.open(indexedDbName); //indexedDbName is defined in main.js
+        const instance = self.indexedDB.open(indexedDbName);
 
         instance.onsuccess = e => {
             indexDB = e.target.result;

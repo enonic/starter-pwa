@@ -186,13 +186,12 @@ const pushLocalChanges = (db, syncServiceUrl) =>
         )
     );
 
-module.exports = {
-    storeNames: storeNames,
-    syncEventTag: syncEventTag,
-    addToStorage: addToStorage,
-    markAsDeleted: markAsDeleted,
-    getItemsFromStore: getItemsFromStore,
-    replaceInStorage: replaceInStorage,
-    pullServerChanges: pullServerChanges,
-    pushLocalChanges: pushLocalChanges
+export {
+    storeNames,
+    syncEventTag,
+    addToStorage,
+    markAsDeleted,
+    replaceInStorage,
+    pullServerChanges,
+    pushLocalChanges
 };
