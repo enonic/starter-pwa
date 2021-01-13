@@ -34,8 +34,8 @@ function renderPage(pageId, title) {
         model.startDisabled = subscriptionsCount === 0;
         model.pageContributions = {
             headEnd:
-                '<link rel="stylesheet" type="text/css" href="precache/css/pushform.css"/>' +
-                '<script defer type="text/javascript" src="bundles/js/push-bundle.js"></script>'
+                '<link rel="stylesheet" type="text/css" href="' + portalLib.assetUrl({path: 'bundles/css/push.css'}) + '"/>' +
+                '<script type="text/javascript" src="' + portalLib.assetUrl({path: 'bundles/js/push.js'}) + '"></script>'
         };
     
     }
@@ -44,9 +44,12 @@ function renderPage(pageId, title) {
         model.pushUrl = portalLib.serviceUrl({ service: "background-sync" });
         model.pageContributions = {
             headEnd:
-                '<script defer type="text/javascript" src="bundles/js/bs-bundle.js"></script>'
+                '<link rel="stylesheet" type="text/css" href="' + portalLib.assetUrl({path: 'bundles/css/bs.css'}) + '"/>' +
+                '<script type="text/javascript" src="' + portalLib.serviceUrl({service: 'init'}) + '"></script>' +
+                '<script type="text/javascript" src="' + portalLib.assetUrl({path: 'bundles/js/bs.js'}) + '"></script>'
         };
     }
+
     return {
         body: thymeleaf.render(resolve('/templates/page.html'), model),
     };
@@ -66,7 +69,7 @@ function renderSW() {
             appVersion: app.version,
             appName: app.name,
             appTitle: siteTitle,
-            iconUrl: appUrl + "precache/icons/icon.png",
+            iconUrl: portalLib.assetUrl({path: 'images/icons/icon.png'}),
             serviceUrl: portalLib.serviceUrl({service: ''}),
             syncServiceUrl: portalLib.serviceUrl({service: 'background-sync'}),
             localStorageName: localStorageName
@@ -79,7 +82,18 @@ function renderManifest() {
     return {
         contentType: 'application/json',
         body: mustache.render(resolve('/templates/manifest.json'), {
-            startUrl: getAppUrl() + '?source=web_app_manifest'
+            startUrl: getAppUrl() + '?source=web_app_manifest',
+            iconPath: portalLib.assetUrl({path: 'images/icons/icon.png'})
+        })
+    };
+}
+
+function renderBrowserConfig() {
+
+    return {
+        contentType: 'application/xml',
+        body: mustache.render(resolve('/templates/browserconfig.xml'), {
+            iconPath: portalLib.assetUrl({path: 'images/icons/icon.png'})
         })
     };
 }
@@ -95,6 +109,7 @@ router.get('/video', function() { return renderPage('video', 'Video capabilities
 router.get('/webrtc', function() { return renderPage('webrtc', 'WebRTC functionality'); });
 router.get('/sw.js', renderSW);
 router.get('/manifest.json', renderManifest);
+router.get('/browserconfig.xml', renderBrowserConfig);
 
 exports.get = function (req) {
     return router.dispatch(req);

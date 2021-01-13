@@ -15,7 +15,7 @@
  *
  */
 
-import ConfigManagerInstance from './Config';
+import ConfigManagerInstance from './config';
 
 class OfflineDatabase {
     constructor() {

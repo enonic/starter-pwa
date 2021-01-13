@@ -7,7 +7,7 @@
   "start_url": "{{startUrl}}",
   "icons": [
     {
-      "src": "precache/icons/icon.png",
+      "src": "{{iconPath}}",
       "sizes": "512x512",
       "type": "image/png"
     }

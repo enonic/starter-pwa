@@ -15,7 +15,7 @@
  *
  */
 
-import ConfigManagerInstance from '../ConfigManager';
+import ConfigManagerInstance from './config';
 
 export default function RepoDBInstance() {
 

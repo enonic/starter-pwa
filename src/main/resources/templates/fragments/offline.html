@@ -3,8 +3,8 @@
 <body>
 
 <div data-th-fragment="fragment-page-offline" data-th-remove="tag">
-    <img id="icon-online" class="icon-status" src="precache/icons/online.svg" alt="Online">
-    <img id="icon-offline" class="icon-status" src="precache/icons/offline.svg" alt="Offline">
+    <img id="icon-online" class="icon-status" data-th-src="${portal.assetUrl({'_path=images/online.svg'})}" src="../../assets/images/online.svg" alt="Online">
+    <img id="icon-offline" class="icon-status" data-th-src="${portal.assetUrl({'_path=images/offline.svg'})}" src="../../assets/images/offline.svg" alt="Offline">
     <div id="page-network-content">
         Toggle network connection to see the effect
     </div>
