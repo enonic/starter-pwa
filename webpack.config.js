@@ -39,7 +39,7 @@ module.exports = {
             {
                 test: /.less$/,
                 use: [
-                    {loader: MiniCssExtractPlugin.loader, options: {publicPath: '../', hmr: !isProd}},
+                    {loader: MiniCssExtractPlugin.loader, options: {publicPath: '../'}},
                     {loader: 'css-loader', options: {sourceMap: !isProd, importLoaders: 1}},
                     {loader: 'less-loader', options: {sourceMap: !isProd}},
                 ]
