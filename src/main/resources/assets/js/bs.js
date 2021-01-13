@@ -361,56 +361,58 @@ const showToastNotification = () =>
         toaster.toast('Offline changes are synced')
     );
 
-// Whenever data is updated on the server, websocket will notify
-// all clients so that they could fetch it and update UI
-const ws = new WebSocket(sync_data.wsUrl, ['sync_data']);
-ws.onmessage = (e) => {
-    if (e.data === 'refresh' && !pushInProgress) {
-        fetchItemsFromServerAndRender();
-    }
-};
-
-fetchItemsFromServerAndRender();
-
-window.addEventListener('online', () => {
-    if (!hasOfflineChanges) {
-        // If there were no changes made offline we still need to fetch
-        // new data from server in case it was changed while we were offline
-        fetchItemsFromServerAndRender();
-        hasOfflineChanges = false;
-    } else if (!backgroundSyncSupported) {
-        // If background sync is not supported and some
-        // changes were made offline, push them manually
-        pushManually();
-    }
-});
-
-document.getElementById('add-todo-button').onclick = addTodo;
-document
-    .getElementById('add-todo-text')
-    .addEventListener('keydown', (event) => {
-        // actions on enter
-        if (event.keyCode === 13) {
-            addTodo();
-        }
-    });
-
-/**
- * Listen to serviceworker
- */
-
-if (navigator.serviceWorker) {
-    navigator.serviceWorker.addEventListener('message', (event) => {
-        if (event.data.message === 'sw-sync-start') {
-            pushInProgress = true;
-        }
-        if (event.data.message === 'sw-sync-end') {
+(function () {
+    // Whenever data is updated on the server, websocket will notify
+    // all clients so that they could fetch it and update UI
+    const ws = new WebSocket(sync_data.wsUrl, ['sync_data']);
+    ws.onmessage = (e) => {
+        if (e.data === 'refresh' && !pushInProgress) {
             fetchItemsFromServerAndRender();
-            pushInProgress = false;
-            if (event.data.notify && hasOfflineChanges) {
-                hasOfflineChanges = false;
-                showToastNotification();
-            }
+        }
+    };
+
+    fetchItemsFromServerAndRender();
+
+    window.addEventListener('online', () => {
+        if (!hasOfflineChanges) {
+            // If there were no changes made offline we still need to fetch
+            // new data from server in case it was changed while we were offline
+            fetchItemsFromServerAndRender();
+            hasOfflineChanges = false;
+        } else if (!backgroundSyncSupported) {
+            // If background sync is not supported and some
+            // changes were made offline, push them manually
+            pushManually();
         }
     });
-}
+
+    document.getElementById('add-todo-button').onclick = addTodo;
+    document
+        .getElementById('add-todo-text')
+        .addEventListener('keydown', (event) => {
+            // actions on enter
+            if (event.keyCode === 13) {
+                addTodo();
+            }
+        });
+
+    /**
+     * Listen to serviceworker
+     */
+
+    if (navigator.serviceWorker) {
+        navigator.serviceWorker.addEventListener('message', (event) => {
+            if (event.data.message === 'sw-sync-start') {
+                pushInProgress = true;
+            }
+            if (event.data.message === 'sw-sync-end') {
+                fetchItemsFromServerAndRender();
+                pushInProgress = false;
+                if (event.data.notify && hasOfflineChanges) {
+                    hasOfflineChanges = false;
+                    showToastNotification();
+                }
+            }
+        });
+    }
+})();

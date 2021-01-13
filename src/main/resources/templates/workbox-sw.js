@@ -14,7 +14,6 @@ setCacheNameDetails({
     runtime: 'runtime'
 });
 
-skipWaiting();
 clientsClaim();
 
 const syncServiceUrl = '{{syncServiceUrl}}';

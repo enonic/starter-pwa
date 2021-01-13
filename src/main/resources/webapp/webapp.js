@@ -35,7 +35,7 @@ function renderPage(pageId, title) {
         model.pageContributions = {
             headEnd:
                 '<link rel="stylesheet" type="text/css" href="' + portalLib.assetUrl({path: 'bundles/css/push.css'}) + '"/>' +
-                '<script defer type="text/javascript" src="' + portalLib.assetUrl({path: 'bundles/js/push.js'}) + '"></script>'
+                '<script type="text/javascript" src="' + portalLib.assetUrl({path: 'bundles/js/push.js'}) + '"></script>'
         };
     
     }
@@ -45,9 +45,10 @@ function renderPage(pageId, title) {
         model.pageContributions = {
             headEnd:
                 '<link rel="stylesheet" type="text/css" href="' + portalLib.assetUrl({path: 'bundles/css/bs.css'}) + '"/>' +
-                '<script defer type="text/javascript" src="' + portalLib.assetUrl({path: 'bundles/js/bs.js'}) + '"></script>'
+                '<script type="text/javascript" src="' + portalLib.assetUrl({path: 'bundles/js/bs.js'}) + '"></script>'
         };
     }
+
     return {
         body: thymeleaf.render(resolve('/templates/page.html'), model),
     };

@@ -16,7 +16,6 @@
     <meta name="msapplication-TileColor" content="#FFF">
     <meta name="Description" data-th-content="${title}">
 
-    <script type="text/javascript" data-th-src="${portal.assetUrl({'_path=bundles/js/main.js'})}" src="../assets/bundles/js/main.js" async></script>
     <script type="text/javascript" data-th-src="${portal.assetUrl({'_path=js/material.min.js'})}" src="../assets/js/material.min.js" async></script>
 
     <link rel="stylesheet" type="text/css" data-th-href="${portal.assetUrl({'_path=bundles/css/main.css'})}" href="../assets/bundles/css/main.css">
@@ -72,7 +71,10 @@
     
 </div>
 
+<script type="text/javascript" data-th-src="${portal.assetUrl({'_path=bundles/js/main.js'})}" src="../assets/bundles/js/main.js"></script>
+
 <script type="text/javascript">
+
     const registerServiceWorker = function(appUrl, appName) {
 
         if ('serviceWorker' in navigator) {
@@ -87,20 +89,7 @@
                             return;
                         }
 
-                        // When the user asks to refresh the UI, we'll need to reload the window
-                        var preventDevToolsReloadLoop;
-                        navigator.serviceWorker.addEventListener('controllerchange', function (event) {
-                            // Ensure refresh is only called once.
-                            // This works around a bug in "force update on reload".
-                            if (preventDevToolsReloadLoop) return;
-                            preventDevToolsReloadLoop = true;
-                            console.log('Controller loaded');
-                            window.location.reload();
-                        });
-
-                        Starter.onNewServiceWorker(registration, function () {
-                            Starter.showNotification(registration, appName);
-                        });
+                        Starter.handleNewServiceWorker(registration, appName);
                         console.log('Service Worker registered with scope ' + registration.scope);
                     }, function (err) {
                         console.log('Service Worker registration failure:');

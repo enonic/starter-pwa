@@ -7,14 +7,13 @@
 
 var $ = require('jquery');
 
-// Components - see templates/fragments/push.html
-var elemSubscribeStatus = $('#subscribe-status')[0];
-var elemSubscribeButton = $('#subscribe-button')[0];
-var elemPushField = $('#push-field')[0];
-var elemPushButton = $('#push-button')[0];
-var elemSubscriberCount = $('#subscriber-count')[0];
-var $subscribeForm = $('#subscribe-form');
-var $pushForm = $('#push-form');
+var elemSubscribeStatus;
+var elemSubscribeButton;
+var elemPushField;
+var elemPushButton;
+var elemSubscriberCount;
+var $subscribeForm;
+var $pushForm;
 
 // State
 var isSubscribed = false;
@@ -29,29 +28,23 @@ var displayingError = false;
 
 // -------------------------------------------------------  Setup  --------------------------------------------------------------
 
-/**
- * Setup the service worker and trigger initialization
- */
-if ('serviceWorker' in navigator && 'PushManager' in window) {
-    // Service Worker and Push is supported
-    navigator.serviceWorker.ready.then(
-        function (reg) {
-            // Service Worker is ready
-            swRegistration = reg;
-            initializeUI();
-        },
-        function (err) {
-            displayErrorStatus('Service Worker is not ready.', false, err);
-        }
-    );
-} else {
-    displayErrorStatus('Push messaging is not supported', true);
+function initUIElements() {
+    // Components - see templates/fragments/push.html
+    elemSubscribeStatus = $('#subscribe-status')[0];
+    elemSubscribeButton = $('#subscribe-button')[0];
+    elemPushField = $('#push-field')[0];
+    elemPushButton = $('#push-button')[0];
+    elemSubscriberCount = $('#subscriber-count')[0];
+    $subscribeForm = $('#subscribe-form');
+    $pushForm = $('#push-form');
 }
 
 /**
  * Initialization: add button click listeners, check the current subscription state and update GUI elements accordingly
  */
 function initializeUI() {
+    initUIElements();
+
     // Add button click listeners
     elemSubscribeButton.addEventListener('click', clickSubscriptionButton);
     elemPushButton.addEventListener('click', clickPushButton);
@@ -473,20 +466,6 @@ function broadcastSubscriberCountChange() {
     );
 }
 
-// Receiving broadcast data from the service worker, triggering a GUI update
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.addEventListener('message', function (event) {
-        if (event.data != null) {
-            // Page received data message
-            var data = JSON.parse(event.data);
-
-            if (data.subscriberCount != null) {
-                updateSubscriberCountInGUI(data.subscriberCount, true);
-            }
-        }
-    });
-}
-
 /** Updating subscriber count in the DOM */
 function updateSubscriberCountInGUI(subscriberCount, live) {
     elemSubscriberCount.textContent =
@@ -502,3 +481,35 @@ function updateSubscriberCountInGUI(subscriberCount, live) {
         $pushForm[0].classList.remove('disabled');
     }
 }
+
+/**
+ * Setup the service worker and trigger initialization
+ */
+(function () {
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+        // Service Worker and Push is supported
+        navigator.serviceWorker.ready.then(
+            function (reg) {
+                // Service Worker is ready
+                swRegistration = reg;
+                initializeUI();
+            },
+            function (err) {
+                displayErrorStatus('Service Worker is not ready.', false, err);
+            }
+        );
+
+        navigator.serviceWorker.addEventListener('message', function (event) {
+            if (event.data != null) {
+                // Page received data message
+                var data = JSON.parse(event.data);
+
+                if (data.subscriberCount != null) {
+                    updateSubscriberCountInGUI(data.subscriberCount, true);
+                }
+            }
+        });
+    } else {
+        displayErrorStatus('Push messaging is not supported', true);
+    }
+})();
