@@ -3,11 +3,9 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { InjectManifest } = require('workbox-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require("copy-webpack-plugin");
-const IgnoreEmitPlugin = require('ignore-emit-webpack-plugin');
 
 // const ENV = process.env.NODE_ENV || 'development'; // console.log(env);
-//const ENV = 'production';
-const ENV = 'development';
+const ENV = 'production';
 const SRC_DIR = 'src/main/resources';
 const DST_DIR = 'build/resources/main';
 const DST_ASSETS_DIR = path.join(__dirname, DST_DIR, 'assets');
@@ -38,11 +36,6 @@ module.exports = {
                     failOnError: true
                 }
             },
-/*            {
-                test: /\.js$/,
-                exclude: /node_modules/,
-                loader: 'babel-loader',
-            },*/
             {
                 test: /.less$/,
                 use: [
