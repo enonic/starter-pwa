@@ -1,5 +1,3 @@
-//importScripts('js/background-sync/sync-helper.js');
-
 import {pushLocalChanges, syncEventTag} from '../assets/js/background-sync/sync-helper';
 
 import {setCacheNameDetails, clientsClaim, skipWaiting} from 'workbox-core';

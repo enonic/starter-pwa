@@ -45,6 +45,7 @@ function renderPage(pageId, title) {
         model.pageContributions = {
             headEnd:
                 '<link rel="stylesheet" type="text/css" href="' + portalLib.assetUrl({path: 'bundles/css/bs.css'}) + '"/>' +
+                '<script type="text/javascript" src="' + portalLib.serviceUrl({service: 'init'}) + '"></script>' +
                 '<script type="text/javascript" src="' + portalLib.assetUrl({path: 'bundles/js/bs.js'}) + '"></script>'
         };
     }

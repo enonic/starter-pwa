@@ -371,8 +371,6 @@ const showToastNotification = () =>
         }
     };
 
-    fetchItemsFromServerAndRender();
-
     window.addEventListener('online', () => {
         if (!hasOfflineChanges) {
             // If there were no changes made offline we still need to fetch
@@ -385,16 +383,6 @@ const showToastNotification = () =>
             pushManually();
         }
     });
-
-    document.getElementById('add-todo-button').onclick = addTodo;
-    document
-        .getElementById('add-todo-text')
-        .addEventListener('keydown', (event) => {
-            // actions on enter
-            if (event.keyCode === 13) {
-                addTodo();
-            }
-        });
 
     /**
      * Listen to serviceworker
@@ -415,4 +403,18 @@ const showToastNotification = () =>
             }
         });
     }
+
+    window.addEventListener('load', function () {
+        fetchItemsFromServerAndRender();
+
+        document.getElementById('add-todo-button').onclick = addTodo;
+        document
+            .getElementById('add-todo-text')
+            .addEventListener('keydown', (event) => {
+                // actions on enter
+                if (event.keyCode === 13) {
+                    addTodo();
+                }
+            });
+    });
 })();

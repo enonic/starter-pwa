@@ -101,23 +101,6 @@ function updateGUI() {
         elemSubscribeButton.textContent = 'Subscribe';
         elemSubscribeButton.classList.remove('subscribing');
     }
-
-    // else { // eslint does not like lonely if-statements
-    //     if (isSubscribed) {
-    //         elemSubscribeStatus.textContent = 'Subscribed to notifications';
-    //         elemSubscribeStatus.classList.add('subscribing');
-    //         elemSubscribeStatus.classList.remove('blocked');
-    //         elemSubscribeButton.textContent = 'Unsubscribe';
-    //         elemSubscribeButton.classList.add('subscribing');
-
-    //     } else {
-    //         elemSubscribeStatus.textContent = 'Unsubscribed from notifications';
-    //         elemSubscribeStatus.classList.remove('subscribing');
-    //         elemSubscribeStatus.classList.remove('blocked');
-    //         elemSubscribeButton.textContent = 'Subscribe';
-    //         elemSubscribeButton.classList.remove('subscribing');
-    //     }
-    // }
 }
 
 /**

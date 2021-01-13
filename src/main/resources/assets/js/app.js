@@ -34,7 +34,7 @@ const handleNewServiceWorker = (registration, appName) => {
 };
 
 (function () {
-    window.onload = function () {
+    window.addEventListener('load', function () {
         const mainContainer = document.getElementById('main-container');
 
         if (!mainContainer) {
@@ -55,7 +55,7 @@ const handleNewServiceWorker = (registration, appName) => {
 
         window.addEventListener('offline', toggleOnlineStatus);
         window.addEventListener('online', toggleOnlineStatus);
-    };
+    });
 })();
 
 export { handleNewServiceWorker };
