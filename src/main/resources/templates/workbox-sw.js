@@ -1,6 +1,6 @@
 import {pushLocalChanges, syncEventTag} from '../assets/js/background-sync/sync-helper';
 
-import {setCacheNameDetails, clientsClaim, skipWaiting} from 'workbox-core';
+import {setCacheNameDetails, clientsClaim} from 'workbox-core';
 import {precacheAndRoute} from 'workbox-precaching';
 import {registerRoute, setDefaultHandler} from 'workbox-routing';
 import {NetworkOnly, NetworkFirst} from 'workbox-strategies';
