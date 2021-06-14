@@ -304,9 +304,8 @@ const updateListenersFor = {
         }
     },
     checkboxes: () => {
-        const checkboxes = document.getElementsByClassName(
-            'todo-app__checkbox'
-        );
+        const checkboxes =
+            document.getElementsByClassName('todo-app__checkbox');
         if (checkboxes) {
             for (const checkbox of checkboxes) {
                 checkbox.onclick = () => {
