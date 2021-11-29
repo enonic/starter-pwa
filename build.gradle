@@ -1,5 +1,5 @@
 plugins {
-    id 'com.enonic.xp.app' version '3.0.0'
+    id 'com.enonic.xp.app' version '3.1.0'
     id "com.github.node-gradle.node" version '3.1.1'
 }
 
