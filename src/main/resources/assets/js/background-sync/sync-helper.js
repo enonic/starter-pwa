@@ -158,6 +158,7 @@ const replaceInStorage = (db, storeName, item) =>
 const pullServerChanges = (db, syncServiceUrl) =>
     new Promise((resolve) =>
         // Clear contents of the local storage
+        // eslint-disable-next-line no-promise-executor-return
         clearStorage(db).then(() =>
             // Fetch all items from the remote repo
             getItemsFromRepo(syncServiceUrl).then((repoItems) =>
@@ -170,6 +171,7 @@ const pullServerChanges = (db, syncServiceUrl) =>
 const pushLocalChanges = (db, syncServiceUrl) =>
     new Promise((resolve) =>
         // Fetch items from the local storage
+        // eslint-disable-next-line no-promise-executor-return
         getItemsFromStorage(db).then(([deletedWhileOffline, dbItems]) =>
             // Sync deletions in the local storage with remote repo
             removeItemsFromRepo(deletedWhileOffline, syncServiceUrl).then(() =>
