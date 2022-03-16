@@ -363,7 +363,7 @@ const showToastNotification = () =>
 (function () {
     // Whenever data is updated on the server, websocket will notify
     // all clients so that they could fetch it and update UI
-    const ws = new WebSocket(sync_data.wsUrl, ['sync_data']);
+    const ws = new WebSocket(syncData.wsUrl, ['sync_data']);
     ws.onmessage = (e) => {
         if (e.data === 'refresh' && !pushInProgress) {
             fetchItemsFromServerAndRender();

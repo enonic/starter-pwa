@@ -10,6 +10,6 @@ exports.get = function() {
 
     return {
         contentType: 'application/javascript',
-        body: 'var sync_data = ' + JSON.stringify(data, null, 2) + ';'
+        body: 'var syncData = ' + JSON.stringify(data, null, 2) + ';'
     };
 };

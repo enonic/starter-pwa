@@ -2,6 +2,7 @@ const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { InjectManifest } = require('workbox-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const ESLintPlugin = require('eslint-webpack-plugin');
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 // const ENV = process.env.NODE_ENV || 'development'; // console.log(env);
@@ -26,16 +27,6 @@ module.exports = {
     devtool: isProd ? false : 'source-map',
     module: {
         rules: [
-            {
-                enforce: 'pre',
-                test: /\.js$/,
-                exclude: /node_modules/,
-                loader: 'eslint-loader',
-                options: {
-                    failOnWarning: false,
-                    failOnError: true
-                }
-            },
             {
                 test: /.less$/,
                 use: [
@@ -79,6 +70,10 @@ module.exports = {
         new InjectManifest({
             swSrc: path.join(__dirname, SRC_DIR, 'templates/workbox-sw.js'),
             swDest: path.join(__dirname, DST_DIR, 'templates/sw.js')
+        }),
+        new ESLintPlugin({
+            extensions: [`js`, `jsx`],
+            exclude: ['/node_modules/']
         }),
         new CopyWebpackPlugin({
             patterns: [
