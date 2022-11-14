@@ -27,7 +27,7 @@ dependencies {
     include "com.enonic.xp:lib-io:${xpVersion}"
     include 'com.enonic.lib:lib-notifications:2.0.0'
     include "com.enonic.lib:lib-router:3.0.0"
-    include "com.enonic.lib:lib-thymeleaf:2.0.1"
+    include "com.enonic.lib:lib-thymeleaf:2.0.2"
     include "com.enonic.lib:lib-mustache:2.1.0"
 }
 
