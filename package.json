@@ -44,7 +44,7 @@
     "workbox-webpack-plugin": "^6.5.4"
   },
   "dependencies": {
-    "jquery": "^3.6.2"
+    "jquery": "^3.6.3"
   },
   "engines": {
     "node": ">= 16.0.0",
