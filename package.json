@@ -38,7 +38,7 @@
     "less-loader": "^11.1.0",
     "mini-css-extract-plugin": "^2.7.5",
     "prettier": "^2.8.4",
-    "style-loader": "^3.3.1",
+    "style-loader": "^3.3.2",
     "webpack": "^5.76.1",
     "webpack-cli": "^5.0.1",
     "workbox-webpack-plugin": "^6.5.4"
