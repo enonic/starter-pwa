@@ -40,7 +40,7 @@
     "prettier": "^2.8.8",
     "style-loader": "^3.3.2",
     "webpack": "^5.81.0",
-    "webpack-cli": "^5.0.2",
+    "webpack-cli": "^5.1.0",
     "workbox-webpack-plugin": "^6.5.4"
   },
   "dependencies": {
