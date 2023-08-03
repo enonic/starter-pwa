@@ -23,7 +23,7 @@ module.exports = {
         'css/bs': './css/bs.less',
         'css/push': './css/push.less'
     },
-    mode: ENV,
+    mode: isProd ? 'production' : 'development',
     devtool: isProd ? false : 'source-map',
     module: {
         rules: [
@@ -40,17 +40,11 @@ module.exports = {
                 use: [
                     'file-loader?name=images/[name].[ext]',
                 ],
-            },
-            {
-                test: /\.(eot|woff|woff2|ttf)$/,
-                use: [{
-                    loader: 'file-loader',
-                    options: {
-                        name: '[name].[ext]',
-                        outputPath: 'fonts/',
-                        publicPath: '../../fonts/',
-                    }
-                }]
+            },            {
+            test: /\.(woff2)$/,
+            use: [
+                'file-loader?name=bundles/fonts/[name].[ext]',
+            ],
             },
         ]
     },
@@ -58,7 +52,8 @@ module.exports = {
         path: DST_ASSETS_DIR,
         filename: 'bundles/[name].js',
         libraryTarget: 'var',
-        library: 'Starter'
+        library: 'Starter',
+        assetModuleFilename: './[file]'
     },
     plugins: [
         new CleanWebpackPlugin({
@@ -84,5 +79,6 @@ module.exports = {
     ],
     resolve: {
         extensions: ['.js', '.less', '.css']
-    }
+    },
+    performance: {hints: false}
 };

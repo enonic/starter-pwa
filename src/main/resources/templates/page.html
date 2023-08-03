@@ -78,7 +78,7 @@
     const registerServiceWorker = function(appUrl, appName) {
 
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
+            window.addEventListener('DOMContentLoaded', function() {
                 navigator.serviceWorker
                     .register(appUrl + 'sw.js', {scope: appUrl})
                     .then(function (registration) {

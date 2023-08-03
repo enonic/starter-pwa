@@ -2,33 +2,33 @@
  * Helper lib for repo operations
  */
 
-var repoLib = require('/lib/xp/repo');
-var nodeLib = require('/lib/xp/node');
-var contextLib = require('/lib/xp/context');
+const repoLib = require('/lib/xp/repo');
+const nodeLib = require('/lib/xp/node');
+const contextLib = require('/lib/xp/context');
 
 // -------------------------------------------------------------------- Constants
 
-var REPO_NAME = app.name;
-var REPO_BRANCH = 'master';
-var REPO_USER = {
+const REPO_NAME = app.name;
+const REPO_BRANCH = 'master';
+const REPO_USER = {
     login: 'su',
     idProvider: 'system'
 };
-var REPO_PRINCIPAL = ["role:system.admin"];
+const REPO_PRINCIPAL = ['role:system.admin'];
 
-var ROOT_PERMISSIONS = [
+const ROOT_PERMISSIONS = [
     {
-        "principal": "role:system.everyone",
-        "allow": [
-            "READ",
-            "CREATE",
-            "MODIFY",
-            "DELETE",
-            "PUBLISH",
-            "READ_PERMISSIONS",
-            "WRITE_PERMISSIONS"
+        principal: 'role:system.everyone',
+        allow: [
+            'READ',
+            'CREATE',
+            'MODIFY',
+            'DELETE',
+            'PUBLISH',
+            'READ_PERMISSIONS',
+            'WRITE_PERMISSIONS'
         ],
-        "deny": []
+        deny: []
     }
 ];
 
@@ -39,29 +39,17 @@ var ROOT_PERMISSIONS = [
  * @public
  * @param {Function} func - Nullary function
  */
-var sudo = function(func) {
-    return contextLib.run({
-        user: REPO_USER,
-        principals: REPO_PRINCIPAL,
-    }, func);
+const sudo = function (func) {
+    return contextLib.run(
+        {
+            user: REPO_USER,
+            principals: REPO_PRINCIPAL
+        },
+        func
+    );
 };
 
-/**
- * Initializes the repo: if either don't exist, the repo and/or the subscription node path are created.
- * @public
- */
-var initRepo = function() {
-    var result = repoLib.get(REPO_NAME);
-    if (!result) {
-        createRepo();
-    }
-
-    if (!repoLib.get(REPO_NAME)) {
-        throw Error('Something went wrong when creating (and/or getting) repo:' + REPO_NAME);
-    }
-}
-
-var createRepo = function () {
+const createRepo = function () {
     // log.info('Creating repository: ' + REPO_NAME);
     repoLib.create({
         id: REPO_NAME,
@@ -69,12 +57,30 @@ var createRepo = function () {
     });
 };
 
+/**
+ * Initializes the repo: if either don't exist, the repo and/or the subscription node path are created.
+ * @public
+ */
+const initRepo = function () {
+    var result = repoLib.get(REPO_NAME);
+    if (!result) {
+        createRepo();
+    }
+
+    if (!repoLib.get(REPO_NAME)) {
+        throw Error(
+            'Something went wrong when creating (and/or getting) repo:' +
+                REPO_NAME
+        );
+    }
+};
+
 // ------------------------------------------------------------------------- Exports
 
 exports.sudo = sudo;
 
-exports.modifyNode = function(key, editor) {
-    var repoConn = exports.getConnection();
+exports.modifyNode = function (key, editor) {
+    const repoConn = exports.getConnection();
     return repoConn.modify({
         key: key,
         editor: editor
@@ -89,21 +95,21 @@ exports.initialize = function () {
  * Returns a connection to the repo. Low-level permission, unless part of functions that are wrapped in {@link sudo}.
  * @public
  */
-exports.getConnection = function() {
+exports.getConnection = function () {
     sudo(initRepo);
     return nodeLib.connect({
         repoId: REPO_NAME,
         branch: REPO_BRANCH
     });
-}
+};
 
 /**
  * Checks if node at specified path already exists and
- * creates it if not 
+ * creates it if not
  */
 exports.createNodeWithPath = function (nodePath) {
     // create node if it des not already exist
-    var nodeExists = exports.nodeWithPathExists(nodePath);
+    const nodeExists = exports.nodeWithPathExists(nodePath);
     if (nodeExists) {
         // Node exists
         return;
@@ -115,19 +121,19 @@ exports.createNodeWithPath = function (nodePath) {
     });
 };
 
-exports.createNode = function(nodeData) {
-    var nodeObj = nodeData;
+exports.createNode = function (nodeData) {
+    const nodeObj = nodeData;
 
     nodeObj._permissions = nodeObj._permissions || ROOT_PERMISSIONS;
-    var conn = exports.getConnection();
-    var node = conn.create(nodeData);
+    const conn = exports.getConnection();
+    const node = conn.create(nodeData);
     conn.refresh();
 
     return node;
-}
+};
 
 exports.nodeWithPathExists = function (path) {
-    var result = exports.getConnection().query({
+    const result = exports.getConnection().query({
         start: 0,
         count: 0,
         query: "_path = '" + path + "'"
@@ -135,7 +141,7 @@ exports.nodeWithPathExists = function (path) {
     return result.total > 0;
 };
 
-exports.getNodesWithPath = function(nodePath) {
+exports.getNodesWithPath = function (nodePath) {
     return exports.getConnection().findChildren({
         start: 0,
         count: -1,
@@ -143,8 +149,8 @@ exports.getNodesWithPath = function(nodePath) {
     });
 };
 
-exports.getNodesWithPathCount = function(nodePath) {
-    var children = exports.getConnection().findChildren({
+exports.getNodesWithPathCount = function (nodePath) {
+    const children = exports.getConnection().findChildren({
         start: 0,
         count: -1,
         parentKey: nodePath
@@ -152,7 +158,6 @@ exports.getNodesWithPathCount = function(nodePath) {
     return children.total;
 };
 
-exports.getNode = function(id) {
+exports.getNode = function (id) {
     return exports.getConnection().get(id);
 };
-

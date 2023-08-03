@@ -3,10 +3,37 @@
  * Exposes a POST endpoint at <domain:port>/webapp/<appname>/_/service/<appname>/push
  */
 
+const notifications = require('/lib/notifications');
+const pushRepo = require('/lib/push/repo');
+const pushKeys = require('/lib/push/keys');
 
-var notifications = require('/lib/notifications');
-var pushRepo = require('/lib/push/repo');
-var pushKeys = require('/lib/push/keys');
+/**
+ * Send a single message to a single subscriber.
+ * @private
+ * @param {Object} keyPair - Pair of fixed public and private key to the notification service, common between subscribe and push. DO NOT
+ * SHARE THE PRIVATE KEY, don't even write it in the code. In our example it's generated once and stored in a node in the repo.
+ * @param {Object} subscription - unique identifier and authentication for the subscription. Contains the fields {@code endpoint,
+ * {@code auth} and {@code key}.
+ * @param {Object} payload - Message that will be wrapped in an object under the key {@code text} and sent out as the payload of the
+ * notification. The {@code payload} object can of course also be used to send general-purpose data.
+ */
+const sendPushNotification = function (keyPair, subscription, payload) {
+    notifications.sendAsync({
+        privateKey: keyPair.privateKey,
+        publicKey: keyPair.publicKey,
+        endpoint: subscription.endpoint,
+        auth: subscription.auth,
+        receiverKey: subscription.key,
+        payload: payload,
+        error: function () {
+            throw Error(
+                "Could not send push notification payload: '" +
+                    JSON.stringify(payload) +
+                    "'"
+            );
+        }
+    });
+};
 
 /**
  * Service entry: Allows the client to POST a message to this service, which next will be pushed as a notification to all subscribing
@@ -21,39 +48,38 @@ exports.post = function (req) {
     var response = {
         status: 200,
         headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
         }
     };
 
     try {
-        if (req.params.message == '') {
+        if (req.params.message === '') {
             response.status = 400;
             response.body = {
-                message: 'Empty message received - nothing to send',
+                message: 'Empty message received - nothing to send'
             };
-
         } else {
             var succeeded = exports.sendPushNotificationToAllSubscribers({
                 text: req.params.message
             });
             response.body = {
                 success: succeeded,
-                message: (succeeded) ? undefined : "No messages were pushed. See the server log.",
+                message: succeeded
+                    ? undefined
+                    : 'No messages were pushed. See the server log.'
             };
         }
-
     } catch (e) {
         // log.error(e);
         response.status = 500;
         response.body = {
             success: false,
-            message: "Push failed.",
+            message: 'Push failed.'
         };
     }
 
     return response;
 };
-
 
 /**
  * Iterate over all registered subscriptions and push a notification to them one by one. In real-world use, this should be done
@@ -78,34 +104,8 @@ exports.sendPushNotificationToAllSubscribers = function (payload) {
 
         if (node && node.subscription) {
             sendPushNotification(keyPair, node.subscription, payload);
-            actuallySent++;
-
+            actuallySent += 1;
         }
     }
-    return (actuallySent > 0);
-};
-
-
-/**
- * Send a single message to a single subscriber.
- * @private
- * @param {Object} keyPair - Pair of fixed public and private key to the notification service, common between subscribe and push. DO NOT
- * SHARE THE PRIVATE KEY, don't even write it in the code. In our example it's generated once and stored in a node in the repo.
- * @param {Object} subscription - unique identifier and authentication for the subscription. Contains the fields {@code endpoint,
- * {@code auth} and {@code key}.
- * @param {Object} payload - Message that will be wrapped in an object under the key {@code text} and sent out as the payload of the
- * notification. The {@code payload} object can of course also be used to send general-purpose data.
- */
-var sendPushNotification = function (keyPair, subscription, payload) {
-    notifications.sendAsync({
-        privateKey: keyPair.privateKey,
-        publicKey: keyPair.publicKey,
-        endpoint: subscription.endpoint,
-        auth: subscription.auth,
-        receiverKey: subscription.key,
-        payload: payload,
-        error: function () {
-            throw Error("Could not send push notification payload: '" + JSON.stringify(payload) + "'");
-        }
-    });
+    return actuallySent > 0;
 };

@@ -3,7 +3,6 @@
  * Exposes a POST endpoint at <domain:port>/webapp/<appname>/_/service/<appname>/background-sync
  */
 
-
 var bsLib = require('/lib/background-sync/repo');
 
 exports.post = function (req) {
@@ -26,20 +25,18 @@ exports.post = function (req) {
         return {
             body: result,
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json'
             }
-        }
-
+        };
     } catch (e) {
-
         return {
             status: 500,
             body: 'Failed to create a node'
-        }
+        };
     }
 };
 
-exports.delete = function (req){
+exports.delete = function (req) {
     try {
         var itemId = req.params.id;
 
@@ -55,22 +52,20 @@ exports.delete = function (req){
             status: result ? 200 : 404,
             body: result ? 'OK' : 'Failed to find the item'
         };
-
     } catch (e) {
-
         return {
             status: 500,
             body: 'Failed to delete the item'
-        }
+        };
     }
-}
+};
 
 exports.put = function (req) {
     try {
         var item = JSON.parse(req.body);
 
         if (!item) {
-            var message = "Missing/invalid item data in request";
+            var message = 'Missing/invalid item data in request';
             log.warning(message);
             return {
                 status: 400,
@@ -87,25 +82,24 @@ exports.put = function (req) {
             return {
                 status: 404,
                 body: 'NOT_FOUND'
-            }
+            };
         }
 
         return {
             body: result,
             headers: {
-                "Content-Type": "application/json"
+                'Content-Type': 'application/json'
             }
         };
     } catch (e) {
-
         return {
             status: 500,
             body: 'Failed to update the item'
-        }
+        };
     }
-}
+};
 
-exports.get = function(req) {
+exports.get = function (req) {
     try {
         var itemId = req.params.id;
         var result = bsLib.getItems(itemId);
@@ -114,21 +108,21 @@ exports.get = function(req) {
             return {
                 body: { TodoItems: [] },
                 headers: {
-                    "Content-Type": "application/json"
+                    'Content-Type': 'application/json'
                 }
-            }
+            };
         }
 
         return {
             body: { TodoItems: result || [] },
             headers: {
-                "Content-Type": "application/json"
+                'Content-Type': 'application/json'
             }
         };
     } catch (e) {
         return {
             status: 500,
-            message: JSON.stringify(e),
+            message: JSON.stringify(e)
         };
     }
-}
+};

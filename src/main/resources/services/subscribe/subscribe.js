@@ -3,9 +3,87 @@
  * Exposes a POST endpoint at <domain:port>/webapp/com.enonic.starter.pwa/_/service/com.enonic.starter.pwa/subscribe
  */
 
-var repoHelper = require('/lib/repo-helper');
-var pushRepo = require('/lib/push/repo');
+const repoHelper = require('/lib/repo-helper');
+const pushRepo = require('/lib/push/repo');
 
+const getSubscriptionObj = function (params) {
+    if (!params.auth || !params.endpoint || !params.key) {
+        log.warning(
+            'Invalid subscription object parameters - missing auth, endpoint and/or key'
+        );
+        return null;
+    }
+
+    return {
+        auth: params.auth,
+        endpoint: params.endpoint,
+        key: params.key
+    };
+};
+
+const createSubscriptionNode = function (subscription) {
+    try {
+        const node = pushRepo.createSubscription(subscription);
+        if (!node) {
+            // log.error("Tried creating subscripton node, but something seems wrong: " + JSON.stringify(
+            //     {
+            //         incoming_subscription:subscription,
+            //         resulting_node:node
+            //     }, null, 2));
+
+            return {
+                status: 500,
+                message: "Couldn't create subscription node"
+            };
+        }
+        return { success: true };
+    } catch (e) {
+        // log.error(e);
+        return {
+            status: 500,
+            message: "Couldn't create subscription node"
+        };
+    }
+};
+
+const deleteSubscriptionNode = function (subscription) {
+    try {
+        const result = pushRepo.deleteSubscription(subscription);
+
+        if (result === 'NOT_FOUND') {
+            return {
+                status: 404,
+                message:
+                    "Subscription not found: auth='" +
+                    subscription.auth +
+                    ", key='" +
+                    subscription.key +
+                    "'"
+            };
+        }
+        if (result === 'SUCCESS') {
+            return { success: true };
+        }
+        if (typeof result === 'string') {
+            return {
+                status: 500,
+                message: 'Some subscription nodes were not deleted',
+                nodeIds: result
+            };
+        }
+        throw Error(
+            'Weird result from pushRepo.deleteSubscription:\n' +
+                JSON.stringify({ result: result }, null, 2) +
+                '\n'
+        );
+    } catch (e) {
+        // log.error(e);
+        return {
+            status: 500,
+            message: "Couldn't delete subscription node"
+        };
+    }
+};
 
 /**
  * Parameters in the request.params object
@@ -25,19 +103,23 @@ var pushRepo = require('/lib/push/repo');
  */
 exports.post = function (req) {
     // log.info(JSON.stringify({subscribe_request:req}, null, 2));
-    var subscription = getSubscriptionObj(req.params);
+    const subscription = getSubscriptionObj(req.params);
     if (!subscription) {
-        var message = 'Missing/invalid subscription data in request';
+        const message = 'Missing/invalid subscription data in request';
         log.warning(message);
         return {
             status: 400,
-            message: message,
+            message: message
         };
     }
 
-    var result = (req.params.cancelSubscription) ?
-         repoHelper.sudo(function(){ return deleteSubscriptionNode(subscription); }) :
-         repoHelper.sudo(function(){ return createSubscriptionNode(subscription); });
+    const result = req.params.cancelSubscription
+        ? repoHelper.sudo(function () {
+              return deleteSubscriptionNode(subscription);
+          })
+        : repoHelper.sudo(function () {
+              return createSubscriptionNode(subscription);
+          });
 
     if (result.status && Number(result.status) >= 400) {
         return result;
@@ -46,81 +128,7 @@ exports.post = function (req) {
     return {
         body: result,
         headers: {
-            'Content-Type': 'application/json',
-        },
-    };
-};
-
-var getSubscriptionObj = function(params) {
-    if (!params.auth || !params.endpoint || !params.key) {
-        log.warning("Invalid subscription object parameters - missing auth, endpoint and/or key");
-        return null;
-    }
-
-    return {
-        auth: params.auth,
-        endpoint: params.endpoint,
-        key: params.key
-    };
-};
-
-var createSubscriptionNode = function (subscription) {
-    try {
-        var node = pushRepo.createSubscription(subscription);
-        if (!node)  {
-            // log.error("Tried creating subscripton node, but something seems wrong: " + JSON.stringify(
-            //     {
-            //         incoming_subscription:subscription,
-            //         resulting_node:node
-            //     }, null, 2));
-t
-            return {
-                status: 500,
-                message: "Couldn't create subscription node",
-            }
-
-        } else {
-            return {success: true};
+            'Content-Type': 'application/json'
         }
-
-    } catch (e) {
-        // log.error(e);
-        return {
-            status: 500,
-            message: "Couldn't create subscription node",
-        };
-    }
-};
-
-var deleteSubscriptionNode = function (subscription) {
-    try {
-        var result = pushRepo.deleteSubscription(subscription);
-
-        if (result === "NOT_FOUND") {
-            return {
-                status: 404,
-                message: "Subscription not found: auth='" + subscription.auth + ", key='" + subscription.key + "'",
-            }
-
-        } else if (result === "SUCCESS") {
-            return {success: true};
-
-        } else if (typeof result === 'string') {
-            return {
-                status: 500,
-                message: "Some subscription nodes were not deleted",
-                nodeIds: result,
-            }
-
-        } else {
-            throw Error("Weird result from pushRepo.deleteSubscription:\n" + JSON.stringify({result:result}, null, 2) + "\n");
-        }
-
-    } catch (e) {
-        // log.error(e);
-        return {
-            status: 500,
-            message: "Couldn't delete subscription node",
-        };
-    }
+    };
 };

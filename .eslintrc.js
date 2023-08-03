@@ -9,6 +9,7 @@ module.exports = {
         'no-plusplus': ['error', { allowForLoopAfterthoughts: true }],
         'vars-on-top': 'off',
         'global-require': 'off',
+        'no-param-reassign': 'off',
         'no-use-before-define': ['error', { functions: false }],
         'linebreak-style': ['off'],
         'prettier/prettier': [
