@@ -91,3 +91,4 @@ crashlytics-build.properties
 # Node modules
 node_modules/
 build/
+.eslintignore
