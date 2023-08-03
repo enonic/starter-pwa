@@ -10,30 +10,35 @@ var PUSH_SUBSCRIPTIONS_PATH = '/push';
  * Creates a subscription node
  */
 var createSubscriptionNode = function () {
-    repoHelper.createNodeWithPath(PUSH_SUBSCRIPTIONS_PATH)
+    repoHelper.createNodeWithPath(PUSH_SUBSCRIPTIONS_PATH);
 };
 
-exports.getSubscriptions = function() {
+exports.getSubscriptions = function () {
     return repoHelper.getNodesWithPath(PUSH_SUBSCRIPTIONS_PATH);
 };
 
-exports.getSubscriptionsCount = function() {
+exports.getSubscriptionsCount = function () {
     return repoHelper.getNodesWithPathCount(PUSH_SUBSCRIPTIONS_PATH);
 };
 
-exports.getSubscriptionById = function(id) {
+exports.getSubscriptionById = function (id) {
     return repoHelper.getNode(id);
 };
 
-exports.createSubscription = function(subscription) {
-    createSubscriptionNode(); 
+exports.createSubscription = function (subscription) {
+    createSubscriptionNode();
     var repoConn = repoHelper.getConnection();
 
     // Prevent duplicates
     var hits = repoConn.query({
-        query: "subscription.auth = '" + subscription.auth +
-               "' AND subscription.key = '" + subscription.key +
-               "' AND subscription.endpoint = '" + subscription.endpoint + "'",
+        query:
+            "subscription.auth = '" +
+            subscription.auth +
+            "' AND subscription.key = '" +
+            subscription.key +
+            "' AND subscription.endpoint = '" +
+            subscription.endpoint +
+            "'"
     }).hits;
     if (hits && hits.length > 0) {
         return repoHelper.getNode(hits[0].id);
@@ -48,13 +53,18 @@ exports.createSubscription = function(subscription) {
     return node;
 };
 
-exports.deleteSubscription = function(subscription) {
+exports.deleteSubscription = function (subscription) {
     var repoConn = repoHelper.getConnection();
     var hits = repoConn.query({
-        query: "subscription.auth = '" + subscription.auth + "' AND subscription.key = '" + subscription.key + "'"
+        query:
+            "subscription.auth = '" +
+            subscription.auth +
+            "' AND subscription.key = '" +
+            subscription.key +
+            "'"
     }).hits;
     if (!hits || hits.length < 1) {
-        return "NOT_FOUND";
+        return 'NOT_FOUND';
     }
 
     var ids = hits.map(function (hit) {
@@ -65,18 +75,20 @@ exports.deleteSubscription = function(subscription) {
     repoConn.refresh();
 
     if (result.length === ids.length) {
-        return "SUCCESS";
+        return 'SUCCESS';
     }
 
-    return JSON.stringify(ids.filter(function (id) {
-        return result.indexOf(id) === -1;
-    }));
+    return JSON.stringify(
+        ids.filter(function (id) {
+            return result.indexOf(id) === -1;
+        })
+    );
 };
 
 exports.loadKeyPair = function () {
-    createSubscriptionNode(); 
+    createSubscriptionNode();
     var pushSubNode = repoHelper.getNode(PUSH_SUBSCRIPTIONS_PATH);
-    return (pushSubNode) ? pushSubNode.keyPair : null;
+    return pushSubNode ? pushSubNode.keyPair : null;
 };
 
 exports.storeKeyPair = function (keyPair) {
@@ -92,7 +104,7 @@ exports.storeKeyPair = function (keyPair) {
     });
 };
 
-exports.deleteAllSubscriptions = function() {
+exports.deleteAllSubscriptions = function () {
     if (!repoHelper.nodeWithPathExists(PUSH_SUBSCRIPTIONS_PATH)) {
         return;
     }

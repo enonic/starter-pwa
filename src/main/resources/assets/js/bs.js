@@ -186,15 +186,17 @@ const updateTodoView = () => {
                 <i id="${
                     todo.id
                 }" class="todo-app__checkbox mdl-cell mdl-cell--1-col material-icons md-48" title="${
-            todo.completed ? 'Mark as incomplete' : 'Mark as completed'
-        }">${todo.completed ? 'check_box' : 'check_box_outline_blank'}</i>
+                    todo.completed ? 'Mark as incomplete' : 'Mark as completed'
+                }">${
+                    todo.completed ? 'check_box' : 'check_box_outline_blank'
+                }</i>
 
 
                 <label id="${todo.id}" value="${
-            todo.text
-        }" class="todo-app__textfield mdl-cell mdl-cell--7-col" title="Click to edit">${
-            todo.text
-        }</label>
+                    todo.text
+                }" class="todo-app__textfield mdl-cell mdl-cell--7-col" title="Click to edit">${
+                    todo.text
+                }</label>
 
                 <div class="todo-app__date mdl-cell mdl-cell--2-col">${todo.getFormattedDate()}</div>
                 <i class="remove-todo-button mdl-cell mdl-cell--2-col material-icons" title="Delete" id=${

@@ -9,7 +9,6 @@ var repoHelper = require('/lib/repo-helper');
 
 // --------------------------------------------------------------------------------  Initialization: key setup
 
-
 /**
  * A fixed pair of authentication keys
  * @typedef {Object} Keypair

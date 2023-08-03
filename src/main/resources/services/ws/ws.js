@@ -4,7 +4,7 @@ var eventLib = require('/lib/xp/event');
 eventLib.listener({
     type: 'node.*',
     localOnly: false,
-    callback: function(event) {
+    callback: function (event) {
         if (isPWARepoNodeEvent(event)) {
             webSocketLib.sendToGroup('sync', 'refresh');
         }
