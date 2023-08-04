@@ -30,30 +30,25 @@ module.exports = {
             {
                 test: /.less$/,
                 use: [
-                    {loader: MiniCssExtractPlugin.loader, options: {publicPath: '../'}},
+                    {loader: MiniCssExtractPlugin.loader, options: {publicPath: '../../'}},
                     {loader: 'css-loader', options: {sourceMap: !isProd, importLoaders: 1}},
                     {loader: 'less-loader', options: {sourceMap: !isProd}},
                 ]
             },
             {
-                test: /\.(png|svg|jpg|gif)$/,
-                use: [
-                    'file-loader?name=images/[name].[ext]',
-                ],
-            },            {
-            test: /\.(woff2)$/,
-            use: [
-                'file-loader?name=bundles/fonts/[name].[ext]',
-            ],
-            },
+                test: /.woff2$/,
+                type: 'asset/resource',
+                generator: {
+                    filename: 'fonts/[hash][ext]'
+                }
+            }
         ]
     },
     output: {
         path: DST_ASSETS_DIR,
         filename: 'bundles/[name].js',
         libraryTarget: 'var',
-        library: 'Starter',
-        assetModuleFilename: './[file]'
+        library: 'Starter'
     },
     plugins: [
         new CleanWebpackPlugin({
@@ -64,7 +59,12 @@ module.exports = {
         }),
         new InjectManifest({
             swSrc: path.join(__dirname, SRC_DIR, 'templates/workbox-sw.js'),
-            swDest: path.join(__dirname, DST_DIR, 'templates/sw.js')
+            swDest: path.join(__dirname, DST_DIR, 'templates/sw.js'),
+            exclude: [
+                /\/css\/.*\.js$/,
+                /\/js\/.*\.css$/,
+                'fonts/material.icons.woff2'
+            ]
         }),
         new ESLintPlugin({
             extensions: [`js`, `jsx`],
@@ -72,7 +72,7 @@ module.exports = {
         }),
         new CopyWebpackPlugin({
             patterns: [
-                {from: 'images/**/*', to: '[path]/[name].[ext]'},
+                {from: 'images/**/*', to: '[path]/[name][ext]'},
                 {from: 'js/material.min.js', to: 'js/'},
             ]
         })

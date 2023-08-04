@@ -44,4 +44,11 @@ task webpack(
     script = file('node_modules/webpack/bin/webpack.js')
 }
 
-jar.dependsOn webpack
+jar {
+    exclude 'assets/fonts/material.icons.woff2'
+    exclude 'assets/bundles/css/*.js'
+    exclude 'assets/bundles/js/*.css'
+
+    includeEmptyDirs = false
+    dependsOn webpack
+}
