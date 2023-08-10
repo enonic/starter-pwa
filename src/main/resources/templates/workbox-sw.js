@@ -52,20 +52,19 @@ self.addEventListener('message', (event) => {
         return;
     }
     switch (event.data) {
-        case 'skipWaiting':
+        case 'skipWaitingAndNotify':
             self.skipWaiting().then(() => {
-                try {
-                    self.registration.showNotification(
+                const promise = self.registration.showNotification(
                     '{{appTitle}}',
                     {
                         body: 'Application is updated to version {{appVersion}}',
                         icon: '{{iconUrl}}'
                     });
-                }
-                catch(e) {
-                    console.log('Notifications disabled. Application is updated to version {{appVersion}}');
-                }
             });
+            break;
+        case 'skipWaiting':
+            console.log('Notifications disabled. Application is updated to version {{appVersion}}');
+            self.skipWaiting();
             break;
         default:
             break;
@@ -76,13 +75,13 @@ self.addEventListener('message', (event) => {
  * Handles the event of receiving of a subscribed push notification
  */
 self.addEventListener('push', function(event) {
-    var data = JSON.parse(event.data.text());
+    var data = event.data.text();
     var iconUrl = '{{iconUrl}}';
     const title = '{{appName}}';
 
-    if (data.text) {
+    if (data) {
         const options = {
-            body: data.text,
+            body: data,
             icon: iconUrl
         };
 
