@@ -1,4 +1,3 @@
-import ToasterInstance from './toaster';
 import '../css/app.less';
 import toast from 'toast-me';
 
@@ -82,9 +81,7 @@ const handleNewServiceWorker = (registration, appName) => {
 
         const toggleOnlineStatus = function () {
             if (!navigator.onLine) {
-                ToasterInstance().then((toaster) => {
-                    toaster.toast('Connection is off.');
-                });
+                toast('Connection is off.');
             }
             mainContainer.classList.toggle('online', navigator.onLine);
             mainContainer.classList.toggle('offline', !navigator.onLine);

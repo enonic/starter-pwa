@@ -1,19 +1,19 @@
-var thymeleaf = require('/lib/thymeleaf');
-var router = require('/lib/router')();
-var portalLib = require('/lib/xp/portal');
-var mustache = require('/lib/mustache');
-var pushRepo = require('/lib/push/repo');
+const thymeleaf = require('/lib/thymeleaf');
+const router = require('/lib/router')();
+const portalLib = require('/lib/xp/portal');
+const mustache = require('/lib/mustache');
+const pushRepo = require('/lib/push/repo');
 
-var siteTitle = 'PWA Starter';
-var localStorageName = 'Todolist';
-var pushKeys = require('/lib/push/keys');
+const siteTitle = 'PWA Starter';
+const localStorageName = 'Todolist';
+const pushKeys = require('/lib/push/keys');
 
 function getAppUrl() {
     return portalLib.url({ path: '/webapp/' + app.name }) + '/';
 }
 
 function renderPage(pageId, title) {
-    var model = {
+    const model = {
         version: app.version,
         appUrl: getAppUrl(),
         pageId: pageId,
@@ -31,7 +31,7 @@ function renderPage(pageId, title) {
             service: 'broadcastsubscribers'
         });
         model.publicKey = pushKeys.getKeyPair().publicKey;
-        var subscriptionsCount = pushRepo.getSubscriptionsCount();
+        const subscriptionsCount = pushRepo.getSubscriptionsCount();
         model.subscriberCount =
             subscriptionsCount +
             ' subscriber' +
@@ -70,7 +70,7 @@ function renderPage(pageId, title) {
 }
 
 function renderSW() {
-    var appUrl = getAppUrl();
+    const appUrl = getAppUrl();
 
     return {
         headers: {

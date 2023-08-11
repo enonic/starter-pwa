@@ -12,24 +12,26 @@ powered by link:https://github.com/enonic/lib-router[Enonic Router library^].
 
 1.Make sure you have Enonic XP of version 7.0.0 or later installed locally. If not, https://developer.enonic.com/start[read here about how to get started]
 
-2.While using Enonic CLI to create a new project, choose **PWA starter** when asked what type of started you want to base your new project on.
+2.While using Enonic CLI to create a new project, choose **Workbox PWA starter** when asked what type of starter you want to base your new project on.
 
-3.Once CLI has set up your new project based on PWA Starter, go to the newly created project folder, build and deploy the application:
+Let's assume you accepted default project name suggested by CLI (`com.example.myproject`) and your project was created in a folder called `myproject`.
+
+3.Once CLI has set up your new project based on the PWA Starter, go to the newly created project folder (`myproject`), build and deploy the application:
 [source,groovy]
 ----
-$ cd mytest
+$ cd myproject
 $ enonic project deploy
 ----
 
-4.If the build completed without errors, you can now open your app in the browser via ``http://localhost:8080/webapp/com.company.myapp``
-(replace ``com.company.myapp`` with whatever name you picked for your app when creating the project with CLI)
+4.If the build completed without errors, you can now open your app in the browser via ``http://localhost:8080/webapp/com.example.myproject/``
+(if you used a different app name when creating the project with CLI, replace ``com.example.myproject`` with whatever name you picked).
 
 
 == Usage and Testing of PWA
 
-We assume that XP service is running on ``localhost:8000`` and your app is called ``com.company.myapp`` as in the example above.
+We assume that XP service is running on ``localhost:8000`` and your app is called ``com.example.myproject`` as in the example above.
 
-1. Open ``http://localhost:8080/webapp/com.company.myapp`` in your browser. You should see this:
+1. Open ``http://localhost:8080/webapp/com.example.myproject/`` in your browser. You should see this:
 
 image::main-page.png[]
 
@@ -51,7 +53,7 @@ Click the "Offline" link in the Starter menu. That will open a new page looking 
 
 image::page-online.png[]
 
-This page shows that it's possible to easily determine online/offline status in the browser and show different content on the page based on that. Go offline by unplugging network cable or turning off Wi-Fi. Now the page should change and look like this:
+This page shows that it's possible to easily determine online/offline status in the browser and show different content on the page based on that. Go offline by unplugging network cable, turning off Wi-Fi or simulating offline mode in the dev console. Now the page should change and look like this:
 
 image::page-offline.png[]
 
@@ -64,31 +66,31 @@ As you can see, the Starter can track its online/offline status and change conte
 == Webpack Config
 
 The Starter is using Webpack to build all LESS files into one CSS bundle ``main.css`` and all Javascript assets into one main JS bundle
-``app-bundle.js`` (some pages are using their own JS bundles in addition to the main one). The Workbox plugin is used by Webpack to automatically generate a template for the Service Worker (``sw.js``) based
+``main.js`` (some pages are using their own JS bundles in addition to the main one). The Workbox plugin is used by Webpack to automatically generate a template for the Service Worker (``sw.js``) based
 on a predefined file (``workbox-sw.js``). Final Service Worker file will be rendered on-the-fly by https://github.com/enonic/lib-router[Enonic Router] lib by intercepting
-a call to ``/sw.js`` file in the site root.
+a request to ``/sw.js`` file in the site root.
 
 == Dependencies
 
 ``assets/js/app.js`` is used as entry point for the Webpack builder, so make sure you add the first level of dependencies to this file (using ``require``).
-For example, if ``assets/js/app.js`` is using a LESS file called ``app.less``, add the following line to the ``app.js``:
+For example, if ``assets/js/app.js`` is using a LESS file called ``app.less`` in the `css` folder, add the following line to the ``app.js``:
 
 [source,javascript]
 ----
-require('../css/styles.less');
+import '../css/app.less';
 ----
 
 Same with JS-dependencies. For example, to include a file called ``new.js`` from the same ``js`` folder add this line to ``app.js``:
 
 [source,javascript]
 ----
-require('../js/new.js');
+import 'new.js';
 ----
 
 You can then require other LESS or JS files directly from ``new.js`` effectively building a chain of dependencies that Webpack will resolve during the build.
 
-As mentioned before, the build process will bundle all LESS and JS assets into ``bundle.css`` and ``bundle.js`` files in the ``precache`` folder which can then
-be referenced directly from the ``main.html`` page.
+As mentioned before, the build process will bundle all LESS and JS assets into ``bundles/js/main.css`` and ``bundles/js/main.css`` files respectively which can then
+be referenced directly from the ``page.html`` page.
 
 
 == Auto-precaching assets
@@ -115,13 +117,13 @@ precacheAndRoute(self.__WB_MANIFEST);
 ----
 
 The last line above injects generated manifest of assets that will be precached upon application startup.
-The manifest itself is generated during the app build based on settings in the webpack config file. If you notice that some of the assets
+The `self.__WB_MANIFEST` placeholder will be replaced with the list of assets processed by Webpack. If you notice that some of the assets
 don't get added to the manifest file (and therefore don't get cached) it means that your Webpack config file is not configured to process them.
 
 == Precaching custom assets
 
 Sometimes you may need to cache assets that are not processed by Webpack build. In this case you have to explicitly specify the assets that you
-need to be cached (this can be a local asset or an external URL).
+need to be cached (this might be an external resource, for example a font file).
 Add a new asset with ``revision`` and ``url`` properties in the call to ``precacheAndRoute`` method as shown below:
 
 .workbox-sw.js:
@@ -139,6 +141,7 @@ precacheAndRoute([{
 }]);
 ----
 
+`{{appVersion}}` and `{{appUrl}}` will be replaced at build-time with app version from `gradle.properties` and webapp url respectively.
 
 == Application Manifest file
 
@@ -167,15 +170,14 @@ title, color scheme, display settings and favicon. Feel free to change the prede
 
 == Changing favicon
 
-Default favicon used by the Starter is called ``icon.png`` and located in ``precache/icons/`` folder, so you can simply replace this icon with
-your own of the same name. If you want to use a different icon file, add it to the same location and change ``page.html`` to point to the new icon. Don't
-forget to make the same changes in ``manifest.json``.
+Default favicon used by the Starter is called ``icon.png`` and located in ``images/icons/`` folder, so you can simply replace this icon with
+your own of the same name. If you want to use a different icon file, add it to the same location and change icon tags inside ``page.html`` to point to the new icon.
 
 .main.html:
 [source,html]
 ----
-    <link rel="apple-touch-icon" href="{{precacheUrl}}/icons/myicon.ico">
-    <link rel="icon" href="{{precacheUrl}}/icons/myicon.ico">
+    <link rel="apple-touch-icon" data-th-href="${portal.assetUrl({'_path=images/icons/icon.png'})}" href="../assets/images/icons/icon.png">
+    <link rel="icon" data-th-href="${portal.assetUrl({'_path=images/icons/icon.png'})}" href="../assets/images/icons/icon.png">
 ----
 
 == main.js
@@ -213,14 +215,14 @@ First, let's change the default page to render a proper template instead of a si
 .main.js:
 [source,javascript]
 ----
-var thymeleaf = require('/lib/thymeleaf');
-var router = require('/lib/router');
-var portalLib = require('/lib/xp/portal');
+const thymeleaf = require('/lib/thymeleaf');
+const router = require('/lib/router');
+const portalLib = require('/lib/xp/portal');
 
 router.get('/', function (req) {
     return {
         body: thymeleaf.render(resolve('/templates/page.html'), {
-            appUrl: portalLib.url({path:'/app/' + app.name}),
+            appUrl: portalLib.url({path: '/webapp/' + app.name}),
             pageId: 'main',
             title: 'Main page'
         })
@@ -355,7 +357,7 @@ registerRoute(
     new CacheFirst()
 );
 
-workboxSW.routing.registerRoute(
+registerRoute(
     '//fonts.gstatic.com/s/materialicons/*',
     new CacheFirst()
 );
@@ -368,3 +370,10 @@ requests to the 3rd-party font file at an external URL.
 TIP: Note that we by default are using _NetworkFirst_ strategy which means that Service Worker will first check for the fresh
 version from the network and fall back to the cached version only if the network is down.
 Read more about possible caching strategies https://developers.google.com/web/tools/workbox/reference-docs/latest/module-workbox-strategies[here].
+
+
+== Push notifications
+
+The app is using the Notifications API to notify user about a new version of the Service Worker. This can happen in two cases: one of the client-side assets (and therefore the manifest) has been changed or version of the app (in gradle.properties) has changed. In this case user will receive a notification that a new version of the app is available and can update the app simply by clicking the "Update" button in the notification popup. After successful update user will be notified as well.
+
+IMPORTANT: In order for notifications to work properly, they have to be allowed not only for the browser page displaying the app, but also for the browser in general (under OS settings).
