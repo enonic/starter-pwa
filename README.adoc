@@ -72,7 +72,7 @@ a request to ``/sw.js`` file in the site root.
 
 == Dependencies
 
-``assets/js/app.js`` is used as entry point for the Webpack builder, so make sure you add the first level of dependencies to this file (using ``require``).
+``assets/js/app.js`` is used as entry point for the Webpack builder, so make sure you add the first level of dependencies to this file (using ``import``).
 For example, if ``assets/js/app.js`` is using a LESS file called ``app.less`` in the `css` folder, add the following line to the ``app.js``:
 
 [source,javascript]
@@ -87,10 +87,9 @@ Same with JS-dependencies. For example, to include a file called ``new.js`` from
 import 'new.js';
 ----
 
-You can then require other LESS or JS files directly from ``new.js`` effectively building a chain of dependencies that Webpack will resolve during the build.
+You can then import other LESS or JS files directly from ``new.js`` effectively building a chain of dependencies that Webpack will resolve during the build.
 
-As mentioned before, the build process will bundle all LESS and JS assets into ``bundles/js/main.css`` and ``bundles/js/main.css`` files respectively which can then
-be referenced directly from the ``page.html`` page.
+As mentioned before, the build process will bundle all LESS and JS assets into ``bundles/js/main.css`` and ``bundles/js/main.css`` files respectively which can then be referenced directly from the ``page.html`` page.
 
 
 == Auto-precaching assets
