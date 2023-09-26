@@ -7,11 +7,10 @@
     "url": "git+https://github.com/enonic/starter-pwa.git"
   },
   "scripts": {
-    "build": "gradle build",
-    "deploy": "gradle deploy",
-    "watch": "gradle deploy -t",
+    "build": "./gradlew build",
     "lint": "eslint src/**/*.js --quiet --cache",
-    "fix": "eslint --fix src/**/*.js --cache"
+    "fix": "eslint --fix src/**/*.js --cache",
+    "watch": "./gradlew -t deploy"
   },
   "keywords": [
     "enonic",
@@ -51,7 +50,7 @@
     "toast-me": "^1.5.0"
   },
   "engines": {
-    "node": ">= 18.12.1",
-    "npm": ">= 8.19.2"
+    "node": ">= 18.17.1",
+    "npm": ">= 9.6.7"
   }
 }

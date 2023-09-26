@@ -13,7 +13,7 @@ app {
 
 node {
     download = true
-    version = '18.12.1'
+    version = '18.17.1'
 }
 
 dependencies {
@@ -37,12 +37,23 @@ repositories {
     xp.enonicRepo()
 }
 
-task webpack(
-    dependsOn: npmInstall,
-    type: NodeTask
-) {
+tasks.register('lint', NpmTask) {
+    dependsOn ( npmInstall )
+    group "verification"
+    args = ['run', 'lint']
+    outputs.upToDateWhen { false }
+}
+
+tasks.register('webpack', NodeTask) {
+    dependsOn( npmInstall )
     script = file('node_modules/webpack/bin/webpack.js')
 }
+
+tasks.register('dev', Exec) {
+    commandLine './gradlew', 'deploy', '-t'
+}
+
+check.dependsOn( lint )
 
 jar {
     exclude 'assets/fonts/material.icons.woff2'
@@ -50,5 +61,5 @@ jar {
     exclude 'assets/bundles/js/*.css'
 
     includeEmptyDirs = false
-    dependsOn webpack
+    dependsOn( webpack )
 }
