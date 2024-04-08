@@ -40,7 +40,7 @@
     "less-loader": "^12.2.0",
     "mini-css-extract-plugin": "^2.8.1",
     "prettier": "^3.2.5",
-    "style-loader": "^3.3.4",
+    "style-loader": "^4.0.0",
     "webpack": "^5.91.0",
     "webpack-cli": "^5.1.4",
     "workbox-webpack-plugin": "^7.0.0"
