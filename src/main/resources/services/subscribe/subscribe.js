@@ -37,6 +37,7 @@ const createSubscriptionNode = function (subscription) {
             };
         }
         return { success: true };
+        // eslint-disable-next-line no-unused-vars
     } catch (e) {
         // log.error(e);
         return {
@@ -76,6 +77,7 @@ const deleteSubscriptionNode = function (subscription) {
                 JSON.stringify({ result: result }, null, 2) +
                 '\n'
         );
+        // eslint-disable-next-line no-unused-vars
     } catch (e) {
         // log.error(e);
         return {

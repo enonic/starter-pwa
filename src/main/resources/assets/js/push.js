@@ -5,26 +5,26 @@
  * Client-side code for push notifications
  */
 
-var $ = require('jquery');
+const $ = require('jquery');
 
-var elemSubscribeStatus;
-var elemSubscribeButton;
-var elemPushField;
-var elemPushButton;
-var elemSubscriberCount;
-var $subscribeForm;
-var $pushForm;
+let elemSubscribeStatus;
+let elemSubscribeButton;
+let elemPushField;
+let elemPushButton;
+let elemSubscriberCount;
+let $subscribeForm;
+let $pushForm;
 
 // State
-var isSubscribed = false;
-var subscriptionEndpoint = null;
-var subscriptionKey = null;
-var subscriptionAuth = null;
-var subscriberCountUrl = null;
+let isSubscribed = false;
+let subscriptionEndpoint = null;
+let subscriptionKey = null;
+let subscriptionAuth = null;
+let subscriberCountUrl = null;
 
-var swRegistration = null;
+let swRegistration = null;
 
-var displayingError = false;
+let displayingError = false;
 
 // -------------------------------------------------------  Setup  --------------------------------------------------------------
 
@@ -51,8 +51,8 @@ function initializeUI() {
 
     // Get the initial subscription state and store it
     swRegistration.pushManager.getSubscription().then(function (subscr) {
-        var subscription = JSON.parse(JSON.stringify(subscr || {}));
-        var keys = subscription.keys || {};
+        const subscription = JSON.parse(JSON.stringify(subscr || {}));
+        const keys = subscription.keys || {};
 
         subscriptionEndpoint = subscription.endpoint;
         subscriptionKey = keys.p256dh;
@@ -124,7 +124,7 @@ function postApiCall(url, data, callbackSuccess, callbackFailure) {
 function displayErrorStatus(message, abort, err) {
     displayingError = true;
 
-    var log = abort ? console.error : console.warn;
+    const log = abort ? console.error : console.warn;
     log(message);
 
     if (err) {
@@ -182,7 +182,7 @@ function clickSubscriptionButton(event) {
 // ------------------------------------------------  Programmatically requesting permissions changes -----------------
 
 function requestPermissionIfNeeded() {
-    var permission = Notification.permission;
+    const permission = Notification.permission;
     if (permission !== 'granted') {
         // Triggering a permission request.
         // A popup should appear if the current permission is 'default', otherwise the permissions must be manually changed.
@@ -218,7 +218,7 @@ function urlB64ToUint8Array(base64String) {
  * Two notifications should appear.
  */
 function subscribeUser() {
-    var publicKey = $subscribeForm.attr('data-public-key');
+    const publicKey = $subscribeForm.attr('data-public-key');
     const applicationServerKey = urlB64ToUint8Array(publicKey);
     swRegistration.pushManager
         .subscribe({
@@ -244,7 +244,7 @@ function updateSubscriptionOnServer(subscription) {
         return;
     }
 
-    var url = $subscribeForm.attr('action');
+    const url = $subscribeForm.attr('action');
     const subObj = JSON.parse(JSON.stringify(subscription));
 
     const params = {
@@ -331,7 +331,7 @@ function removeSubscriptionOnServer() {
         subscriptionKey &&
         subscriptionAuth
     ) {
-        var url = $subscribeForm.attr('action');
+        const url = $subscribeForm.attr('action');
         const params = {
             cancelSubscription: true,
             endpoint: subscriptionEndpoint,
@@ -485,7 +485,7 @@ function updateSubscriberCountInGUI(subscriberCount, live) {
         navigator.serviceWorker.addEventListener('message', function (event) {
             if (event.data != null) {
                 // Page received data message
-                var data = JSON.parse(event.data);
+                const data = JSON.parse(event.data);
 
                 if (data.subscriberCount != null) {
                     updateSubscriberCountInGUI(data.subscriberCount, true);

@@ -29,9 +29,7 @@
     "clean-webpack-plugin": "^4.0.0",
     "copy-webpack-plugin": "^13.0.0",
     "css-loader": "^7.1.2",
-    "eslint": "^8.57.0",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-config-prettier": "^10.1.5",
+    "eslint": "^9.27.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-prettier": "^5.4.0",
     "eslint-webpack-plugin": "^4.2.0",
@@ -39,7 +37,6 @@
     "less": "^4.3.0",
     "less-loader": "^12.3.0",
     "mini-css-extract-plugin": "^2.9.2",
-    "prettier": "^3.5.3",
     "style-loader": "^4.0.0",
     "webpack": "^5.99.8",
     "webpack-cli": "^6.0.1",
@@ -50,7 +47,7 @@
     "toast-me": "^1.5.0"
   },
   "engines": {
-    "node": ">= 20.10.0",
-    "npm": ">= 10.2.3"
+    "node": ">= 22.16.0",
+    "npm": ">= 10.9.2"
   }
 }

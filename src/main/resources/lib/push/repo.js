@@ -2,14 +2,14 @@
  * Lib for handling push subscription storage.
  */
 
-var repoHelper = require('/lib/repo-helper');
+const repoHelper = require('/lib/repo-helper');
 
-var PUSH_SUBSCRIPTIONS_PATH = '/push';
+const PUSH_SUBSCRIPTIONS_PATH = '/push';
 
 /**
  * Creates a subscription node
  */
-var createSubscriptionNode = function () {
+const createSubscriptionNode = function () {
     repoHelper.createNodeWithPath(PUSH_SUBSCRIPTIONS_PATH);
 };
 
@@ -27,10 +27,10 @@ exports.getSubscriptionById = function (id) {
 
 exports.createSubscription = function (subscription) {
     createSubscriptionNode();
-    var repoConn = repoHelper.getConnection();
+    const repoConn = repoHelper.getConnection();
 
     // Prevent duplicates
-    var hits = repoConn.query({
+    const hits = repoConn.query({
         query:
             "subscription.auth = '" +
             subscription.auth +
@@ -44,7 +44,7 @@ exports.createSubscription = function (subscription) {
         return repoHelper.getNode(hits[0].id);
     }
 
-    var node = repoHelper.createNode({
+    const node = repoHelper.createNode({
         _parentPath: PUSH_SUBSCRIPTIONS_PATH,
         subscription: subscription
     });
@@ -54,8 +54,8 @@ exports.createSubscription = function (subscription) {
 };
 
 exports.deleteSubscription = function (subscription) {
-    var repoConn = repoHelper.getConnection();
-    var hits = repoConn.query({
+    const repoConn = repoHelper.getConnection();
+    const hits = repoConn.query({
         query:
             "subscription.auth = '" +
             subscription.auth +
@@ -67,11 +67,11 @@ exports.deleteSubscription = function (subscription) {
         return 'NOT_FOUND';
     }
 
-    var ids = hits.map(function (hit) {
+    const ids = hits.map(function (hit) {
         return hit.id;
     });
 
-    var result = repoConn.delete(ids);
+    const result = repoConn.delete(ids);
     repoConn.refresh();
 
     if (result.length === ids.length) {
@@ -87,7 +87,7 @@ exports.deleteSubscription = function (subscription) {
 
 exports.loadKeyPair = function () {
     createSubscriptionNode();
-    var pushSubNode = repoHelper.getNode(PUSH_SUBSCRIPTIONS_PATH);
+    const pushSubNode = repoHelper.getNode(PUSH_SUBSCRIPTIONS_PATH);
     return pushSubNode ? pushSubNode.keyPair : null;
 };
 
@@ -108,9 +108,9 @@ exports.deleteAllSubscriptions = function () {
     if (!repoHelper.nodeWithPathExists(PUSH_SUBSCRIPTIONS_PATH)) {
         return;
     }
-    var subscriptionNodes = exports.getSubscriptions();
-    for (var i = 0; i < subscriptionNodes.hits.length; i++) {
-        var node = exports.getSubscriptionById(subscriptionNodes.hits[i].id);
+    const subscriptionNodes = exports.getSubscriptions();
+    for (let i = 0; i < subscriptionNodes.hits.length; i++) {
+        const node = exports.getSubscriptionById(subscriptionNodes.hits[i].id);
         exports.deleteSubscription(node.subscription);
     }
 };

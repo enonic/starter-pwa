@@ -62,7 +62,7 @@ const createRepo = function () {
  * @public
  */
 const initRepo = function () {
-    var result = repoLib.get(REPO_NAME);
+    const result = repoLib.get(REPO_NAME);
     if (!result) {
         createRepo();
     }

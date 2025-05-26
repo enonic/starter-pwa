@@ -2,21 +2,21 @@
  * Lib for handling background sync storage.
  */
 
-var repoHelper = require('/lib/repo-helper');
+const repoHelper = require('/lib/repo-helper');
 
-var BACKGROUND_SYNC_PATH = '/background-sync';
+const BACKGROUND_SYNC_PATH = '/background-sync';
 
 /**
  * Creates a background sync node
  */
-var createBackgroundSyncNode = function () {
+const createBackgroundSyncNode = function () {
     repoHelper.createNodeWithPath(BACKGROUND_SYNC_PATH);
 };
 
-var findNodeByItemd = function (itemId) {
-    var repoConn = repoHelper.getConnection();
+const findNodeByItemd = function (itemId) {
+    const repoConn = repoHelper.getConnection();
 
-    var hits = repoConn.query({
+    const hits = repoConn.query({
         query:
             "_parentPath = '" +
             BACKGROUND_SYNC_PATH +
@@ -53,14 +53,14 @@ exports.createItem = function (item) {
 };
 
 exports.deleteItem = function (itemId) {
-    var nodeId = findNodeByItemd(itemId);
+    const nodeId = findNodeByItemd(itemId);
 
     if (!nodeId) {
         return false;
     }
 
-    var repoConn = repoHelper.getConnection();
-    var result = repoConn.delete(nodeId);
+    const repoConn = repoHelper.getConnection();
+    const result = repoConn.delete(nodeId);
 
     repoConn.refresh();
 
@@ -68,21 +68,21 @@ exports.deleteItem = function (itemId) {
 };
 
 exports.updateItem = function (item) {
-    var nodeId = findNodeByItemd(item.id);
+    const nodeId = findNodeByItemd(item.id);
 
     if (!nodeId) {
         return false;
     }
 
-    var editor = function (node) {
+    const editor = function (node) {
         node.item = item;
 
         return node;
     };
 
-    var result = repoHelper.modifyNode(nodeId, editor);
+    const result = repoHelper.modifyNode(nodeId, editor);
 
-    var repoConn = repoHelper.getConnection();
+    const repoConn = repoHelper.getConnection();
     repoConn.refresh();
 
     return result;
@@ -91,13 +91,13 @@ exports.updateItem = function (item) {
 exports.getItems = function (itemId) {
     createBackgroundSyncNode();
 
-    var repoConn = repoHelper.getConnection();
-    var query = "_parentPath = '" + BACKGROUND_SYNC_PATH + "'";
+    const repoConn = repoHelper.getConnection();
+    let query = "_parentPath = '" + BACKGROUND_SYNC_PATH + "'";
     if (itemId) {
         query += 'AND item.id = ' + itemId;
     }
 
-    var hits = repoConn.query({
+    const hits = repoConn.query({
         count: 1000,
         start: 0,
         query: query
@@ -108,7 +108,7 @@ exports.getItems = function (itemId) {
     }
 
     return hits.map(function (hit) {
-        var item = repoConn.get(hit.id).item;
+        const item = repoConn.get(hit.id).item;
 
         item.synced = true;
         item.changed = false;

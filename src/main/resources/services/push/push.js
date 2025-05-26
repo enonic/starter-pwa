@@ -45,7 +45,7 @@ const sendPushNotification = function (keyPair, subscription, payload) {
  * @returns {{body: Object, status: number, headers: Object}} HTTP Response object
  */
 exports.post = function (req) {
-    var response = {
+    const response = {
         status: 200,
         headers: {
             'Content-Type': 'application/json'
@@ -59,7 +59,7 @@ exports.post = function (req) {
                 message: 'Empty message received - nothing to send'
             };
         } else {
-            var succeeded = exports.sendPushNotificationToAllSubscribers({
+            const succeeded = exports.sendPushNotificationToAllSubscribers({
                 text: req.params.message
             });
             response.body = {
@@ -69,6 +69,7 @@ exports.post = function (req) {
                     : 'No messages were pushed. See the server log.'
             };
         }
+        // eslint-disable-next-line no-unused-vars
     } catch (e) {
         // log.error(e);
         response.status = 500;
@@ -90,17 +91,17 @@ exports.post = function (req) {
  * @returns {boolean} True if any subscriptions were found and pushed to, false if there were no subscriptions
  */
 exports.sendPushNotificationToAllSubscribers = function (payload) {
-    var subscriptions = pushRepo.getSubscriptions();
+    const subscriptions = pushRepo.getSubscriptions();
 
     if (subscriptions.total === 0) {
         return false;
     }
 
-    var actuallySent = 0;
-    var keyPair = pushKeys.getKeyPair();
-    for (var i = 0; i < subscriptions.hits.length; i++) {
-        var hit = subscriptions.hits[i];
-        var node = pushRepo.getSubscriptionById(hit.id);
+    let actuallySent = 0;
+    const keyPair = pushKeys.getKeyPair();
+    for (let i = 0; i < subscriptions.hits.length; i++) {
+        const hit = subscriptions.hits[i];
+        const node = pushRepo.getSubscriptionById(hit.id);
 
         if (node && node.subscription) {
             sendPushNotification(keyPair, node.subscription, payload);

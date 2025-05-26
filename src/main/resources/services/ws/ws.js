@@ -1,5 +1,5 @@
-var webSocketLib = require('/lib/xp/websocket');
-var eventLib = require('/lib/xp/event');
+const webSocketLib = require('/lib/xp/websocket');
+const eventLib = require('/lib/xp/event');
 
 eventLib.listener({
     type: 'node.*',

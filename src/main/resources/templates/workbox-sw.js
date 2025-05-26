@@ -75,8 +75,8 @@ self.addEventListener('message', (event) => {
  * Handles the event of receiving of a subscribed push notification
  */
 self.addEventListener('push', function(event) {
-    var data = event.data.text();
-    var iconUrl = '{{iconUrl}}';
+    const data = event.data.text();
+    const iconUrl = '{{iconUrl}}';
     const title = '{{appName}}';
 
     if (data) {
