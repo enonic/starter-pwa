@@ -3,11 +3,11 @@
  * Exposes a POST endpoint at <domain:port>/webapp/<appname>/_/service/<appname>/background-sync
  */
 
-var bsLib = require('/lib/background-sync/repo');
+const bsLib = require('/lib/background-sync/repo');
 
 exports.post = function (req) {
     try {
-        var item = JSON.parse(req.body);
+        const item = JSON.parse(req.body);
 
         if (!item) {
             return {
@@ -20,7 +20,7 @@ exports.post = function (req) {
         delete item.synced;
         delete item.changed;
 
-        var result = bsLib.createItem(item);
+        const result = bsLib.createItem(item);
 
         return {
             body: result,
@@ -28,6 +28,7 @@ exports.post = function (req) {
                 'Content-Type': 'application/json'
             }
         };
+        // eslint-disable-next-line no-unused-vars
     } catch (e) {
         return {
             status: 500,
@@ -38,7 +39,7 @@ exports.post = function (req) {
 
 exports.delete = function (req) {
     try {
-        var itemId = req.params.id;
+        const itemId = req.params.id;
 
         if (!itemId) {
             return {
@@ -47,11 +48,12 @@ exports.delete = function (req) {
             };
         }
 
-        var result = bsLib.deleteItem(itemId);
+        const result = bsLib.deleteItem(itemId);
         return {
             status: result ? 200 : 404,
             body: result ? 'OK' : 'Failed to find the item'
         };
+        // eslint-disable-next-line no-unused-vars
     } catch (e) {
         return {
             status: 500,
@@ -62,10 +64,10 @@ exports.delete = function (req) {
 
 exports.put = function (req) {
     try {
-        var item = JSON.parse(req.body);
+        const item = JSON.parse(req.body);
 
         if (!item) {
-            var message = 'Missing/invalid item data in request';
+            const message = 'Missing/invalid item data in request';
             log.warning(message);
             return {
                 status: 400,
@@ -76,7 +78,7 @@ exports.put = function (req) {
         delete item.synced;
         delete item.changed;
 
-        var result = bsLib.updateItem(item);
+        const result = bsLib.updateItem(item);
 
         if (!result) {
             return {
@@ -91,6 +93,7 @@ exports.put = function (req) {
                 'Content-Type': 'application/json'
             }
         };
+        // eslint-disable-next-line no-unused-vars
     } catch (e) {
         return {
             status: 500,
@@ -101,8 +104,8 @@ exports.put = function (req) {
 
 exports.get = function (req) {
     try {
-        var itemId = req.params.id;
-        var result = bsLib.getItems(itemId);
+        const itemId = req.params.id;
+        const result = bsLib.getItems(itemId);
 
         if (itemId && !result) {
             return {

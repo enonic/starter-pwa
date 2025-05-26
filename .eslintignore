@@ -1,5 +1,0 @@
-src/main/resources/templates/workbox-sw.js
-src/main/resources/assets/js/background-sync/**/*.js
-src/main/resources/assets/js/material.min.js
-node_modules/**/*.js
-build/

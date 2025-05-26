@@ -3,9 +3,9 @@
  * Common to lib/push.js and main.js.
  */
 
-var notifications = require('/lib/notifications');
-var pushRepo = require('/lib/push/repo');
-var repoHelper = require('/lib/repo-helper');
+const notifications = require('/lib/notifications');
+const pushRepo = require('/lib/push/repo');
+const repoHelper = require('/lib/repo-helper');
 
 // --------------------------------------------------------------------------------  Initialization: key setup
 
@@ -24,7 +24,7 @@ var repoHelper = require('/lib/repo-helper');
  * @returns {Keypair}
  */
 exports.getKeyPair = function () {
-    var keyPair = repoHelper.sudo(function () {
+    let keyPair = repoHelper.sudo(function () {
         return pushRepo.loadKeyPair();
     });
     if (!keyPair) {

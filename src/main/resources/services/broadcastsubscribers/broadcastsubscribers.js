@@ -1,9 +1,9 @@
-var pushRepo = require('/lib/push/repo');
-var pushService = require('/services/push/push');
+const pushRepo = require('/lib/push/repo');
+const pushService = require('/services/push/push');
 
 exports.post = function () {
     // log.info(JSON.stringify({broadcastsubscription_request:req}, null, 2));
-    var response = {
+    const response = {
         status: 200,
         headers: {
             'Content-Type': 'application/json'
@@ -11,11 +11,12 @@ exports.post = function () {
     };
 
     try {
-        var subscriberCount = pushRepo.getSubscriptionsCount();
+        const subscriberCount = pushRepo.getSubscriptionsCount();
         pushService.sendPushNotificationToAllSubscribers({
             subscriberCount: subscriberCount
         });
         response.body = { success: true, subscriberCount: subscriberCount };
+        // eslint-disable-next-line no-unused-vars
     } catch (e) {
         // log.error(e);
         response.status = 500;
