@@ -12,4 +12,4 @@ jobs:
 
       - uses: enonic/action-app-build@v1
       
-      - uses: codecov/codecov-action@v5
+      - uses: codecov/codecov-action@v6
