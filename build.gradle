@@ -1,14 +1,6 @@
 plugins {
-    id 'com.enonic.xp.app' version '3.6.2'
+    id 'com.enonic.xp.app'
     id "com.github.node-gradle.node" version '7.1.0'
-}
-
-app {
-    name = project.appName
-    displayName = 'PWA Starter Kit'
-    vendorName = 'Enonic AS'
-    vendorUrl = 'https://enonic.com'
-    systemVersion = "${xpVersion}"
 }
 
 node {
@@ -17,18 +9,18 @@ node {
 }
 
 dependencies {
-    include "com.enonic.xp:lib-repo:${xpVersion}"
-    include "com.enonic.xp:lib-node:${xpVersion}"
-    include "com.enonic.xp:lib-context:${xpVersion}"
-    include "com.enonic.xp:lib-content:${xpVersion}"
-    include "com.enonic.xp:lib-portal:${xpVersion}"
-    include "com.enonic.xp:lib-websocket:${xpVersion}"
-    include "com.enonic.xp:lib-event:${xpVersion}"
-    include "com.enonic.xp:lib-io:${xpVersion}"
-    include 'com.enonic.lib:lib-notifications:2.0.1'
-    include "com.enonic.lib:lib-router:3.2.0"
-    include "com.enonic.lib:lib-thymeleaf:2.1.1"
-    include "com.enonic.lib:lib-mustache:2.1.1"
+    include xplibs.repo
+    include xplibs.node
+    include xplibs.context
+    include xplibs.content
+    include xplibs.portal
+    include xplibs.websocket
+    include xplibs.event
+    include xplibs.io
+    include libs.lib.notifications
+    include libs.lib.router
+    include libs.lib.thymeleaf
+    include libs.lib.mustache
 }
 
 repositories {
@@ -47,14 +39,6 @@ tasks.register('lint', NpmTask) {
 tasks.register('webpack', NodeTask) {
     dependsOn( npmInstall )
     script = file('node_modules/webpack/bin/webpack.js')
-}
-
-tasks.register('dev', Exec) {
-    if (System.getProperty('os.name').toLowerCase().contains('windows')) {
-        commandLine 'gradlew.bat', 'deploy', '-t'
-    } else {
-        commandLine './gradlew', 'deploy', '-t'
-    }
 }
 
 check.dependsOn( lint )

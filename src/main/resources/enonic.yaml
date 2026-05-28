@@ -1,0 +1,5 @@
+kind: "Application"
+title: "PWA Starter Kit"
+description: "Build a Progressive Web Application on Enonic XP platform"
+vendorName: "Enonic AS"
+vendorUrl: "https://enonic.com"
