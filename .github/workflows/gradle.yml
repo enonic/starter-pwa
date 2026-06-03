@@ -10,6 +10,6 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: enonic/action-app-build@v1
+      - uses: enonic/action-app-build@v2
       
       - uses: codecov/codecov-action@v6
